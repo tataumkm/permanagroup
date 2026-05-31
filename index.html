@@ -2,342 +2,488 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Green House GH1 Kreweh</title>
-    
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- Favicon -->
-    <link rel="icon" type="image/png" href="https://tataumkm.github.io/draft-stock-apps/icons/favicon-96x96.png" sizes="96x96">
-    <link rel="icon" type="image/svg+xml" href="https://tataumkm.github.io/draft-stock-apps/icons/favicon.svg">
-    <link rel="shortcut icon" href="https://tataumkm.github.io/draft-stock-apps/icons/favicon.ico">
-    <link rel="apple-touch-icon" sizes="180x180" href="https://tataumkm.github.io/draft-stock-apps/icons/apple-touch-icon.png">
-    <link rel="manifest" href="https://tataumkm.github.io/draft-stock-apps/icons/site.webmanifest">
-    
-    <!-- Web App Meta Tags -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="application-name" content="GH1 Kreweh">
-    <meta name="apple-mobile-web-app-title" content="GH1 Kreweh">
-    <meta name="theme-color" content="#16a34a">
-    <meta name="description" content="Sistem Informasi Greenhouse GH1 Kreweh">
+    <title>Sistem Informasi Terintegrasi</title>
+    
+    <link rel="icon" type="image/png" href="https://tataumkm.github.io/permanagroup/icons/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="https://tataumkm.github.io/permanagroup/icons/favicon.svg" />
+    <link rel="shortcut icon" href="https://tataumkm.github.io/permanagroup/icons/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="https://tataumkm.github.io/permanagroup/icons/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-title" content="Permana Group" />
+    <link rel="manifest" href="https://tataumkm.github.io/permanagroup/icons/site.webmanifest" />
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
     
     <style>
-        /* Animasi dan transisi yang lebih halus */
-        .menu-card {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            text-decoration: none;
-            position: relative;
-            overflow: hidden;
+        /* ELEGANT PALETTE - WITH DISTINCT GROUP TINTS (No Pure Black/White) */
+        :root {
+            --bg-base: #E2E3DF;        /* Latar belakang utama (Stone Slate) */
+            
+            /* Warna latar belakang per grup */
+            --bg-finance: #E2E7EC;     /* Muted Steel Blue */
+            --bg-logistics: #EEF0EC;   /* Soft Sage */
+            --bg-sales: #EAE5E1;       /* Warm Clay */
+            
+            --text-primary: #2C332D;   /* Charcoal gelap */
+            --text-secondary: #657067; /* Abu-abu sage */
+            --accent-strong: #4A5D4E;  /* Hijau deep forest */
+            
+            --shadow-soft: 0 4px 12px rgba(44, 51, 45, 0.03);
+            --shadow-hover: 0 8px 20px rgba(44, 51, 45, 0.06);
+            
+            --radius-md: 16px;
+            --radius-full: 999px;
+            --transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         }
-        
-        .menu-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-base);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            line-height: 1.4;
+            overflow-x: hidden;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 1.25rem 1.5rem;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        /* HEADER HORIZONTAL */
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background-color: rgba(238, 240, 236, 0.4);
+            padding: 0.75rem 1.25rem;
+            border-radius: var(--radius-md);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo-container {
+            width: 42px;
+            height: 42px;
+            background-color: #EEF0EC;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent-strong);
+            font-size: 1.25rem;
+            font-weight: 500;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+        }
+
+        .logo-container img {
             width: 100%;
             height: 100%;
-            background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%);
-            transform: translateX(-100%);
-            transition: transform 0.6s;
+            object-fit: cover;
         }
-        
-        .menu-card:hover::before {
-            transform: translateX(0);
+
+        .header-content h1 {
+            font-size: 1.35rem;
+            font-weight: 500;
+            letter-spacing: -0.02em;
         }
-        
-        .menu-card:active {
-            transform: scale(0.97);
+
+        .header-content p {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            font-weight: 300;
         }
-        
-        .icon-wrapper {
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
+        /* PANEL INFO WAKTU & STATUS (POJOK KANAN ATAS) */
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
         }
-        
-        .menu-card:hover .icon-wrapper {
-            transform: scale(1.1) rotate(5deg);
+
+        .datetime-pill {
+            background-color: rgba(44, 51, 45, 0.05);
+            padding: 0.35rem 0.85rem;
+            border-radius: var(--radius-full);
+            font-size: 0.8rem;
+            font-weight: 400;
+            color: var(--text-primary);
+            letter-spacing: 0.02em;
         }
-        
-        /* Efek hover pada ikon */
-        .menu-card:hover i {
-            animation: iconFloat 1.5s ease-in-out infinite;
+
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            background-color: #EEF0EC;
+            padding: 0.35rem 0.75rem;
+            border-radius: var(--radius-full);
+            font-size: 0.75rem;
+            color: var(--accent-strong);
+            border: 1px solid rgba(255, 255, 255, 0.3);
         }
-        
-        @keyframes iconFloat {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-5px); }
-            100% { transform: translateY(0px); }
-        }
-        
-        /* Header dengan gradien */
-        .header-gradient {
-            background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        /* .header-gradient::after {
-            content: '';
-            position: absolute;
-            bottom: -20px;
-            left: 0;
-            width: 100%;
-            height: 40px;
-            background: linear-gradient(to top, rgba(249,250,251,1) 0%, rgba(249,250,251,0) 100%);
-            z-index: 1;
-        } */
-        
-        /* Latar belakang halaman */
-        body {
-            background-color: #f9fafb;
-            background-image: 
-                radial-gradient(circle at 10% 20%, rgba(22, 163, 74, 0.05) 0%, transparent 20%),
-                radial-gradient(circle at 90% 80%, rgba(22, 163, 74, 0.05) 0%, transparent 20%);
-            background-attachment: fixed;
-        }
-        
-        /* Efek bayangan yang lebih modern */
-        .menu-card {
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-        }
-        
-        .menu-card:hover {
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-        }
-        
-        /* Animasi fade-in untuk konten */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        .fade-in {
-            animation: fadeIn 0.6s ease-out forwards;
-        }
-        
-        /* Untuk PWA */
-        body {
-            overscroll-behavior: none;
-        }
-        
-        /* Splash screen untuk iOS */
-        @media screen and (max-width: 480px) {
-            body::before {
-                content: '';
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background-color: #16a34a;
-                background-image: url('/apple-touch-icon.png');
-                background-position: center;
-                background-repeat: no-repeat;
-                background-size: 120px;
-                z-index: 9999;
-                pointer-events: none;
-                opacity: 0;
-                transition: opacity 0.3s ease;
-            }
-            body.loaded::before {
-                opacity: 0;
-                display: none;
-            }
-        }
-        
-        /* Efek ripple untuk interaksi */
-        .ripple {
-            position: absolute;
+
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            background-color: #7B997F;
             border-radius: 50%;
-            background-color: rgba(255, 255, 255, 0.7);
-            transform: scale(0);
-            animation: ripple 0.6s linear;
         }
-        
-        @keyframes ripple {
-            to {
-                transform: scale(4);
-                opacity: 0;
+
+        /* STRUKTUR GRUP KATEGORI */
+        .category-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .category-title {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+
+        .category-title::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(to right, var(--accent-strong), transparent);
+            opacity: 0.2;
+        }
+
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 0.75rem;
+        }
+
+        /* KARTU MENU (COMPACT DENGAN IKON) */
+        .menu-card {
+            border-radius: var(--radius-md);
+            padding: 0.85rem 1.15rem;
+            text-decoration: none;
+            color: inherit;
+            display: flex;
+            align-items: center;
+            box-shadow: var(--shadow-soft);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            transition: var(--transition);
+            gap: 0.85rem;
+        }
+
+        /* Perbedaan Warna Latar Belakang Berdasarkan Grup */
+        .group-finance .menu-card { background-color: var(--bg-finance); }
+        .group-logistics .menu-card { background-color: var(--bg-logistics); }
+        .group-sales .menu-card { background-color: var(--bg-sales); }
+
+        .menu-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-hover);
+            filter: brightness(0.97);
+        }
+
+        /* Desain Wadah Ikon Menu */
+        .card-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background-color: rgba(44, 51, 45, 0.05);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent-strong);
+            flex-shrink: 0;
+        }
+
+        .card-icon svg {
+            width: 20px;
+            height: 20px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 1.5;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .card-body {
+            flex: 1;
+        }
+
+        .card-body h3 {
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 0.1rem;
+        }
+
+        .card-body p {
+            font-size: 0.8rem;
+            font-weight: 300;
+            color: var(--text-secondary);
+            line-height: 1.3;
+        }
+
+        .action-icon {
+            color: var(--text-secondary);
+            opacity: 0.5;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            transition: var(--transition);
+        }
+
+        .action-icon svg {
+            width: 14px;
+            height: 14px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+        }
+
+        .menu-card:hover .action-icon {
+            opacity: 1;
+            color: var(--accent-strong);
+            transform: translateX(2px);
+        }
+
+        /* FOOTER RINGKAS */
+        footer {
+            margin-top: auto;
+            text-align: center;
+            padding: 0.75rem 0;
+            font-size: 0.75rem;
+            font-weight: 300;
+            color: var(--text-secondary);
+            border-top: 1px solid rgba(178, 189, 179, 0.2);
+        }
+
+        /* RESPONSIVE LAYOUT */
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+                gap: 1rem;
+            }
+            header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+            .header-right {
+                width: 100%;
+                justify-content: space-between;
+            }
+            .menu-grid {
+                grid-template-columns: 1fr;
             }
         }
     </style>
 </head>
-<body class="min-h-screen flex flex-col" onload="document.body.classList.add('loaded')">
-    <header class="header-gradient py-6 text-center shadow-lg relative z-10">
-        <!-- Tombol Kembali ke Menu Utama dengan Ikon Home -->
-        <a href="index.html" class="absolute top-4 left-4 flex items-center space-x-1 bg-white/20 backdrop-blur-sm rounded-full px-3 py-1.5 text-white text-sm font-medium hover:bg-white/30 transition-all duration-200 shadow-sm">
-            <i class="fas fa-home text-sm"></i>
-            <span>Kembali ke List GH</span>
-        </a>
-    
-        <div class="flex items-center justify-center space-x-6 px-4">
-            <div class="w-20 h-20 bg-white rounded-xl flex items-center justify-center shadow-lg transform hover:rotate-6 transition-transform duration-300">
-                <img src="https://tataumkm.github.io/draft-stock-apps/icons/favicon-96x96.png" class="w-20 h-20 rounded-xl">
-            </div>
-            <div>
-                <h1 class="text-2xl md:text-3xl font-bold text-white">Green House GH1 Kreweh</h1>
-                <p class="text-sm md:text-base text-green-100">Sistem Informasi Budidaya GH1 Kreweh</p>
-                <p class="text-sm md:text-base text-green-100">PT Java Indo Arjuna</p>
-                <p class="text-sm md:text-base text-green-100">Web App Produced by Tata Umkm</p>
-            </div>
-        </div>
-    </header>
-    
-    <main class="px-4 py-8 flex-1 w-[90%] mx-auto">
-        <div class="grid grid-cols-3 gap-5 w-full mx-auto">
-            <a href="gh1/stok_monitoring.html" class="menu-card bg-white rounded-2xl p-5 flex flex-col items-center text-center fade-in" style="animation-delay: 0.1s">
-                <div class="icon-wrapper w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mb-4">
-                    <i class="fas fa-boxes-stacked text-emerald-600 text-2xl"></i>
-                </div>
-                <h3 class="text-base font-semibold text-gray-900 mb-1">Stok Monitoring</h3>
-                <p class="text-xs text-gray-500">Cek Stok dan Filter Data Stok</p>
-            </a>
+<body>
 
-            <a href="gh1/monitoring_minus.html" class="menu-card bg-white rounded-2xl p-5 flex flex-col items-center text-center fade-in" style="animation-delay: 0.1s">
-                <div class="icon-wrapper w-16 h-16 bg-rose-100 rounded-full flex items-center justify-center mb-4">
-                    <i class="fas fa-magnifying-glass-minus text-rose-600 text-2xl"></i>
-                </div>
-                <h3 class="text-base font-semibold text-gray-900 mb-1">Stok Minus</h3>
-                <p class="text-xs text-gray-500">Pengecekan Stok Minus dan penyesuaiannya</p>
-            </a>
-
-            <a href="gh1/penerimaan_barang.html" class="menu-card bg-white rounded-2xl p-5 flex flex-col items-center text-center fade-in" style="animation-delay: 0.1s">
-                <div class="icon-wrapper w-16 h-16 bg-cyan-100 rounded-full flex items-center justify-center mb-4">
-                    <i class="fas fa-tent-arrows-down text-cyan-600 text-2xl"></i>
-                </div>
-                <h3 class="text-base font-semibold text-gray-900 mb-1">Penerimaan Barang Datang</h3>
-                <p class="text-xs text-gray-500">Penerimaan Barang dari Tumapel dan Kreweh</p>
-            </a>
-
-            <a href="gh1/splitting.html" class="menu-card bg-white rounded-2xl p-5 flex flex-col items-center text-center fade-in" style="animation-delay: 0.1s">
-                <div class="icon-wrapper w-16 h-16 bg-fuchsia-100 rounded-full flex items-center justify-center mb-4">
-                    <i class="fas fa-diagram-project text-fuchsia-600 text-2xl"></i>
-                </div>
-                <h3 class="text-base font-semibold text-gray-900 mb-1">Splitting Plant</h3>
-                <p class="text-xs text-gray-500">Input Data hasil Project Split</p>
-            </a>
-
-            <a href="gh1/perpindahan_kondisi.html" class="menu-card bg-white rounded-2xl p-5 flex flex-col items-center text-center fade-in" style="animation-delay: 0.1s">
-                <div class="icon-wrapper w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mb-4">
-                    <i class="fas fa-share-from-square text-amber-600 text-2xl"></i>
-                </div>
-                <h3 class="text-base font-semibold text-gray-900 mb-1">Perpindahan Kondisi Plant</h3>
-                <p class="text-xs text-gray-500">Input data perpindahan kondisi plant</p>
-            </a>
-            
-            <a href="gh1/stok_keluar.html" class="menu-card bg-white rounded-2xl p-5 flex flex-col items-center text-center fade-in" style="animation-delay: 0.3s">
-                <div class="icon-wrapper w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
-                    <i class="fas fa-trash-arrow-up text-red-600 text-2xl"></i>
-                </div>
-                <h3 class="text-base font-semibold text-gray-900 mb-1">Stok Keluar Lainnya</h3>
-                <p class="text-xs text-gray-500">Input Stok Keluar Lainnya</p>
-            </a>
-
-            <a href="gh1/distribusi_barang.html" class="menu-card bg-white rounded-2xl p-5 flex flex-col items-center text-center fade-in" style="animation-delay: 0.2s">
-                <div class="icon-wrapper w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mb-4">
-                    <i class="fas fa-truck-arrow-right text-purple-600 text-2xl"></i>
-                </div>
-                <h3 class="text-base font-semibold text-gray-900 mb-1">Distribusi Barang</h3>
-                <p class="text-xs text-gray-500">Distribusi Barang ke Kebun Lain</p>
-            </a>
-
-            <a href="gh1/opname.html" class="menu-card bg-white rounded-2xl p-5 flex flex-col items-center text-center fade-in" style="animation-delay: 0.2s">
-                <div class="icon-wrapper w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mb-4">
-                    <i class="fas fa-calculator text-orange-600 text-2xl"></i>
-                </div>
-                <h3 class="text-base font-semibold text-gray-900 ml-1">Opname & Penyesuaian</h3>
-                <p class="text-xs text-gray-500">Penyesuaian Barang Dagang dengan Proses Opname</p>
-            </a>
-
-            <a href="gh1/track_kode.html" class="menu-card bg-white rounded-2xl p-5 flex flex-col items-center text-center fade-in" style="animation-delay: 0.2s">
-                <div class="icon-wrapper w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-4">
-                    <i class="fas fa-clock-rotate-left text-slate-600 text-2xl"></i>
-                </div>
-                <h3 class="text-base font-semibold text-gray-900 ml-1">Tracking Riwayat Kode</h3>
-                <p class="text-xs text-gray-500">Penelusuran Riwayat stok keluar dan masuk pada setiap kode</p>
-            </a>
-        </div>
-
-        <!-- <div class="grid grid-cols-3 gap-5 mt-5">
-            <a href="index.html" class="col-span-2 menu-card bg-white rounded-2xl p-5 flex flex-row items-center text-center fade-in" style="animation-delay: 0.2s">
-                <div class="icon-wrapper w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center">
-                    <i class="fas fa-home text-slate-600 text-2xl"></i>
-                </div>
-                <h3 class="text-base font-semibold text-gray-900 ml-5">Kembali ke Menu Utama</h3>
-                <p class="text-xs text-gray-500">Distribusi Barang ke Kebun Lain</p>
-            </a>
-            <a href="gh1/opname.html" class="col-span-1 menu-card bg-white rounded-2xl p-5 flex flex-row items-center text-center fade-in" style="animation-delay: 0.2s">
-                <div class="icon-wrapper w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center">
-                    <i class="fas fa-calculator text-orange-600 text-2xl"></i>
-                </div>
-                <h3 class="text-base font-semibold text-gray-900 ml-5">Opname & Penyesuaian</h3>
-                <p class="text-xs text-gray-500">Distribusi Barang ke Kebun Lain</p>
-            </a>
-        </div> -->
+    <div class="container">
         
-        <!-- <div class="mt-8 text-center">
-            <div class="inline-block bg-white rounded-full px-4 py-2 shadow-sm">
-                <p class="text-xs text-gray-500">Versi 1.0.0</p>
+        <header>
+            <div class="header-left">
+                <div class="logo-container">
+                    SI
+                </div>
+                <div class="header-content">
+                    <h1>Sistem Operasional</h1>
+                    <p>Navigasi integrasi seluruh modul bisnis.</p>
+                </div>
             </div>
-        </div> -->
-    </main>
-    
-    <!-- Footer yang lebih elegan -->
-    <footer class="bg-white py-4 px-4 border-t border-gray-200 text-center">
-        <div class="flex items-center justify-center space-x-2 mb-2">
-            <div class="w-8 h-8 bg-stone-100 rounded-full flex items-center justify-center">
-                <i class="fas fa-warehouse text-stone-600 text-sm"></i>
+            
+            <div class="header-right">
+                <div id="realtime-clock" class="datetime-pill">Memuat waktu...</div>
+                <div class="status-pill">
+                    <div class="status-dot"></div>
+                    Sistem Online
+                </div>
             </div>
-            <p class="text-sm font-medium text-stone-700">Tata Umkm, Solusi Digitalisasi Bisnis</p>
+        </header>
+
+        <div class="category-wrapper group-finance">
+            <h2 class="category-title">Keuangan & Akuntansi</h2>
+            <div class="menu-grid">
+                
+                <a href="a/coa.html" class="menu-card">
+                    <div class="card-icon">
+                        <svg viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                    </div>
+                    <div class="card-body">
+                        <h3>Chart of Account</h3>
+                        <p>Pengelolaan struktur kode akun akuntansi terpusat.</p>
+                    </div>
+                    <div class="action-icon">
+                        <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    </div>
+                </a>
+
+                <a href="https://script.google.com/macros/s/AKfycbwMVwdfD0eQlMKkftweo56rrvdgVwGdVQJy-BnZfelYC0y6AxwplLOPQyvtZMAQyguqHg/exec" target="_blank" class="menu-card">
+                    <div class="card-icon">
+                        <svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2" ry="2"/><path d="M12 11h4v2h-4z"/></svg>
+                    </div>
+                    <div class="card-body">
+                        <h3>Manajemen Deposit</h3>
+                        <p>Pemantauan dan rekonsiliasi deposit dana mitra.</p>
+                    </div>
+                    <div class="action-icon">
+                        <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    </div>
+                </a>
+
+            </div>
         </div>
-        <p class="text-xs text-gray-500">© 2025 Tata Umkm. All rights reserved.  Versi 2.0.0</p>
+
+        <div class="category-wrapper group-logistics">
+            <h2 class="category-title">Logistik & Manajemen Stok</h2>
+            <div class="menu-grid">
+
+                <a href="https://script.google.com/macros/s/AKfycbzaM6aODhHPbJhzlnIyyFj70jYbms9rhrGDPaLf9ApgKWXocZixBK-l6aQ2Gno39jUe/exec" target="_blank" class="menu-card">
+                    <div class="card-icon">
+                        <svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+                    </div>
+                    <div class="card-body">
+                        <h3>Suppliers</h3>
+                        <p>Direktori data pemasok utama dan riwayat kerja sama.</p>
+                    </div>
+                    <div class="action-icon">
+                        <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    </div>
+                </a>
+
+                <a href="https://script.google.com/macros/s/AKfycbxC2Q9G1-NzOBJuyfUSs-pqUU9xhTwg5WjMC6VnktpNglNsenDRrcWVLGgJRsfigAc/exec" target="_blank" class="menu-card">
+                    <div class="card-icon">
+                        <svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4zM3 6h18M16 10a4 4 0 0 1-8 0"/></svg>
+                    </div>
+                    <div class="card-body">
+                        <h3>Pengadaan Barang</h3>
+                        <p>Sistem pengajuan pembelian supply produk dagang baru.</p>
+                    </div>
+                    <div class="action-icon">
+                        <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    </div>
+                </a>
+
+                <a href="https://script.google.com/macros/s/AKfycbxt_lQ1IMDlcRxf1vAfyYXhaDnonhNNQJlDl5Mnv2-Lc9Oi2SIXZ7dhVkelE0gVdmFY/exec" target="_blank" class="menu-card">
+                    <div class="card-icon">
+                        <svg viewBox="0 0 24 24"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>
+                    </div>
+                    <div class="card-body">
+                        <h3>Penerimaan Barang</h3>
+                        <p>Validasi logistik masuk saat pasokan tiba di gudang.</p>
+                    </div>
+                    <div class="action-icon">
+                        <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    </div>
+                </a>
+
+                <a href="https://script.google.com/macros/s/AKfycbwNv-RigOd_LUJOvLH_hskfcwm6XIF5Jm_3V1WS0X99ZQW5sfTsg1mF0l9PQpJm181m/exec" target="_blank" class="menu-card">
+                    <div class="card-icon">
+                        <svg viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/><path d="M3 12c0 1.66 4 3 9 3s9-1.34 9-3"/></svg>
+                    </div>
+                    <div class="card-body">
+                        <h3>Stock Management</h3>
+                        <p>Kontrol kartu opname stok dan pelacakan mutasi.</p>
+                    </div>
+                    <div class="action-icon">
+                        <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    </div>
+                </a>
+
+            </div>
+        </div>
+
+        <div class="category-wrapper group-sales">
+            <h2 class="category-title">Penjualan & Transaksi</h2>
+            <div class="menu-grid">
+
+                <a href="https://script.google.com/macros/s/AKfycbwz2I-6TJCynK5Cc3kZ8IH-8YhS-tTVUQRii4KU0Py9ToCX22JzkVV5wtAPFhR7KRIV_g/exec" target="_blank" class="menu-card">
+                    <div class="card-icon">
+                        <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="2" y1="10" x1="22" y1="10"/><path d="M6 14h.01M10 14h.01M14 14h.01"/></svg>
+                    </div>
+                    <div class="card-body">
+                        <h3>Penjualan POS</h3>
+                        <p>Aplikasi kasir retail untuk transaksi langsung di outlet.</p>
+                    </div>
+                    <div class="action-icon">
+                        <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    </div>
+                </a>
+
+                <a href="https://script.google.com/macros/s/AKfycbwGqC-hRjzEcAv-h4uah1UnwEZFxZ6GLuY70JREPCc6lShJqZ2LCu-waTI1Nd2cK1Cytg/exec" target="_blank" class="menu-card">
+                    <div class="card-icon">
+                        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    </div>
+                    <div class="card-body">
+                        <h3>Penjualan Broker</h3>
+                        <p>Pencatatan transaksi melalui pihak ketiga atau keagenan.</p>
+                    </div>
+                    <div class="action-icon">
+                        <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    </div>
+                </a>
+
+            </div>
+        </div>
+
+    </div>
+
+    <footer>
+        <p>&copy; 2026 Dashboard Operasional Terintegrasi.</p>
     </footer>
 
-    <!-- Script untuk PWA dan efek interaktif -->
     <script>
-        // Registrasi Service Worker untuk PWA
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', function() {
-                navigator.serviceWorker.register('/sw.js').then(function(registration) {
-                    console.log('ServiceWorker registration successful with scope: ', registration.scope);
-                }, function(err) {
-                    console.log('ServiceWorker registration failed: ', err);
-                });
-            });
+        function startRealTimeClock() {
+            const clockElement = document.getElementById('realtime-clock');
+            
+            function updateClock() {
+                const sekarang = new Date();
+                const namaHari = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+                const namaBulan = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+                
+                const hari = namaHari[sekarang.getDay()];
+                const tanggal = sekarang.getDate().toString().padStart(2, '0');
+                const bulan = namaBulan[sekarang.getMonth()];
+                const tahun = sekarang.getFullYear();
+                
+                const jam = sekarang.getHours().toString().padStart(2, '0');
+                const menit = sekarang.getMinutes().toString().padStart(2, '0');
+                
+                clockElement.textContent = `${hari}, ${tanggal} ${bulan} ${tahun} • ${jam}:${menit}`;
+            }
+            
+            updateClock();
+            setInterval(updateClock, 60000); // Diperbarui setiap satu menit
         }
         
-        // Tambahkan event listener untuk install prompt (Android)
-        let deferredPrompt;
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-        });
-        
-        // Efek ripple pada kartu menu
-        document.querySelectorAll('.menu-card').forEach(card => {
-            card.addEventListener('click', function(e) {
-                const ripple = document.createElement('span');
-                ripple.classList.add('ripple');
-                
-                const rect = this.getBoundingClientRect();
-                const size = Math.max(rect.width, rect.height);
-                const x = e.clientX - rect.left - size / 2;
-                const y = e.clientY - rect.top - size / 2;
-                
-                ripple.style.width = ripple.style.height = size + 'px';
-                ripple.style.left = x + 'px';
-                ripple.style.top = y + 'px';
-                
-                this.appendChild(ripple);
-                
-                setTimeout(() => {
-                    ripple.remove();
-                }, 600);
-            });
-        });
+        document.addEventListener('DOMContentLoaded', startRealTimeClock);
     </script>
 </body>
 </html>
