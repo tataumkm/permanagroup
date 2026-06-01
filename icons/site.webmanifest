@@ -3,13 +3,13 @@
   "short_name": "Permana",
   "icons": [
     {
-      "src": "/https://permanagroup.tataumkm.github.io/icons/web-app-manifest-192x192.png",
+      "src": "/https://tataumkm.github.io/permanagroup/icons/web-app-manifest-192x192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "maskable"
     },
     {
-      "src": "/https://permanagroup.tataumkm.github.io/icons/web-app-manifest-512x512.png",
+      "src": "/https://tataumkm.github.io/permanagroup/icons/web-app-manifest-512x512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
