@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Saldo Kas & Bank</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="icon" type="image/png" href="https://tataumkm.github.io/permanagroup/icons/favicon-96x96.png" sizes="96x96" />
+  <link rel="icon" type="image/svg+xml" href="https://tataumkm.github.io/permanagroup/icons/favicon.svg" />
+  <link rel="shortcut icon" href="https://tataumkm.github.io/permanagroup/icons/favicon.ico" />
+  <link rel="apple-touch-icon" sizes="180x180" href="https://tataumkm.github.io/permanagroup/icons/apple-touch-icon.png" />
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      width: 100%;
+      height: 100%;
+      font-family: Arial, sans-serif;
+    }
+
+    /* Iframe dibuat penuh karena header dihapus */
+    iframe {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+      z-index: 1;
+    }
+
+    /* Style untuk Bola Mengambang (Floating Button) */
+    #floating-btn {
+      position: fixed;
+      bottom: 80px; /* Sekitar 5cm dari bawah layar */
+      left: 20px;
+      width: 56px;
+      height: 56px;
+      background-color: rgba(40, 40, 40, 0.85); /* Warna gelap transparan ala iPhone */
+      border-radius: 50%;
+      z-index: 9999;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      cursor: grab;
+      touch-action: none; /* Mencegah layar ter-scroll saat menggeser bola di HP */
+      transition: background-color 0.2s;
+    }
+
+    #floating-btn:active {
+      cursor: grabbing;
+      background-color: rgba(60, 60, 60, 0.95);
+    }
+
+    #floating-btn img {
+      width: 32px;
+      height: 32px;
+      object-fit: contain;
+      pointer-events: none; /* Mencegah gambar ikut ter-drag secara default oleh browser */
+    }
+  </style>
+</head>
+<body>
+
+  <iframe 
+    src="https://script.google.com/macros/s/AKfycbyE60-LQM3TFFCxTSts22ZeM5o-fjRw1L_L_N1B7nbThkRKhNBtavXi-oaAPWmxfa_muw/exec"
+    allow="camera; microphone;"
+    allowfullscreen>
+  </iframe>
+
+  <div id="floating-btn" title="Kembali ke Menu Utama">
+    <img src="https://tataumkm.github.io/permanagroup/icons/favicon-96x96.png" alt="Home">
+  </div>
+
+  <script>
+    const btn = document.getElementById('floating-btn');
+    
+    // Variabel untuk melacak status drag
+    let isDown = false;
+    let isMoved = false;
+    let startX;
+    let startY;
+    let btnLeft;
+    let btnTop;
+
+    // --- EVENT UNTUK MOUSE (LAPTOP/PC) ---
+    btn.addEventListener('mousedown', (e) => {
+      isDown = true;
+      isMoved = false;
+      startX = e.clientX;
+      startY = e.clientY;
+      const rect = btn.getBoundingClientRect();
+      btnLeft = rect.left;
+      btnTop = rect.top;
+      e.preventDefault();
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (!isDown) return;
+      const dx = e.clientX - startX;
+      const dy = e.clientY - startY;
+      
+      // Jika digeser lebih dari 5 pixel, anggap ini drag, bukan klik
+      if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
+        isMoved = true;
+      }
+      
+      if (isMoved) {
+        moveButton(btnLeft + dx, btnTop + dy);
+      }
+    });
+
+    window.addEventListener('mouseup', (e) => {
+      if (!isDown) return;
+      isDown = false;
+      if (!isMoved) {
+        // Jika tidak digeser (hanya klik), arahkan ke Beranda
+        window.location.href = '../index.html';
+      }
+    });
+
+    // --- EVENT UNTUK TOUCH (SMARTPHONE) ---
+    btn.addEventListener('touchstart', (e) => {
+      isDown = true;
+      isMoved = false;
+      const touch = e.touches[0];
+      startX = touch.clientX;
+      startY = touch.clientY;
+      const rect = btn.getBoundingClientRect();
+      btnLeft = rect.left;
+      btnTop = rect.top;
+    }, {passive: false});
+
+    window.addEventListener('touchmove', (e) => {
+      if (!isDown) return;
+      const touch = e.touches[0];
+      const dx = touch.clientX - startX;
+      const dy = touch.clientY - startY;
+      
+      if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
+        isMoved = true;
+      }
+      
+      if (isMoved) {
+        e.preventDefault(); // Mencegah layar tertarik / terscroll
+        moveButton(btnLeft + dx, btnTop + dy);
+      }
+    }, {passive: false});
+
+    window.addEventListener('touchend', (e) => {
+      if (!isDown) return;
+      isDown = false;
+      if (!isMoved) {
+        // Jika tidak digeser (hanya tap), arahkan ke Beranda
+        window.location.href = '../index.html';
+      }
+    });
+
+    // Fungsi untuk memperbarui posisi tombol dan menjaganya tidak keluar layar
+    function moveButton(newLeft, newTop) {
+      const maxLeft = window.innerWidth - btn.offsetWidth;
+      const maxTop = window.innerHeight - btn.offsetHeight;
+
+      // Batasi agar tidak keluar layar
+      newLeft = Math.max(0, Math.min(newLeft, maxLeft));
+      newTop = Math.max(0, Math.min(newTop, maxTop));
+
+      btn.style.left = newLeft + 'px';
+      btn.style.top = newTop + 'px';
+      btn.style.bottom = 'auto'; // Reset CSS bottom bawaan
+      btn.style.right = 'auto';  // Reset CSS right bawaan
+    }
+  </script>
+</body>
+</html>
