@@ -1,0 +1,1348 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tutorial — Sistem Broker & Penjualan</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'sans-serif'] },
+          colors: {
+            primary: '#4F46E5',
+            broker: '#7c3aed',
+            surface: '#F8FAFC'
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #f1f5f9; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+    html { scroll-behavior: smooth; scroll-padding-top: 80px; }
+
+    .fade-in { animation: fadeIn 0.5s ease-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+
+    .step-number {
+      width: 36px; height: 36px; min-width: 36px;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 50%; font-weight: 700; font-size: 14px;
+    }
+
+    .toc-link { transition: all 0.2s; border-left: 3px solid transparent; }
+    .toc-link:hover { border-left-color: #7c3aed; background: #f5f3ff; color: #7c3aed; }
+    .toc-link.active { border-left-color: #7c3aed; background: #ede9fe; color: #7c3aed; font-weight: 600; }
+
+    .card-tip { border-left: 4px solid #7c3aed; }
+    .card-warning { border-left: 4px solid #f59e0b; }
+    .card-danger { border-left: 4px solid #ef4444; }
+    .card-info { border-left: 4px solid #3b82f6; }
+    .card-success { border-left: 4px solid #10b981; }
+
+    .screenshot-placeholder {
+      background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+      border: 2px dashed #cbd5e1;
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      min-height: 180px;
+      color: #94a3b8;
+      font-size: 14px;
+      position: relative;
+      overflow: hidden;
+    }
+    .screenshot-placeholder::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(203,213,225,0.1) 10px, rgba(203,213,225,0.1) 20px);
+    }
+
+    .flow-arrow { color: #7c3aed; font-size: 24px; line-height: 1; }
+    
+    .kbd {
+      display: inline-flex; align-items: center; justify-content: center;
+      padding: 2px 8px; border-radius: 6px; font-size: 12px; font-weight: 600;
+      background: #f1f5f9; border: 1px solid #cbd5e1; color: #475569;
+      box-shadow: 0 1px 0 #cbd5e1;
+      font-family: 'Inter', monospace;
+    }
+
+    @media print {
+      nav, .no-print { display: none !important; }
+      .print-break { page-break-before: always; }
+    }
+  </style>
+</head>
+<body class="bg-surface text-slate-800 font-sans antialiased">
+
+  <!-- TOP NAV BAR -->
+  <nav class="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md border-b border-slate-200 shadow-sm no-print">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 bg-broker rounded-lg flex items-center justify-center text-white">
+          <svg fill="#ffffff" width="20px" height="20px" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M46.72,20.52a1.73,1.73,0,0,1,2.47,0l13.46,13a1.62,1.62,0,0,1,0,2.43L49.19,49a1.72,1.72,0,0,1-2.47,0l-2.47-2.42a1.62,1.62,0,0,1,0-2.43L48.46,40a1.12,1.12,0,0,0-.82-1.9H24.83A1.85,1.85,0,0,1,23,36.38V32.92a1.92,1.92,0,0,1,1.83-1.74H47.64a1.1,1.1,0,0,0,.82-1.9L44.25,25.2a1.62,1.62,0,0,1,0-2.43Zm-7.24,30.53a1.73,1.73,0,0,0-2.48,0l-13.45,13a1.62,1.62,0,0,0,0,2.43L37,79.48a1.74,1.74,0,0,0,2.48,0L42,77.05a1.61,1.61,0,0,0,0-2.42l-4.21-4.08a1.12,1.12,0,0,1,.82-1.91H49.42A15.63,15.63,0,0,1,49,65a16.17,16.17,0,0,1,.34-3.29H38.56a1.1,1.1,0,0,1-.82-1.91L42,55.73a1.62,1.62,0,0,0,0-2.43ZM53,65A12,12,0,1,1,65,77,12,12,0,0,1,53,65Zm19.52-2.81-8.07,8.08a1.46,1.46,0,0,1-2.15,0l-3.9-3.91a.69.69,0,0,1,0-1.07l1.07-1.08a.71.71,0,0,1,1.08,0L63.37,67l6.93-6.93a.7.7,0,0,1,1.08,0l1.07,1.08A.66.66,0,0,1,72.52,62.19Z" fill-rule="evenodd"/></svg>
+        </div>
+        <div>
+          <h1 class="text-sm font-bold text-slate-900 leading-tight">Panduan Penggunaan</h1>
+          <p class="text-[11px] text-slate-400">Sistem Broker & Penjualan v1.0</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <button onclick="window.print()" class="hidden sm:flex items-center gap-1.5 text-xs font-medium text-slate-500 hover:text-slate-700 bg-white border border-slate-200 px-3 py-1.5 rounded-lg transition-colors">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+          Cetak
+        </button>
+        <button onclick="scrollToTop()" class="flex items-center gap-1.5 text-xs font-medium text-broker hover:text-violet-700 bg-violet-50 border border-violet-200 px-3 py-1.5 rounded-lg transition-colors">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path></svg>
+          Atas
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- MAIN LAYOUT -->
+  <div class="pt-20 pb-16 max-w-7xl mx-auto px-4 sm:px-6 flex gap-8">
+
+    <!-- LEFT: TABLE OF CONTENTS (Sticky) -->
+    <aside class="hidden lg:block w-64 flex-shrink-0 no-print">
+      <div class="sticky top-24">
+        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 px-3">Daftar Isi</h3>
+        <nav id="toc-nav" class="space-y-0.5 text-sm max-h-[calc(100vh-140px)] overflow-y-auto">
+          <a href="#pendahuluan" class="toc-link block px-3 py-2 rounded-r-lg text-slate-600">Pendahuluan</a>
+          <a href="#persyaratan" class="toc-link block px-3 py-2 rounded-r-lg text-slate-600">Persyaratan Sistem</a>
+          <a href="#alur-kerja" class="toc-link block px-3 py-2 rounded-r-lg text-slate-600">Alur Kerja Broker</a>
+          <a href="#dashboard" class="toc-link block px-3 py-2 rounded-r-lg text-slate-600">1. Dashboard</a>
+          <a href="#transaksi-baru" class="toc-link block px-3 py-2 rounded-r-lg text-slate-600">2. Transaksi Baru</a>
+          <a href="#riwayat-transaksi" class="toc-link block px-3 py-2 rounded-r-lg text-slate-600">3. Riwayat Transaksi</a>
+          <a href="#detail-transaksi" class="toc-link block px-3 py-2 rounded-r-lg text-slate-600">4. Detail & Pembayaran</a>
+          <a href="#data-pelanggan" class="toc-link block px-3 py-2 rounded-r-lg text-slate-600">5. Data Pelanggan</a>
+          <a href="#pelunasan-pabrik" class="toc-link block px-3 py-2 rounded-r-lg text-slate-600">6. Pelunasan Pabrik</a>
+          <a href="#hutang-pabrik" class="toc-link block px-3 py-2 rounded-r-lg text-slate-600">7. Laporan Hutang Pabrik</a>
+          <a href="#piutang-buyer" class="toc-link block px-3 py-2 rounded-r-lg text-slate-600">8. Laporan Piutang Buyer</a>
+          <a href="#export-excel" class="toc-link block px-3 py-2 rounded-r-lg text-slate-600">9. Export Excel</a>
+          <a href="#aturan-khusus" class="toc-link block px-3 py-2 rounded-r-lg text-slate-600">Aturan & Kebijakan Khusus</a>
+          <a href="#faq" class="toc-link block px-3 py-2 rounded-r-lg text-slate-600">FAQ / Pemecahan Masalah</a>
+        </nav>
+      </div>
+    </aside>
+
+    <!-- RIGHT: CONTENT -->
+    <main class="flex-1 min-w-0 space-y-12">
+
+      <!-- ============================================== -->
+      <!-- HERO / HEADER -->
+      <!-- ============================================== -->
+      <section id="pendahuluan" class="fade-in">
+        <div class="bg-gradient-to-br from-violet-600 via-purple-600 to-indigo-700 rounded-2xl p-8 md:p-12 text-white shadow-xl relative overflow-hidden">
+          <!-- Decorative -->
+          <div class="absolute top-0 right-0 w-72 h-72 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/4"></div>
+          <div class="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full translate-y-1/3 -translate-x-1/4"></div>
+          
+          <div class="relative z-10">
+            <div class="inline-flex items-center gap-2 bg-white/15 backdrop-blur-sm rounded-full px-4 py-1.5 text-xs font-semibold mb-6 border border-white/20">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+              Dokumentasi Resmi
+            </div>
+            <h1 class="text-3xl md:text-4xl font-extrabold leading-tight mb-3">Panduan Lengkap<br>Sistem Broker & Penjualan</h1>
+            <p class="text-purple-100 text-base md:text-lg max-w-2xl leading-relaxed">Panduan step-by-step untuk mengoperasikan aplikasi manajemen transaksi broker, mulai dari input pesanan, pencatatan pembayaran, pelunasan hutang pabrik, hingga laporan keuangan.</p>
+            <div class="flex flex-wrap gap-4 mt-8">
+              <div class="flex items-center gap-2 bg-white/10 rounded-lg px-4 py-2 text-sm">
+                <svg class="w-4 h-4 text-purple-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                Versi 1.0 — 2026
+              </div>
+              <div class="flex items-center gap-2 bg-white/10 rounded-lg px-4 py-2 text-sm">
+                <svg class="w-4 h-4 text-purple-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                Oleh: Tata Umkm
+              </div>
+              <div class="flex items-center gap-2 bg-white/10 rounded-lg px-4 py-2 text-sm">
+                <svg class="w-4 h-4 text-purple-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                Google Apps Script
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================== -->
+      <!-- PERSYARATAN SISTEM -->
+      <!-- ============================================== -->
+      <section id="persyaratan">
+        <div class="flex items-center gap-3 mb-6">
+          <div class="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center text-amber-600">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+          </div>
+          <h2 class="text-2xl font-bold text-slate-900">Persyaratan & Prasyarat</h2>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Prasyarat Teknis -->
+          <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+            <h3 class="font-bold text-slate-800 mb-4 flex items-center gap-2">
+              <span class="w-6 h-6 bg-blue-100 rounded flex items-center justify-center text-blue-600 text-xs font-bold">⚙</span>
+              Prasyarat Teknis
+            </h3>
+            <ul class="space-y-3">
+              <li class="flex items-start gap-2 text-sm text-slate-600">
+                <svg class="w-5 h-5 text-emerald-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                <span>Akun <strong>Google</strong> yang terdaftar dan memiliki akses ke spreadsheet aplikasi.</span>
+              </li>
+              <li class="flex items-start gap-2 text-sm text-slate-600">
+                <svg class="w-5 h-5 text-emerald-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                <span>Browser modern (<strong>Chrome, Edge, Firefox, Safari</strong>) versi terbaru.</span>
+              </li>
+              <li class="flex items-start gap-2 text-sm text-slate-600">
+                <svg class="w-5 h-5 text-emerald-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                <span>Koneksi internet yang stabil (data tersimpan di Google Cloud).</span>
+              </li>
+              <li class="flex items-start gap-2 text-sm text-slate-600">
+                <svg class="w-5 h-5 text-emerald-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                <span>Layar minimal <strong>1024×768</strong> (disarankan desktop untuk pengalaman optimal).</span>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Prasyarat Data -->
+          <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+            <h3 class="font-bold text-slate-800 mb-4 flex items-center gap-2">
+              <span class="w-6 h-6 bg-amber-100 rounded flex items-center justify-center text-amber-600 text-xs font-bold">📋</span>
+              Prasyarat Data (Wajib Diisi Dulu)
+            </h3>
+            <ul class="space-y-3">
+              <li class="flex items-start gap-2 text-sm text-slate-600">
+                <span class="w-5 h-5 bg-red-100 text-red-600 rounded flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">1</span>
+                <span><strong>Data Supplier/Pabrik</strong> harus sudah diinput di Sistem PO (termasuk Kategori: Deposit / Reguler).</span>
+              </li>
+              <li class="flex items-start gap-2 text-sm text-slate-600">
+                <span class="w-5 h-5 bg-red-100 text-red-600 rounded flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">2</span>
+                <span><strong>Data Rekening Bank Perusahaan</strong> harus sudah terdaftar di sistem (via fungsi <code class="bg-slate-100 px-1.5 py-0.5 rounded text-xs">getBankList</code>).</span>
+              </li>
+              <li class="flex items-start gap-2 text-sm text-slate-600">
+                <span class="w-5 h-5 bg-amber-100 text-amber-600 rounded flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">3</span>
+                <span><strong>Data Pelanggan (Buyer)</strong> — bisa ditambah langsung dari menu aplikasi ini.</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Peran Pengguna -->
+        <div class="mt-6 bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+          <h3 class="font-bold text-slate-800 mb-4 flex items-center gap-2">
+            <span class="w-6 h-6 bg-violet-100 rounded flex items-center justify-center text-violet-600 text-xs font-bold">👤</span>
+            Peran & Hak Akses
+          </h3>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm text-left">
+              <thead class="bg-slate-50 text-slate-500 text-xs uppercase">
+                <tr>
+                  <th class="px-4 py-3 font-semibold">Fitur</th>
+                  <th class="px-4 py-3 font-semibold text-center">Broker / Operator</th>
+                  <th class="px-4 py-3 font-semibold text-center">Pemilik / Manager</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100">
+                <tr><td class="px-4 py-2.5">Input Transaksi Baru</td><td class="px-4 py-2.5 text-center text-emerald-600">✅</td><td class="px-4 py-2.5 text-center text-emerald-600">✅</td></tr>
+                <tr><td class="px-4 py-2.5">Catat Pembayaran Buyer</td><td class="px-4 py-2.5 text-center text-emerald-600">✅</td><td class="px-4 py-2.5 text-center text-emerald-600">✅</td></tr>
+                <tr><td class="px-4 py-2.5">Pelunasan Hutang Pabrik</td><td class="px-4 py-2.5 text-center text-emerald-600">✅</td><td class="px-4 py-2.5 text-center text-emerald-600">✅</td></tr>
+                <tr><td class="px-4 py-2.5">Edit Data Transaksi</td><td class="px-4 py-2.5 text-center text-amber-500">⚠ Draft saja</td><td class="px-4 py-2.5 text-center text-emerald-600">✅</td></tr>
+                <tr><td class="px-4 py-2.5">Hapus Pelanggan</td><td class="px-4 py-2.5 text-center text-red-400">❌</td><td class="px-4 py-2.5 text-center text-emerald-600">✅</td></tr>
+                <tr><td class="px-4 py-2.5">Export Laporan Excel</td><td class="px-4 py-2.5 text-center text-emerald-600">✅</td><td class="px-4 py-2.5 text-center text-emerald-600">✅</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================== -->
+      <!-- ALUR KERJA BROKER -->
+      <!-- ============================================== -->
+      <section id="alur-kerja">
+        <div class="flex items-center gap-3 mb-6">
+          <div class="w-10 h-10 bg-violet-100 rounded-xl flex items-center justify-center text-violet-600">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+          </div>
+          <h2 class="text-2xl font-bold text-slate-900">Alur Kerja Broker (Big Picture)</h2>
+        </div>
+
+        <div class="bg-white rounded-xl border border-slate-200 p-6 md:p-8 shadow-sm">
+          <!-- FLOW DIAGRAM -->
+          <div class="flex flex-col items-center gap-3">
+            <!-- Step 1 -->
+            <div class="bg-violet-50 border-2 border-violet-200 rounded-xl px-6 py-4 text-center max-w-sm w-full">
+              <div class="text-xs font-bold text-violet-500 mb-1">LANGKAH 1</div>
+              <div class="font-bold text-slate-800">Tambah Data Pelanggan</div>
+              <div class="text-xs text-slate-500 mt-1">Menu: Data Pelanggan → + Pelanggan Baru</div>
+            </div>
+            <div class="flow-arrow">↓</div>
+            <!-- Step 2 -->
+            <div class="bg-blue-50 border-2 border-blue-200 rounded-xl px-6 py-4 text-center max-w-sm w-full">
+              <div class="text-xs font-bold text-blue-500 mb-1">LANGKAH 2</div>
+              <div class="font-bold text-slate-800">Input Transaksi Baru</div>
+              <div class="text-xs text-slate-500 mt-1">Menu: Transaksi Baru → Isi Form → Simpan</div>
+            </div>
+            <div class="flow-arrow">↓</div>
+            <!-- Step 3 -->
+            <div class="bg-emerald-50 border-2 border-emerald-200 rounded-xl px-6 py-4 text-center max-w-sm w-full">
+              <div class="text-xs font-bold text-emerald-500 mb-1">LANGKAH 3</div>
+              <div class="font-bold text-slate-800">Terima Pembayaran dari Buyer</div>
+              <div class="text-xs text-slate-500 mt-1">Menu: Riwayat Transaksi → Detail → Catat Bayar</div>
+            </div>
+            <div class="flow-arrow">↓</div>
+            <!-- Step 4 -->
+            <div class="bg-orange-50 border-2 border-orange-200 rounded-xl px-6 py-4 text-center max-w-sm w-full">
+              <div class="text-xs font-bold text-orange-500 mb-1">LANGKAH 4</div>
+              <div class="font-bold text-slate-800">Bayar Hutang ke Pabrik</div>
+              <div class="text-xs text-slate-500 mt-1">Menu: Pelunasan Pabrik → Pilih & Bayar</div>
+            </div>
+            <div class="flow-arrow">↓</div>
+            <!-- Step 5 -->
+            <div class="bg-slate-100 border-2 border-slate-300 rounded-xl px-6 py-4 text-center max-w-sm w-full">
+              <div class="text-xs font-bold text-slate-500 mb-1">LANGKAH 5</div>
+              <div class="font-bold text-slate-800">Monitoring Laporan</div>
+              <div class="text-xs text-slate-500 mt-1">Menu: Hutang Pabrik / Piutang Buyer → Export</div>
+            </div>
+          </div>
+
+          <div class="mt-8 card-info bg-blue-50 border border-blue-100 rounded-lg p-4">
+            <div class="flex items-start gap-3">
+              <svg class="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+              <div>
+                <h4 class="font-bold text-blue-800 text-sm">Tips Alur Kerja</h4>
+                <p class="text-xs text-blue-600 mt-1">Pastikan <strong>data supplier/pabrik</strong> sudah ada di sistem PO sebelum menggunakan Broker System. Jika pabrik belum terdaftar, maka dropdown pabrik akan kosong.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================== -->
+      <!-- 1. DASHBOARD -->
+      <!-- ============================================== -->
+      <section id="dashboard" class="print-break">
+        <div class="flex items-center gap-3 mb-6">
+          <div class="step-number bg-violet-600 text-white">1</div>
+          <h2 class="text-2xl font-bold text-slate-900">Dashboard</h2>
+        </div>
+
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+          <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50">
+            <h3 class="font-semibold text-slate-700">Apa yang ditampilkan di Dashboard?</h3>
+          </div>
+          <div class="p-6 space-y-5">
+            <p class="text-sm text-slate-600 leading-relaxed">Dashboard adalah halaman utama yang menampilkan ringkasan bisnis broker Anda secara real-time. Data diambil langsung dari Google Sheets.</p>
+
+            <!-- Stat Cards Explanation -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div class="bg-purple-50 border border-purple-100 rounded-lg p-4">
+                <div class="text-xs font-bold text-purple-600 mb-1">📊 Total Transaksi</div>
+                <p class="text-xs text-slate-500">Jumlah seluruh transaksi yang pernah dicatat, tanpa memandang status pembayaran.</p>
+              </div>
+              <div class="bg-blue-50 border border-blue-100 rounded-lg p-4">
+                <div class="text-xs font-bold text-blue-600 mb-1">💰 Total Omzet</div>
+                <p class="text-xs text-slate-500">Total nilai penjualan (Total Tagihan Buyer) dari seluruh transaksi.</p>
+              </div>
+              <div class="bg-emerald-50 border border-emerald-100 rounded-lg p-4">
+                <div class="text-xs font-bold text-emerald-600 mb-1">📈 Estimasi Profit</div>
+                <p class="text-xs text-slate-500">Selisih antara Total Tagihan Buyer dan Total Cost (Harga Beli + Biaya yang ditanggung perusahaan).</p>
+              </div>
+              <div class="bg-orange-50 border border-orange-100 rounded-lg p-4">
+                <div class="text-xs font-bold text-orange-600 mb-1">⏳ Sisa Tagihan</div>
+                <p class="text-xs text-slate-500">Total piutang yang belum dibayar oleh pembeli (semua transaksi yang statusnya belum Lunas).</p>
+              </div>
+            </div>
+
+            <!-- Active Shipments Table -->
+            <div class="bg-slate-50 rounded-lg p-4 border border-slate-200">
+              <h4 class="font-bold text-sm text-slate-700 mb-2">🚚 Tabel Proses Pengiriman</h4>
+              <p class="text-xs text-slate-500">Menampilkan transaksi yang <strong>belum Lunas</strong> (status DP atau Belum Bayar). Klik "Lihat Semua" untuk membuka halaman Riwayat Transaksi.</p>
+            </div>
+
+            <div class="card-tip bg-violet-50 border border-violet-100 rounded-lg p-4">
+              <div class="flex items-start gap-3">
+                <svg class="w-5 h-5 text-violet-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path></svg>
+                <div>
+                  <h4 class="font-bold text-violet-800 text-sm">Tips</h4>
+                  <p class="text-xs text-violet-600 mt-1">Dashboard otomatis di-refresh setiap kali Anda membuka halaman. Tidak ada tombol refresh manual — cukup navigasi ulang ke menu Dashboard.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================== -->
+      <!-- 2. TRANSAKSI BARU -->
+      <!-- ============================================== -->
+      <section id="transaksi-baru" class="print-break">
+        <div class="flex items-center gap-3 mb-6">
+          <div class="step-number bg-violet-600 text-white">2</div>
+          <h2 class="text-2xl font-bold text-slate-900">Input Transaksi Baru</h2>
+        </div>
+
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+          <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50">
+            <h3 class="font-semibold text-slate-700">Langkah-langkah Membuat Transaksi</h3>
+          </div>
+          <div class="p-6 space-y-6">
+            <p class="text-sm text-slate-600">Form ini adalah inti dari sistem broker. Anda akan mencatat detail pesanan, harga beli/jual, biaya tambahan, dan pembayaran awal (DP).</p>
+
+            <!-- STEP 2.1 -->
+            <div class="flex gap-4">
+              <div class="step-number bg-slate-200 text-slate-700 text-sm">2.1</div>
+              <div class="flex-1">
+                <h4 class="font-bold text-slate-800 mb-2">Isi Informasi Pesanan</h4>
+                <div class="bg-slate-50 rounded-lg p-4 space-y-3 text-sm text-slate-600 border border-slate-200">
+                  <div class="flex items-start gap-2">
+                    <span class="font-bold text-slate-700 min-w-[120px]">Tanggal Transaksi</span>
+                    <span>Default hari ini. Bisa diubah jika mencatat transaksi mundur.</span>
+                  </div>
+                  <div class="flex items-start gap-2">
+                    <span class="font-bold text-slate-700 min-w-[120px]">Pelanggan (Buyer)</span>
+                    <span><span class="text-red-500">*</span> Wajib. Ketik nama/kode lalu <strong>pilih dari dropdown</strong>. Tidak boleh diketik manual (Strict Mode).</span>
+                  </div>
+                  <div class="flex items-start gap-2">
+                    <span class="font-bold text-slate-700 min-w-[120px]">Pabrik (Supplier)</span>
+                    <span>Ketik nama pabrik, pilih dari dropdown. Data diambil dari Sistem PO.</span>
+                  </div>
+                  <div class="flex items-start gap-2">
+                    <span class="font-bold text-slate-700 min-w-[120px]">No. PO Pembeli</span>
+                    <span>Opsional. Klik <span class="kbd">🔄 Auto</span> untuk generate otomatis (format: PO-XXXXXX).</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- DEPOSIT WARNING -->
+            <div class="card-warning bg-amber-50 border border-amber-100 rounded-lg p-4">
+              <div class="flex items-start gap-3">
+                <svg class="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"></path></svg>
+                <div>
+                  <h4 class="font-bold text-amber-800 text-sm">⚠ Perhatian: Supplier Kategori Deposit</h4>
+                  <p class="text-xs text-amber-700 mt-1">Jika pabrik yang Anda pilih berkategori <strong>Deposit</strong>, maka:</p>
+                  <ul class="text-xs text-amber-700 mt-1 ml-4 list-disc space-y-1">
+                    <li>Banner peringatan berwarna kuning akan muncul di form.</li>
+                    <li>Section <strong>Pembayaran Awal (DP)</strong> akan dinonaktifkan (grayed out).</li>
+                    <li>Pembayaran untuk supplier Deposit ditangani <strong>di luar sistem broker</strong> — jangan input di sini.</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <!-- STEP 2.2 -->
+            <div class="flex gap-4">
+              <div class="step-number bg-slate-200 text-slate-700 text-sm">2.2</div>
+              <div class="flex-1">
+                <h4 class="font-bold text-slate-800 mb-2">Isi Rincian Biaya Transaksi</h4>
+                <p class="text-sm text-slate-500 mb-3">Form ini dibagi menjadi dua kolom: <strong>Sisi Pembelian (Cost)</strong> dan <strong>Sisi Penjualan (Bill)</strong>.</p>
+
+                <!-- Kolom Kiri -->
+                <div class="bg-slate-50 border border-slate-200 rounded-lg p-4 mb-3">
+                  <h5 class="font-bold text-slate-700 text-sm mb-3 flex items-center gap-2">
+                    <div class="w-2 h-5 bg-slate-400 rounded-full"></div>
+                    Sisi Pembelian (Cost / Pabrik)
+                  </h5>
+                  <div class="space-y-2 text-xs text-slate-600">
+                    <div class="flex justify-between bg-white rounded p-2 border"><span class="font-medium">Harga Beli ke Pabrik</span><span class="text-slate-500">Negosiasi harga dari supplier</span></div>
+                    <div class="flex justify-between bg-white rounded p-2 border"><span class="font-medium">Biaya Handling/Muat</span><span class="text-slate-500">Pilih tanggungan: PT atau Buyer</span></div>
+                    <div class="flex justify-between bg-white rounded p-2 border"><span class="font-medium">Biaya Lainnya (Pabrik)</span><span class="text-slate-500">Contoh: Packing, Asuransi</span></div>
+                  </div>
+                </div>
+
+                <!-- Kolom Kanan -->
+                <div class="bg-blue-50 border border-blue-100 rounded-lg p-4 mb-3">
+                  <h5 class="font-bold text-blue-700 text-sm mb-3 flex items-center gap-2">
+                    <div class="w-2 h-5 bg-blue-500 rounded-full"></div>
+                    Sisi Penjualan (Bill / Buyer)
+                  </h5>
+                  <div class="space-y-2 text-xs text-slate-600">
+                    <div class="flex justify-between bg-white rounded p-2 border"><span class="font-medium">Harga Jual ke Buyer</span><span class="text-slate-500">Harga yang ditagih ke pembeli</span></div>
+                    <div class="flex justify-between bg-white rounded p-2 border"><span class="font-medium">Biaya Ongkir Kirim</span><span class="text-slate-500">Pilih tanggungan: PT atau Buyer</span></div>
+                    <div class="flex justify-between bg-white rounded p-2 border"><span class="font-medium">Fee</span><span class="text-slate-500">Komisi tambahan jika ada</span></div>
+                    <div class="flex justify-between bg-white rounded p-2 border"><span class="font-medium">Biaya Lainnya (Buyer)</span><span class="text-slate-500">Contoh: Dokumen, Biaya Pelabuhan</span></div>
+                  </div>
+                </div>
+
+                <!-- Profit Bar -->
+                <div class="bg-slate-800 rounded-lg p-4 text-white text-sm">
+                  <div class="flex items-center justify-between">
+                    <div>
+                      <span class="text-xs text-slate-400 font-bold">ESTIMASI PROFIT BERSIH</span>
+                      <div class="text-[10px] text-slate-500">= Total Tagihan Buyer − Total Cost Pabrik</div>
+                    </div>
+                    <span class="text-emerald-400 font-bold text-lg">Dihitung Otomatis</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- STEP 2.3 -->
+            <div class="flex gap-4">
+              <div class="step-number bg-slate-200 text-slate-700 text-sm">2.3</div>
+              <div class="flex-1">
+                <h4 class="font-bold text-slate-800 mb-2">Catat Pembayaran Awal (DP) — Opsional</h4>
+                <div class="bg-slate-50 rounded-lg p-4 border border-slate-200 space-y-3 text-sm text-slate-600">
+                  <div class="flex items-start gap-2">
+                    <span class="font-bold text-slate-700 min-w-[140px]">Tujuan Transfer</span>
+                    <div>
+                      <span class="inline-flex items-center gap-1"><span class="kbd">Ke Pabrik Langsung</span> — uang ditransfer langsung ke rekening supplier.</span><br>
+                      <span class="inline-flex items-center gap-1 mt-1"><span class="kbd">Ke Rekening Perusahaan</span> — uang masuk dulu ke rekening PT, lalu dialokasikan.</span>
+                    </div>
+                  </div>
+                  <div class="flex items-start gap-2">
+                    <span class="font-bold text-slate-700 min-w-[140px]">Pilih Rekening</span>
+                    <span>Hanya muncul jika tujuan = "Ke Rekening Perusahaan". Pilih bank dari dropdown.</span>
+                  </div>
+                  <div class="flex items-start gap-2">
+                    <span class="font-bold text-slate-700 min-w-[140px]">Tanggal & Nominal</span>
+                    <span>Isi tanggal bayar dan nominal DP. Bisa kosong jika belum ada pembayaran.</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- STEP 2.4 -->
+            <div class="flex gap-4">
+              <div class="step-number bg-slate-200 text-slate-700 text-sm">2.4</div>
+              <div class="flex-1">
+                <h4 class="font-bold text-slate-800 mb-2">Klik "Simpan Transaksi"</h4>
+                <p class="text-sm text-slate-600">Setelah semua data terisi, klik tombol <strong>Simpan Transaksi</strong>. Sistem akan memvalidasi dan menyimpan ke Google Sheets. Jika berhasil, Anda akan diarahkan ke halaman Riwayat Transaksi.</p>
+              </div>
+            </div>
+
+            <!-- Important Rules -->
+            <div class="card-danger bg-red-50 border border-red-100 rounded-lg p-4">
+              <div class="flex items-start gap-3">
+                <svg class="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"></path></svg>
+                <div>
+                  <h4 class="font-bold text-red-800 text-sm">Validasi Wajib</h4>
+                  <ul class="text-xs text-red-700 mt-1 ml-4 list-disc space-y-1">
+                    <li><strong>Pelanggan wajib dipilih dari dropdown</strong> — tidak boleh diketik bebas. Jika nama tidak muncul, tambahkan dulu di menu Data Pelanggan.</li>
+                    <li>Semua field nominal menerima angka saja. Sistem otomatis memformat ke Rupiah saat Anda mengetik.</li>
+                    <li>Jangan input pembayaran untuk supplier Deposit melalui form ini.</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================== -->
+      <!-- 3. RIWAYAT TRANSAKSI -->
+      <!-- ============================================== -->
+      <section id="riwayat-transaksi" class="print-break">
+        <div class="flex items-center gap-3 mb-6">
+          <div class="step-number bg-violet-600 text-white">3</div>
+          <h2 class="text-2xl font-bold text-slate-900">Riwayat Transaksi</h2>
+        </div>
+
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+          <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50">
+            <h3 class="font-semibold text-slate-700">Mencari & Memfilter Transaksi</h3>
+          </div>
+          <div class="p-6 space-y-5">
+            <p class="text-sm text-slate-600">Halaman ini menampilkan seluruh transaksi yang pernah dicatat, lengkap dengan fitur filter, paginasi, dan export.</p>
+
+            <!-- Filter Explanation -->
+            <div class="space-y-3">
+              <h4 class="font-bold text-sm text-slate-800">🔧 Fitur Filter yang Tersedia</h4>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div class="bg-slate-50 border border-slate-200 rounded-lg p-3">
+                  <div class="font-semibold text-xs text-slate-700 mb-1">🔍 Pencarian Umum</div>
+                  <p class="text-xs text-slate-500">Cari berdasarkan No. Ref atau Nama Pelanggan. Ketik langsung, hasil langsung terfilter.</p>
+                </div>
+                <div class="bg-slate-50 border border-slate-200 rounded-lg p-3">
+                  <div class="font-semibold text-xs text-slate-700 mb-1">🏭 Filter Pabrik</div>
+                  <p class="text-xs text-slate-500">Ketik nama pabrik di dropdown. Gunakan searchable select untuk memilih pabrik spesifik.</p>
+                </div>
+                <div class="bg-slate-50 border border-slate-200 rounded-lg p-3">
+                  <div class="font-semibold text-xs text-slate-700 mb-1">📋 Filter Status</div>
+                  <p class="text-xs text-slate-500">Pilih: Lunas, DP, Belum Lunas, atau Belum Lengkap (Draft).</p>
+                </div>
+                <div class="bg-slate-50 border border-slate-200 rounded-lg p-3">
+                  <div class="font-semibold text-xs text-slate-700 mb-1">📅 Filter Tanggal</div>
+                  <p class="text-xs text-slate-500">Rentang tanggal dari — sampai untuk membatasi periode transaksi.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Pagination -->
+            <div class="bg-blue-50 border border-blue-100 rounded-lg p-4">
+              <h4 class="font-bold text-sm text-blue-800 mb-2">📄 Paginasi</h4>
+              <p class="text-xs text-blue-600">Data ditampilkan <strong>15 baris per halaman</strong>. Gunakan tombol "Sebelumnya" / "Selanjutnya" di bagian bawah tabel untuk berpindah halaman. Info jumlah data yang ditampilkan ada di kiri bawah.</p>
+            </div>
+
+            <!-- Status Badges -->
+            <div class="space-y-3">
+              <h4 class="font-bold text-sm text-slate-800">🏷 Keterangan Status Badge</h4>
+              <div class="flex flex-wrap gap-3">
+                <span class="inline-flex items-center gap-2 bg-green-100 text-green-700 px-3 py-1.5 rounded-full text-xs font-bold border border-green-200">🟢 Lunas — Pembayaran buyer sudah lengkap</span>
+                <span class="inline-flex items-center gap-2 bg-yellow-100 text-yellow-700 px-3 py-1.5 rounded-full text-xs font-bold border border-yellow-200">🟡 DP — Pembayaran sebagian</span>
+                <span class="inline-flex items-center gap-2 bg-red-100 text-red-700 px-3 py-1.5 rounded-full text-xs font-bold border border-red-200">🔴 Belum — Belum ada pembayaran</span>
+                <span class="inline-flex items-center gap-2 bg-slate-200 text-slate-600 px-3 py-1.5 rounded-full text-xs font-bold border border-slate-300">⚪ Draft — Data belum lengkap</span>
+              </div>
+            </div>
+
+            <!-- Tombol Export -->
+            <div class="card-success bg-emerald-50 border border-emerald-100 rounded-lg p-4">
+              <div class="flex items-start gap-3">
+                <svg class="w-5 h-5 text-emerald-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                <div>
+                  <h4 class="font-bold text-emerald-800 text-sm">Export Excel</h4>
+                  <p class="text-xs text-emerald-600 mt-1">Klik tombol "Export Excel" di kanan atas untuk mengunduh data transaksi sesuai filter yang sedang aktif. File berformat <code>.xlsx</code> dan bisa dibuka di Microsoft Excel / Google Sheets.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================== -->
+      <!-- 4. DETAIL TRANSAKSI -->
+      <!-- ============================================== -->
+      <section id="detail-transaksi" class="print-break">
+        <div class="flex items-center gap-3 mb-6">
+          <div class="step-number bg-violet-600 text-white">4</div>
+          <h2 class="text-2xl font-bold text-slate-900">Detail Transaksi & Pembayaran</h2>
+        </div>
+
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+          <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50">
+            <h3 class="font-semibold text-slate-700">Membuka Detail & Mencatat Pembayaran</h3>
+          </div>
+          <div class="p-6 space-y-6">
+
+            <div class="flex gap-4">
+              <div class="step-number bg-blue-100 text-blue-700 text-sm">4.1</div>
+              <div class="flex-1">
+                <h4 class="font-bold text-slate-800 mb-2">Buka Detail Transaksi</h4>
+                <p class="text-sm text-slate-600">Di halaman Riwayat Transaksi, klik tombol <strong>"Detail"</strong> pada baris transaksi. Modal (jendela pop-up) akan terbuka menampilkan informasi lengkap.</p>
+              </div>
+            </div>
+
+            <div class="flex gap-4">
+              <div class="step-number bg-blue-100 text-blue-700 text-sm">4.2</div>
+              <div class="flex-1">
+                <h4 class="font-bold text-slate-800 mb-2">Informasi yang Ditampilkan</h4>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                  <div class="bg-white border border-slate-200 rounded-lg p-3">
+                    <span class="font-bold text-slate-700">📝 Informasi Pesanan</span>
+                    <p class="text-slate-500 mt-1">Nama Pabrik, No. PO, Catatan</p>
+                  </div>
+                  <div class="bg-blue-50 border border-blue-100 rounded-lg p-3">
+                    <span class="font-bold text-blue-700">💵 Rincian Tagihan Pembeli</span>
+                    <p class="text-blue-500 mt-1">Harga Jual, Ongkir, Handling, Total</p>
+                  </div>
+                  <div class="bg-slate-50 border border-slate-200 rounded-lg p-3">
+                    <span class="font-bold text-slate-700">📊 Analisa Biaya Internal</span>
+                    <p class="text-slate-500 mt-1">Harga Beli, Ongkir PT, Handling PT</p>
+                  </div>
+                  <div class="bg-emerald-50 border border-emerald-100 rounded-lg p-3">
+                    <span class="font-bold text-emerald-700">✅ Profit Bersih & Sisa Tagihan</span>
+                    <p class="text-emerald-500 mt-1">Dihitung otomatis dari data di atas</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex gap-4">
+              <div class="step-number bg-blue-100 text-blue-700 text-sm">4.3</div>
+              <div class="flex-1">
+                <h4 class="font-bold text-slate-800 mb-2">Catat Pembayaran Baru (dari Buyer)</h4>
+                <p class="text-sm text-slate-600 mb-3">Di bagian bawah modal, terdapat form "Catat Pembayaran Baru" yang muncul jika transaksi belum Lunas.</p>
+                <div class="bg-slate-50 border border-slate-200 rounded-lg p-4 space-y-2 text-sm text-slate-600">
+                  <div class="flex items-start gap-2">
+                    <span class="font-bold text-slate-700 min-w-[130px]">Tujuan Transfer</span>
+                    <span>Pilih <span class="kbd">Langsung ke Pabrik</span> atau <span class="kbd">Ke Rekening Perusahaan</span>.</span>
+                  </div>
+                  <div class="flex items-start gap-2">
+                    <span class="font-bold text-slate-700 min-w-[130px]">Pilih Rekening</span>
+                    <span>Muncul jika tujuan = Perusahaan. Pilih rekening bank tujuan.</span>
+                  </div>
+                  <div class="flex items-start gap-2">
+                    <span class="font-bold text-slate-700 min-w-[130px]">Nominal</span>
+                    <span>Ketik jumlah yang diterima. Otomatis terformat Rupiah.</span>
+                  </div>
+                  <div class="flex items-start gap-2">
+                    <span class="font-bold text-slate-700 min-w-[130px]">Catatan</span>
+                    <span>Opsional. Misal: "Transfer BCA 15 Jun".</span>
+                  </div>
+                  <div class="flex items-start gap-2">
+                    <span class="font-bold text-slate-700 min-w-[130px]">Klik Simpan</span>
+                    <span>Pembayaran langsung tercatat dan status transaksi diperbarui otomatis.</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex gap-4">
+              <div class="step-number bg-blue-100 text-blue-700 text-sm">4.4</div>
+              <div class="flex-1">
+                <h4 class="font-bold text-slate-800 mb-2">Edit Data Transaksi</h4>
+                <p class="text-sm text-slate-600">Klik tombol <strong>"Edit Data"</strong> di kanan atas modal untuk mengubah data transaksi. Anda bisa mengedit: Pabrik, PO Buyer, Harga Jual/Beli, Catatan, Ongkir, dan Handling.</p>
+                <div class="card-warning bg-amber-50 border border-amber-100 rounded-lg p-4 mt-2">
+                  <div class="flex items-start gap-3">
+                    <svg class="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"></path></svg>
+                    <div>
+                      <h4 class="font-bold text-amber-800 text-sm">Perhatian saat Edit</h4>
+                      <ul class="text-xs text-amber-700 mt-1 ml-4 list-disc space-y-1">
+                        <li>Tombol Edit hanya muncul untuk transaksi yang <strong>belum Lunas</strong> atau berstatus <strong>Draft</strong>.</li>
+                        <li>Mengubah harga beli/jual akan mengubah kalkulasi profit dan sisa tagihan secara otomatis.</li>
+                        <li>Jika mengubah pabrik ke supplier Deposit, banner peringatan akan muncul di form edit.</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Deposit Info in Detail -->
+            <div class="card-info bg-blue-50 border border-blue-100 rounded-lg p-4">
+              <div class="flex items-start gap-3">
+                <svg class="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <div>
+                  <h4 class="font-bold text-blue-800 text-sm">Supplier Deposit di Detail Transaksi</h4>
+                  <p class="text-xs text-blue-600 mt-1">Untuk transaksi dengan supplier Deposit, form "Catat Pembayaran Baru" tidak akan ditampilkan. Sebagai gantinya, muncul pesan: <em>"Supplier Deposit — Pembayaran ditangani di luar sistem."</em></p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================== -->
+      <!-- 5. DATA PELANGGAN -->
+      <!-- ============================================== -->
+      <section id="data-pelanggan">
+        <div class="flex items-center gap-3 mb-6">
+          <div class="step-number bg-violet-600 text-white">5</div>
+          <h2 class="text-2xl font-bold text-slate-900">Data Pelanggan</h2>
+        </div>
+
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+          <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50">
+            <h3 class="font-semibold text-slate-700">Mengelola Database Pembeli (Buyer)</h3>
+          </div>
+          <div class="p-6 space-y-5">
+            <div class="flex gap-4">
+              <div class="step-number bg-emerald-100 text-emerald-700 text-sm">5.1</div>
+              <div class="flex-1">
+                <h4 class="font-bold text-slate-800 mb-2">Menambah Pelanggan Baru</h4>
+                <ol class="text-sm text-slate-600 space-y-2 ml-4 list-decimal">
+                  <li>Klik tombol <strong>"+ Pelanggan Baru"</strong> di kanan atas.</li>
+                  <li>Modal form akan terbuka. Kode pelanggan <strong>digenerate otomatis</strong> oleh sistem.</li>
+                  <li>Isi <strong>Nama Pelanggan</strong> (wajib), No. Telepon/WA, dan Alamat.</li>
+                  <li>Klik <strong>"Simpan"</strong>. Data langsung tersimpan dan tabel diperbarui.</li>
+                </ol>
+              </div>
+            </div>
+
+            <div class="flex gap-4">
+              <div class="step-number bg-emerald-100 text-emerald-700 text-sm">5.2</div>
+              <div class="flex-1">
+                <h4 class="font-bold text-slate-800 mb-2">Menghapus Pelanggan</h4>
+                <p class="text-sm text-slate-600">Klik tombol <strong>"Hapus"</strong> pada baris pelanggan. Konfirmasi akan diminta sebelum penghapusan permanen.</p>
+                <div class="card-danger bg-red-50 border border-red-100 rounded-lg p-3 mt-2">
+                  <p class="text-xs text-red-700"><strong>⚠ Peringatan:</strong> Menghapus pelanggan yang memiliki transaksi terkait bisa menyebabkan data tidak konsisten. Pastikan pelanggan belum pernah digunakan dalam transaksi sebelum menghapus.</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="card-tip bg-violet-50 border border-violet-100 rounded-lg p-4">
+              <div class="flex items-start gap-3">
+                <svg class="w-5 h-5 text-violet-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path></svg>
+                <div>
+                  <h4 class="font-bold text-violet-800 text-sm">Tips</h4>
+                  <p class="text-xs text-violet-600 mt-1">Kode pelanggan bersifat <strong>auto-increment</strong> dan tidak bisa diedit manual. Jangan khawatir tentang penomoran — sistem akan mengurusnya.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================== -->
+      <!-- 6. PELUNASAN PABRIK -->
+      <!-- ============================================== -->
+      <section id="pelunasan-pabrik" class="print-break">
+        <div class="flex items-center gap-3 mb-6">
+          <div class="step-number bg-violet-600 text-white">6</div>
+          <h2 class="text-2xl font-bold text-slate-900">Pelunasan Hutang Pabrik</h2>
+        </div>
+
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+          <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50">
+            <h3 class="font-semibold text-slate-700">Membayar Hutang ke Supplier/Pabrik</h3>
+          </div>
+          <div class="p-6 space-y-6">
+            <p class="text-sm text-slate-600">Halaman ini digunakan untuk mencatat pembayaran dari perusahaan ke pabrik. Anda bisa membayar beberapa tagihan sekaligus dalam satu transaksi pembayaran.</p>
+
+            <div class="flex gap-4">
+              <div class="step-number bg-orange-100 text-orange-700 text-sm">6.1</div>
+              <div class="flex-1">
+                <h4 class="font-bold text-slate-800 mb-2">Pilih Pabrik & Cek Tagihan</h4>
+                <ol class="text-sm text-slate-600 space-y-2 ml-4 list-decimal">
+                  <li>Ketik nama pabrik di field <strong>"Pilih Pabrik (Supplier)"</strong> dan pilih dari dropdown.</li>
+                  <li>Klik tombol <strong>"Cek Tagihan Pabrik"</strong>.</li>
+                  <li>Sistem akan menampilkan daftar transaksi yang masih memiliki sisa hutang ke pabrik tersebut.</li>
+                </ol>
+              </div>
+            </div>
+
+            <div class="flex gap-4">
+              <div class="step-number bg-orange-100 text-orange-700 text-sm">6.2</div>
+              <div class="flex-1">
+                <h4 class="font-bold text-slate-800 mb-2">Pilih Tagihan & Isi Nominal</h4>
+                <ol class="text-sm text-slate-600 space-y-2 ml-4 list-decimal">
+                  <li><strong>Centang</strong> tagihan yang ingin dibayar di kolom checkbox kiri.</li>
+                  <li>Isi <strong>Total Nominal Dibayar</strong> (jumlah uang yang benar-benar ditransfer).</li>
+                  <li>Pilih <strong>Rekening Sumber Dana</strong> (bank perusahaan yang digunakan untuk transfer).</li>
+                </ol>
+
+                <div class="bg-amber-50 border border-amber-100 rounded-lg p-4 mt-3">
+                  <h5 class="font-bold text-amber-800 text-sm mb-2">🔄 Sistem Alokasi FIFO</h5>
+                  <p class="text-xs text-amber-700">Sistem menggunakan metode <strong>FIFO (First In First Out)</strong> untuk mengalokasikan pembayaran. Artinya, uang akan diprioritaskan untuk melunasi tagihan paling lama terlebih dahulu.</p>
+                  <div class="mt-2 bg-white rounded border border-amber-200 p-3">
+                    <p class="text-xs font-bold text-slate-700 mb-1">Contoh:</p>
+                    <p class="text-xs text-slate-600">Anda centang 3 tagihan (masing-masing Rp 5 juta, Rp 3 juta, Rp 2 juta). Lalu isi nominal bayar Rp 7 juta. Maka:</p>
+                    <ul class="text-xs text-slate-600 mt-1 ml-4 list-disc">
+                      <li>Tagihan 1: Dibayar <strong>Rp 5 juta</strong> (lunas)</li>
+                      <li>Tagihan 2: Dibayar <strong>Rp 2 juta</strong> (sisa Rp 1 juta)</li>
+                      <li>Tagihan 3: Dibayar <strong>Rp 0</strong> (belum terbayar)</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex gap-4">
+              <div class="step-number bg-orange-100 text-orange-700 text-sm">6.3</div>
+              <div class="flex-1">
+                <h4 class="font-bold text-slate-800 mb-2">Proses Pelunasan</h4>
+                <p class="text-sm text-slate-600">Klik tombol <strong>"Proses Pelunasan"</strong>. Konfirmasi akan diminta. Setelah berhasil, tabel hutang akan di-refresh dan status transaksi terkait diperbarui otomatis.</p>
+              </div>
+            </div>
+
+            <div class="card-info bg-blue-50 border border-blue-100 rounded-lg p-4">
+              <div class="flex items-start gap-3">
+                <svg class="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <div>
+                  <h4 class="font-bold text-blue-800 text-sm">Supplier Deposit Tidak Muncul</h4>
+                  <p class="text-xs text-blue-600 mt-1">Supplier yang berkategori <strong>Deposit</strong> tidak akan muncul di dropdown pabrik di halaman Pelunasan ini. Pembayaran Deposit ditangani terpisah di luar sistem broker.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Ringkasan Section -->
+            <div class="bg-slate-50 border border-slate-200 rounded-lg p-4">
+              <h5 class="font-bold text-sm text-slate-700 mb-2">📊 Ringkasan Real-time</h5>
+              <div class="grid grid-cols-2 gap-3 text-xs">
+                <div class="bg-white rounded border p-2">
+                  <span class="text-slate-500">Total Tagihan Dipilih:</span>
+                  <span class="font-bold text-slate-800 ml-1">Dihitung otomatis</span>
+                </div>
+                <div class="bg-white rounded border p-2">
+                  <span class="text-slate-500">Sisa Dana (Alokasi):</span>
+                  <span class="font-bold text-emerald-600 ml-1">Hijau = masih ada sisa</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================== -->
+      <!-- 7. LAPORAN HUTANG PABRIK -->
+      <!-- ============================================== -->
+      <section id="hutang-pabrik">
+        <div class="flex items-center gap-3 mb-6">
+          <div class="step-number bg-violet-600 text-white">7</div>
+          <h2 class="text-2xl font-bold text-slate-900">Laporan Hutang Pabrik</h2>
+        </div>
+
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+          <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50">
+            <h3 class="font-semibold text-slate-700">Monitoring Kewajiban ke Supplier</h3>
+          </div>
+          <div class="p-6 space-y-5">
+            <p class="text-sm text-slate-600">Laporan ini merangkum seluruh hutang ke pabrik, dikelompokkan per supplier.</p>
+
+            <!-- Summary Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div class="bg-orange-50 border border-orange-100 rounded-lg p-4">
+                <div class="text-xs font-bold text-orange-600 mb-1">Total Kewajiban</div>
+                <p class="text-xs text-slate-500">Total seluruh nilai pembelian ke semua pabrik.</p>
+              </div>
+              <div class="bg-slate-50 border border-slate-100 rounded-lg p-4">
+                <div class="text-xs font-bold text-slate-500 mb-1">Sudah Dibayar</div>
+                <p class="text-xs text-slate-500">Total yang sudah ditransfer ke pabrik.</p>
+              </div>
+              <div class="bg-red-50 border border-red-100 rounded-lg p-4">
+                <div class="text-xs font-bold text-red-600 mb-1">Sisa Hutang Aktif</div>
+                <p class="text-xs text-slate-500">Selisih = Kewajiban − Dibayar.</p>
+              </div>
+            </div>
+
+            <!-- Tabel -->
+            <div class="text-sm text-slate-600 space-y-2">
+              <h4 class="font-bold text-slate-800">Kolom Tabel:</h4>
+              <ul class="ml-4 list-disc space-y-1">
+                <li><strong>Pabrik/Supplier</strong> — Nama pabrik</li>
+                <li><strong>Jumlah Transaksi</strong> — Berapa kali transaksi dengan pabrik ini</li>
+                <li><strong>Total Kewajiban / Dibayar / Sisa Hutang</strong> — Angka rupiah</li>
+                <li><strong>Aksi</strong> — Tombol <span class="kbd">Bayar</span> (langsung ke halaman Pelunasan) atau badge <span class="bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded text-xs">Lunas</span></li>
+              </ul>
+            </div>
+
+            <div class="card-success bg-emerald-50 border border-emerald-100 rounded-lg p-4">
+              <div class="flex items-start gap-3">
+                <svg class="w-5 h-5 text-emerald-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                <div>
+                  <h4 class="font-bold text-emerald-800 text-sm">Export Laporan Hutang Pabrik</h4>
+                  <p class="text-xs text-emerald-600 mt-1">Klik tombol "Export Excel" untuk mengunduh laporan dalam format <code>.xlsx</code>. File berisi kolom: Nama Pabrik, Jumlah Transaksi, Total Kewajiban, Sudah Dibayar, Sisa Hutang.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================== -->
+      <!-- 8. PIUTANG BUYER -->
+      <!-- ============================================== -->
+      <section id="piutang-buyer">
+        <div class="flex items-center gap-3 mb-6">
+          <div class="step-number bg-violet-600 text-white">8</div>
+          <h2 class="text-2xl font-bold text-slate-900">Laporan Piutang Pelanggan</h2>
+        </div>
+
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+          <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50">
+            <h3 class="font-semibold text-slate-700">Monitoring Tagihan ke Pembeli</h3>
+          </div>
+          <div class="p-6 space-y-5">
+            <p class="text-sm text-slate-600">Mirip dengan Laporan Hutang Pabrik, tapi fokus pada piutang dari sisi pembeli (buyer).</p>
+
+            <!-- Summary Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div class="bg-blue-50 border border-blue-100 rounded-lg p-4">
+                <div class="text-xs font-bold text-blue-600 mb-1">Total Tagihan</div>
+                <p class="text-xs text-slate-500">Total nilai penjualan ke semua buyer.</p>
+              </div>
+              <div class="bg-slate-50 border border-slate-100 rounded-lg p-4">
+                <div class="text-xs font-bold text-slate-500 mb-1">Sudah Diterima</div>
+                <p class="text-xs text-slate-500">Total pembayaran yang sudah masuk.</p>
+              </div>
+              <div class="bg-emerald-50 border border-emerald-100 rounded-lg p-4">
+                <div class="text-xs font-bold text-emerald-600 mb-1">Sisa Piutang Aktif</div>
+                <p class="text-xs text-slate-500">Tagihan yang belum dibayar buyer.</p>
+              </div>
+            </div>
+
+            <!-- Quick Navigation -->
+            <div class="card-tip bg-violet-50 border border-violet-100 rounded-lg p-4">
+              <div class="flex items-start gap-3">
+                <svg class="w-5 h-5 text-violet-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
+                <div>
+                  <h4 class="font-bold text-violet-800 text-sm">Navigasi Cepat</h4>
+                  <p class="text-xs text-violet-600 mt-1">Klik tombol <strong>"Lihat Transaksi"</strong> pada baris pelanggan untuk langsung menuju Riwayat Transaksi yang terfilter berdasarkan pelanggan tersebut. Nama pelanggan akan otomatis terisi di filter pencarian.</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="card-success bg-emerald-50 border border-emerald-100 rounded-lg p-4">
+              <div class="flex items-start gap-3">
+                <svg class="w-5 h-5 text-emerald-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                <div>
+                  <h4 class="font-bold text-emerald-800 text-sm">Export Laporan Piutang</h4>
+                  <p class="text-xs text-emerald-600 mt-1">Sama seperti Hutang Pabrik, klik "Export Excel" untuk mengunduh laporan. File berisi: Nama Pelanggan, Jumlah Transaksi, Total Tagihan, Diterima, Sisa Piutang.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================== -->
+      <!-- 9. EXPORT EXCEL -->
+      <!-- ============================================== -->
+      <section id="export-excel">
+        <div class="flex items-center gap-3 mb-6">
+          <div class="step-number bg-violet-600 text-white">9</div>
+          <h2 class="text-2xl font-bold text-slate-900">Export Excel</h2>
+        </div>
+
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+          <div class="p-6 space-y-5">
+            <p class="text-sm text-slate-600">Sistem menyediakan tiga titik export Excel yang masing-masing menghasilkan file <code>.xlsx</code>:</p>
+
+            <div class="overflow-x-auto">
+              <table class="w-full text-sm text-left border border-slate-200 rounded-lg overflow-hidden">
+                <thead class="bg-slate-100 text-slate-600 text-xs uppercase">
+                  <tr>
+                    <th class="px-4 py-3 font-semibold">Lokasi Tombol</th>
+                    <th class="px-4 py-3 font-semibold">Isi Export</th>
+                    <th class="px-4 py-3 font-semibold">Keterangan</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                  <tr>
+                    <td class="px-4 py-3 font-medium">Riwayat Transaksi</td>
+                    <td class="px-4 py-3 text-xs text-slate-500">Ref, Tanggal, Pelanggan, Pabrik, Status, Harga Jual/Beli, Ongkir, Handling, Total Tagihan, Dibayar, Sisa, Profit</td>
+                    <td class="px-4 py-3 text-xs text-slate-500">Mengikuti filter yang sedang aktif. Nama file: <code>Laporan_Broker_YYYY-MM-DD.xlsx</code></td>
+                  </tr>
+                  <tr>
+                    <td class="px-4 py-3 font-medium">Laporan Hutang Pabrik</td>
+                    <td class="px-4 py-3 text-xs text-slate-500">Nama Pabrik, Jumlah Transaksi, Total Kewajiban, Dibayar, Sisa Hutang</td>
+                    <td class="px-4 py-3 text-xs text-slate-500">Seluruh data hutang pabrik. Nama file: <code>Laporan_Hutang_Pabrik.xlsx</code></td>
+                  </tr>
+                  <tr>
+                    <td class="px-4 py-3 font-medium">Laporan Piutang Buyer</td>
+                    <td class="px-4 py-3 text-xs text-slate-500">Nama Pelanggan, Jumlah Transaksi, Total Tagihan, Diterima, Sisa Piutang</td>
+                    <td class="px-4 py-3 text-xs text-slate-500">Seluruh data piutang buyer. Nama file: <code>Laporan_Piutang_Buyer.xlsx</code></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="card-info bg-blue-50 border border-blue-100 rounded-lg p-4">
+              <div class="flex items-start gap-3">
+                <svg class="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <div>
+                  <h4 class="font-bold text-blue-800 text-sm">Catatan Teknis</h4>
+                  <ul class="text-xs text-blue-600 mt-1 ml-4 list-disc space-y-1">
+                    <li>Export menggunakan library <strong>SheetJS (XLSX)</strong> yang berjalan sepenuhnya di sisi client (browser).</li>
+                    <li>Tanggal di export menggunakan format <code>YYYY-MM-DD</code> agar kompatibel dengan Excel.</li>
+                    <li>Lebar kolom sudah diatur otomatis agar mudah dibaca.</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================== -->
+      <!-- ATURAN KHUSUS -->
+      <!-- ============================================== -->
+      <section id="aturan-khusus" class="print-break">
+        <div class="flex items-center gap-3 mb-6">
+          <div class="w-10 h-10 bg-red-100 rounded-xl flex items-center justify-center text-red-600">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+          </div>
+          <h2 class="text-2xl font-bold text-slate-900">Aturan & Kebijakan Khusus</h2>
+        </div>
+
+        <div class="space-y-4">
+          <!-- Rule 1 -->
+          <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+            <h3 class="font-bold text-slate-800 mb-3 flex items-center gap-2">
+              <span class="w-6 h-6 bg-red-100 rounded flex items-center justify-center text-red-600 text-xs font-bold">1</span>
+              Supplier Kategori Deposit
+            </h3>
+            <ul class="text-sm text-slate-600 space-y-2 ml-8 list-disc">
+              <li>Supplier yang ditandai sebagai <strong>Deposit</strong> di sistem PO akan mendapat perlakuan khusus.</li>
+              <li>Tidak bisa input pembayaran DP di form Transaksi Baru.</li>
+              <li>Tidak bisa mencatat pembayaran di Detail Transaksi.</li>
+              <li>Tidak muncul di dropdown Pelunasan Pabrik.</li>
+              <li><strong>Alasan:</strong> Pembayaran Deposit ditangani terpisah di luar mekanisme broker.</li>
+            </ul>
+          </div>
+
+          <!-- Rule 2 -->
+          <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+            <h3 class="font-bold text-slate-800 mb-3 flex items-center gap-2">
+              <span class="w-6 h-6 bg-red-100 rounded flex items-center justify-center text-red-600 text-xs font-bold">2</span>
+              Strict Mode pada Dropdown Pencarian
+            </h3>
+            <ul class="text-sm text-slate-600 space-y-2 ml-8 list-disc">
+              <li>Semua dropdown pelanggan dan pabrik menggunakan <strong>Strict Mode</strong>.</li>
+              <li>Artinya Anda <strong>wajib memilih dari daftar</strong> yang muncul — tidak boleh mengetik nilai bebas.</li>
+              <li>Jika mengetik nilai yang tidak ada di daftar, field akan ditandai merah (invalid) dengan pesan error.</li>
+              <li><strong>Solusi:</strong> Jika pelanggan belum terdaftar, tambahkan dulu di menu Data Pelanggan. Jika pabrik belum ada, input dulu di Sistem PO.</li>
+            </ul>
+          </div>
+
+          <!-- Rule 3 -->
+          <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+            <h3 class="font-bold text-slate-800 mb-3 flex items-center gap-2">
+              <span class="w-6 h-6 bg-red-100 rounded flex items-center justify-center text-red-600 text-xs font-bold">3</span>
+              Perhitungan Profit
+            </h3>
+            <div class="ml-8 text-sm text-slate-600 space-y-2">
+              <p>Profit dihitung dengan formula:</p>
+              <div class="bg-slate-50 border border-slate-200 rounded-lg p-4 font-mono text-xs">
+                <strong>Profit</strong> = Total Tagihan Buyer − Total Cost Pabrik<br><br>
+                <strong>Total Tagihan Buyer</strong> = Harga Jual + Fee + Biaya Lain Buyer<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;+ Ongkir (jika ditanggung Pembeli)<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;+ Handling (jika ditanggung Pembeli)<br><br>
+                <strong>Total Cost Pabrik</strong> = Harga Beli + Biaya Lain Pabrik<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;+ Ongkir (jika ditanggung Perusahaan)<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;+ Handling (jika ditanggung Perusahaan)
+              </div>
+            </div>
+          </div>
+
+          <!-- Rule 4 -->
+          <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+            <h3 class="font-bold text-slate-800 mb-3 flex items-center gap-2">
+              <span class="w-6 h-6 bg-red-100 rounded flex items-center justify-center text-red-600 text-xs font-bold">4</span>
+              Alokasi Pembayaran Pabrik (FIFO)
+            </h3>
+            <ul class="text-sm text-slate-600 space-y-2 ml-8 list-disc">
+              <li>Pembayaran ke pabrik menggunakan sistem <strong>FIFO (First In First Out)</strong>.</li>
+              <li>Jika nominal yang dibayarkan <strong>lebih kecil</strong> dari total tagihan yang dicentang, maka tagihan paling lama dilunasi lebih dulu.</li>
+              <li>Anda tidak bisa mengalokasikan secara manual per-transaksi — sistem mengurusnya otomatis.</li>
+              <li>Periksa kolom <strong>"Akan Dibayar"</strong> sebelum klik "Proses Pelunasan".</li>
+            </ul>
+          </div>
+
+          <!-- Rule 5 -->
+          <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+            <h3 class="font-bold text-slate-800 mb-3 flex items-center gap-2">
+              <span class="w-6 h-6 bg-red-100 rounded flex items-center justify-center text-red-600 text-xs font-bold">5</span>
+              Rekening Bank Perusahaan
+            </h3>
+            <ul class="text-sm text-slate-600 space-y-2 ml-8 list-disc">
+              <li>Setiap kali Anda memilih <strong>"Ke Rekening Perusahaan"</strong> sebagai tujuan transfer, Anda wajib memilih rekening bank dari dropdown.</li>
+              <li>Daftar bank diambil dari fungsi <code class="bg-slate-100 px-1.5 py-0.5 rounded text-xs">getBankList</code> di Google Apps Script.</li>
+              <li>Jika dropdown bank kosong, hubungi administrator untuk menambahkan data rekening.</li>
+            </ul>
+          </div>
+
+          <!-- Rule 6 -->
+          <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+            <h3 class="font-bold text-slate-800 mb-3 flex items-center gap-2">
+              <span class="w-6 h-6 bg-red-100 rounded flex items-center justify-center text-red-600 text-xs font-bold">6</span>
+              Format Input Mata Uang
+            </h3>
+            <ul class="text-sm text-slate-600 space-y-2 ml-8 list-disc">
+              <li>Semua field nominal (harga, ongkir, handling, fee, dll.) otomatis diformat ke Rupiah saat mengetik.</li>
+              <li><strong>Cukup ketik angka</strong> — pemisah ribuan ditambahkan otomatis.</li>
+              <li>Jangan copy-paste nilai yang sudah diformat dari sumber lain karena bisa menyebabkan error parsing.</li>
+            </ul>
+          </div>
+
+          <!-- Rule 7 -->
+          <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+            <h3 class="font-bold text-slate-800 mb-3 flex items-center gap-2">
+              <span class="w-6 h-6 bg-red-100 rounded flex items-center justify-center text-red-600 text-xs font-bold">7</span>
+              Batasan Edit Transaksi
+            </h3>
+            <ul class="text-sm text-slate-600 space-y-2 ml-8 list-disc">
+              <li>Tombol Edit hanya muncul untuk transaksi berstatus <strong>belum Lunas</strong> atau <strong>Draft / Belum Lengkap</strong>.</li>
+              <li>Transaksi yang sudah Lunas <strong>tidak bisa diedit</strong> untuk menjaga integritas data keuangan.</li>
+              <li>Jika perlu koreksi pada transaksi Lunas, hubungi administrator untuk pengaturan manual di spreadsheet.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================== -->
+      <!-- FAQ -->
+      <!-- ============================================== -->
+      <section id="faq" class="print-break">
+        <div class="flex items-center gap-3 mb-6">
+          <div class="w-10 h-10 bg-indigo-100 rounded-xl flex items-center justify-center text-indigo-600">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+          </div>
+          <h2 class="text-2xl font-bold text-slate-900">FAQ / Pemecahan Masalah</h2>
+        </div>
+
+        <div class="space-y-3" id="faq-container">
+          <!-- FAQ items will be interactive -->
+        </div>
+      </section>
+
+      <!-- ============================================== -->
+      <!-- GLOSARIUM -->
+      <!-- ============================================== -->
+      <section id="glosarium">
+        <div class="flex items-center gap-3 mb-6">
+          <div class="w-10 h-10 bg-slate-200 rounded-xl flex items-center justify-center text-slate-600">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+          </div>
+          <h2 class="text-2xl font-bold text-slate-900">Glosarium Istilah</h2>
+        </div>
+
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm text-left">
+              <thead class="bg-slate-50 text-slate-500 text-xs uppercase">
+                <tr>
+                  <th class="px-6 py-3 font-semibold w-40">Istilah</th>
+                  <th class="px-6 py-3 font-semibold">Penjelasan</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100">
+                <tr><td class="px-6 py-3 font-bold text-slate-800">Broker</td><td class="px-6 py-3 text-slate-600">Pihak perantara yang menghubungkan pembeli (buyer) dengan pabrik (supplier).</td></tr>
+                <tr><td class="px-6 py-3 font-bold text-slate-800">Buyer</td><td class="px-6 py-3 text-slate-600">Pelanggan / pembeli yang memesan barang melalui broker.</td></tr>
+                <tr><td class="px-6 py-3 font-bold text-slate-800">Pabrik / Supplier</td><td class="px-6 py-3 text-slate-600">Pihak yang memproduksi dan menjual barang ke broker.</td></tr>
+                <tr><td class="px-6 py-3 font-bold text-slate-800">Ref No</td><td class="px-6 py-3 text-slate-600">Nomor referensi unik untuk setiap transaksi (auto-generated).</td></tr>
+                <tr><td class="px-6 py-3 font-bold text-slate-800">DP</td><td class="px-6 py-3 text-slate-600">Down Payment / Uang Muka — pembayaran awal sebelum barang dikirim.</td></tr>
+                <tr><td class="px-6 py-3 font-bold text-slate-800">FIFO</td><td class="px-6 py-3 text-slate-600">First In First Out — metode alokasi pembayaran, tagihan lama dilunasi lebih dulu.</td></tr>
+                <tr><td class="px-6 py-3 font-bold text-slate-800">Handling</td><td class="px-6 py-3 text-slate-600">Biaya bongkar/muat barang. Bisa ditanggung PT atau Buyer.</td></tr>
+                <tr><td class="px-6 py-3 font-bold text-slate-800">Ongkir</td><td class="px-6 py-3 text-slate-600">Biaya pengiriman. Bisa ditanggung PT atau Buyer.</td></tr>
+                <tr><td class="px-6 py-3 font-bold text-slate-800">Deposit Supplier</td><td class="px-6 py-3 text-slate-600">Kategori supplier yang pembayarannya ditangani di luar sistem broker.</td></tr>
+                <tr><td class="px-6 py-3 font-bold text-slate-800">Strict Mode</td><td class="px-6 py-3 text-slate-600">Mode pada dropdown yang mewajibkan pemilihan dari daftar — tidak boleh input bebas.</td></tr>
+                <tr><td class="px-6 py-3 font-bold text-slate-800">Cost / Kewajiban</td><td class="px-6 py-3 text-slate-600">Total biaya yang harus dibayar ke pabrik (harga beli + biaya yang ditanggung PT).</td></tr>
+                <tr><td class="px-6 py-3 font-bold text-slate-800">Total Tagihan</td><td class="px-6 py-3 text-slate-600">Total nilai yang ditagih ke buyer (harga jual + biaya yang ditanggung buyer).</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- FOOTER -->
+      <section class="pt-8 border-t border-slate-200">
+        <div class="text-center">
+          <div class="flex items-center justify-center gap-2 mb-3">
+            <div class="w-8 h-8 bg-broker rounded-lg flex items-center justify-center text-white">
+              <svg fill="#ffffff" width="16px" height="16px" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M46.72,20.52a1.73,1.73,0,0,1,2.47,0l13.46,13a1.62,1.62,0,0,1,0,2.43L49.19,49a1.72,1.72,0,0,1-2.47,0l-2.47-2.42a1.62,1.62,0,0,1,0-2.43L48.46,40a1.12,1.12,0,0,0-.82-1.9H24.83A1.85,1.85,0,0,1,23,36.38V32.92a1.92,1.92,0,0,1,1.83-1.74H47.64a1.1,1.1,0,0,0,.82-1.9L44.25,25.2a1.62,1.62,0,0,1,0-2.43Zm-7.24,30.53a1.73,1.73,0,0,0-2.48,0l-13.45,13a1.62,1.62,0,0,0,0,2.43L37,79.48a1.74,1.74,0,0,0,2.48,0L42,77.05a1.61,1.61,0,0,0,0-2.42l-4.21-4.08a1.12,1.12,0,0,1,.82-1.91H49.42A15.63,15.63,0,0,1,49,65a16.17,16.17,0,0,1,.34-3.29H38.56a1.1,1.1,0,0,1-.82-1.91L42,55.73a1.62,1.62,0,0,0,0-2.43ZM53,65A12,12,0,1,1,65,77,12,12,0,0,1,53,65Zm19.52-2.81-8.07,8.08a1.46,1.46,0,0,1-2.15,0l-3.9-3.91a.69.69,0,0,1,0-1.07l1.07-1.08a.71.71,0,0,1,1.08,0L63.37,67l6.93-6.93a.7.7,0,0,1,1.08,0l1.07,1.08A.66.66,0,0,1,72.52,62.19Z" fill-rule="evenodd"/></svg>
+            </div>
+            <span class="font-bold text-slate-700">Broker System</span>
+          </div>
+          <p class="text-xs text-slate-400">&copy; 2026 Produced by Tata Umkm. Dokumentasi ini bersifat internal.</p>
+          <p class="text-xs text-slate-400 mt-1">Terakhir diperbarui: Juni 2026</p>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- BACK TO TOP (Floating) -->
+  <button id="btn-back-top" onclick="scrollToTop()" class="fixed bottom-6 right-6 z-40 w-12 h-12 bg-broker text-white rounded-full shadow-lg hover:bg-violet-700 transition-all opacity-0 translate-y-4 pointer-events-none no-print flex items-center justify-center">
+    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path></svg>
+  </button>
+
+  <script>
+    // --- FAQ DATA ---
+    const faqData = [
+      {
+        q: "Dropdown pabrik kosong, tidak ada pilihan. Mengapa?",
+        a: "Data pabrik diambil dari Sistem PO. Pastikan data supplier sudah diinput di sistem PO dan fungsi <code>getSuppliersForDropdown</code> berjalan dengan benar. Jika baru menambah supplier, refresh halaman broker."
+      },
+      {
+        q: "Saya tidak bisa menyimpan transaksi, muncul error 'Pelanggan harus dipilih'.",
+        a: "Field Pelanggan menggunakan Strict Mode. Anda harus <strong>memilih dari dropdown</strong> yang muncul saat mengetik, bukan sekadar mengetik nama. Jika nama tidak muncul di dropdown, tambahkan pelanggan dulu di menu Data Pelanggan."
+      },
+      {
+        q: "Kenapa section DP (Pembayaran Awal) berwarna abu-abu dan tidak bisa diisi?",
+        a: "Itu terjadi karena pabrik yang Anda pilih berkategori <strong>Deposit</strong>. Untuk supplier Deposit, pembayaran tidak dicatat melalui sistem broker. Pilih pabrik lain, atau jika pabrik ini memang Deposit, lanjutkan tanpa mengisi bagian DP."
+      },
+      {
+        q: "Bagaimana cara mengedit transaksi yang sudah Lunas?",
+        a: "Transaksi Lunas <strong>tidak bisa diedit</strong> melalui aplikasi untuk menjaga integritas data keuangan. Jika perlu koreksi, hubungi administrator untuk edit langsung di Google Sheets."
+      },
+      {
+        q: "Nominal yang saya input berubah format menjadi Rupiah otomatis. Normal?",
+        a: "Ya, itu fitur otomatis. Cukup ketik angka saja (contoh: 5000000), sistem akan memformatnya menjadi 5.000.000. Jangan ketik titik atau koma secara manual."
+      },
+      {
+        q: "Apa bedanya 'Ke Pabrik Langsung' dan 'Ke Rekening Perusahaan'?",
+        a: "<strong>Ke Pabrik Langsung</strong> = Uang ditransfer langsung dari buyer ke rekening pabrik, broker hanya mencatat.<br><strong>Ke Rekening Perusahaan</strong> = Uang masuk dulu ke rekening PT (broker), lalu PT yang meneruskan ke pabrik. Pilih sesuai praktik bisnis Anda."
+      },
+      {
+        q: "Export Excel di Riwayat Transaksi hanya mengexport data yang terfilter. Bagaimana cara export semua?",
+        a: "Klik tombol <strong>'Reset Semua Filter'</strong> terlebih dahulu agar semua transaksi muncul, lalu klik Export Excel. Data yang diexport selalu mengikuti filter yang sedang aktif."
+      },
+      {
+        q: "Saya tidak bisa melihat tombol 'Edit Data' di modal detail.",
+        a: "Tombol Edit hanya muncul untuk transaksi berstatus <strong>Belum Lunas, DP, atau Draft</strong>. Jika transaksi sudah Lunas, tombol edit tidak ditampilkan."
+      },
+      {
+        q: "Aplikasi terasa lambat saat memuat data. Apa yang bisa saya lakukan?",
+        a: "Kinerja tergantung pada koneksi internet dan jumlah data di Google Sheets. Tips: (1) Gunakan browser Chrome versi terbaru, (2) Hindari membuka banyak tab sekaligus, (3) Gunakan filter untuk membatasi jumlah data yang ditampilkan."
+      },
+      {
+        q: "Bagaimana cara menghapus transaksi?",
+        a: "Saat ini aplikasi <strong>tidak menyediakan fitur hapus transaksi</strong> untuk mencegah penghapusan tidak sengaja. Jika ada transaksi yang salah input, gunakan fitur Edit untuk memperbaiki data, atau hubungi administrator untuk penghapusan manual di spreadsheet."
+      }
+    ];
+
+    // --- RENDER FAQ ---
+    function renderFAQ() {
+      const container = document.getElementById('faq-container');
+      container.innerHTML = faqData.map((item, idx) => `
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden faq-item">
+          <button onclick="toggleFAQ(${idx})" class="w-full px-6 py-4 text-left flex items-center justify-between gap-4 hover:bg-slate-50 transition-colors">
+            <span class="font-semibold text-sm text-slate-800">${item.q}</span>
+            <svg class="w-5 h-5 text-slate-400 flex-shrink-0 transition-transform duration-200 faq-icon-${idx}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+          </button>
+          <div id="faq-answer-${idx}" class="hidden px-6 pb-5">
+            <div class="text-sm text-slate-600 leading-relaxed border-t border-slate-100 pt-4">${item.a}</div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function toggleFAQ(idx) {
+      const answer = document.getElementById(`faq-answer-${idx}`);
+      const icon = document.querySelector(`.faq-icon-${idx}`);
+      const isOpen = !answer.classList.contains('hidden');
+      
+      // Close all first
+      document.querySelectorAll('[id^="faq-answer-"]').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('[class*="faq-icon-"]').forEach(el => el.style.transform = '');
+      
+      if (!isOpen) {
+        answer.classList.remove('hidden');
+        if (icon) icon.style.transform = 'rotate(180deg)';
+      }
+    }
+
+    // --- TABLE OF CONTENTS ACTIVE STATE ---
+    function updateActiveTOC() {
+      const sections = document.querySelectorAll('section[id]');
+      const tocLinks = document.querySelectorAll('.toc-link');
+      
+      let currentSection = '';
+      sections.forEach(section => {
+        const sectionTop = section.offsetTop - 100;
+        if (window.scrollY >= sectionTop) {
+          currentSection = section.getAttribute('id');
+        }
+      });
+
+      tocLinks.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href') === '#' + currentSection) {
+          link.classList.add('active');
+        }
+      });
+    }
+
+    // --- BACK TO TOP BUTTON ---
+    function updateBackToTop() {
+      const btn = document.getElementById('btn-back-top');
+      if (window.scrollY > 400) {
+        btn.classList.remove('opacity-0', 'translate-y-4', 'pointer-events-none');
+        btn.classList.add('opacity-100', 'translate-y-0', 'pointer-events-auto');
+      } else {
+        btn.classList.add('opacity-0', 'translate-y-4', 'pointer-events-none');
+        btn.classList.remove('opacity-100', 'translate-y-0', 'pointer-events-auto');
+      }
+    }
+
+    function scrollToTop() {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // --- SCROLL LISTENER ---
+    window.addEventListener('scroll', () => {
+      updateActiveTOC();
+      updateBackToTop();
+    }, { passive: true });
+
+    // --- INIT ---
+    renderFAQ();
+    updateActiveTOC();
+  </script>
+</body>
+</html>

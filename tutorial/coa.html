@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tutorial — Sistem COA Akuntansi</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'sans-serif'] },
+          colors: {
+            primary: '#2563eb',
+            coa: '#2563eb',
+            surface: '#F8FAFC'
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #f1f5f9; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+    html { scroll-behavior: smooth; scroll-padding-top: 80px; }
+
+    .fade-in { animation: fadeIn 0.5s ease-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+
+    .step-number {
+      width: 36px; height: 36px; min-width: 36px;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 50%; font-weight: 700; font-size: 14px;
+    }
+
+    .toc-link { transition: all 0.2s; border-left: 3px solid transparent; }
+    .toc-link:hover { border-left-color: #2563eb; background: #eff6ff; color: #2563eb; }
+    .toc-link.active { border-left-color: #2563eb; background: #dbeafe; color: #2563eb; font-weight: 600; }
+
+    .card-tip { border-left: 4px solid #2563eb; }
+    .card-warning { border-left: 4px solid #f59e0b; }
+    .card-danger { border-left: 4px solid #ef4444; }
+    .card-info { border-left: 4px solid #3b82f6; }
+    .card-success { border-left: 4px solid #10b981; }
+
+    .kbd {
+      display: inline-flex; align-items: center; justify-content: center;
+      padding: 2px 8px; border-radius: 6px; font-size: 12px; font-weight: 600;
+      background: #f1f5f9; border: 1px solid #cbd5e1; color: #475569;
+      box-shadow: 0 1px 0 #cbd5e1;
+      font-family: 'Inter', monospace;
+    }
+
+    .visual-code {
+      background: #0f172a; color: #e2e8f0; padding: 1.25rem;
+      border-radius: 0.75rem; font-family: 'Courier New', monospace;
+      font-size: 14px; line-height: 1.8;
+    }
+    .visual-code .part-h1 { color: #38bdf8; font-weight: bold; }
+    .visual-code .part-h2 { color: #818cf8; font-weight: bold; }
+    .visual-code .part-h3 { color: #a78bfa; font-weight: bold; }
+    .visual-code .part-nama { color: #4ade80; font-weight: bold; }
+    .visual-code .separator { color: #94a3b8; }
+
+    @media print {
+      nav, .no-print { display: none !important; }
+      .print-break { page-break-before: always; }
+    }
+        /* Smooth transition saat section di-hide/show */
+    main section[id] {
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+    main section[id].search-hidden {
+      display: none !important;
+    }
+
+    /* Highlight teks hasil pencarian */
+    mark.search-highlight {
+      background-color: #fef08a; /* Kuning cerah */
+      color: #854d0e; /* Coklat tua */
+      padding: 0.1rem 0.2rem;
+      border-radius: 0.25rem;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body class="bg-surface text-slate-800 font-sans antialiased">
+
+  <!-- TOP NAV BAR -->
+  <nav class="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md border-b border-slate-200 shadow-sm no-print">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 bg-blue-600 rounded-lg flex items-center justify-center text-white">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+        </div>
+        <div>
+          <h1 class="text-sm font-bold text-slate-900 leading-tight">Panduan Penggunaan</h1>
+          <p class="text-[11px] text-slate-400">Sistem COA Akuntansi v1.0</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+
+        <div class="relative flex-1 max-w-xs hidden sm:block">
+          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <svg class="h-4 w-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+          </div>
+          <input type="text" id="search-input" oninput="searchTutorial(this.value)" placeholder="Cari panduan... (contoh: saldo awal)" class="pl-9 w-full bg-slate-100 border border-slate-200 rounded-lg text-sm py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-colors">
+        </div>
+
+        <button onclick="window.print()" class="hidden sm:flex items-center gap-1.5 text-xs font-medium text-slate-500 hover:text-slate-700 bg-white border border-slate-200 px-3 py-1.5 rounded-lg transition-colors">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+          Cetak
+        </button>
+        <button onclick="scrollToTop()" class="flex items-center gap-1.5 text-xs font-medium text-blue-600 hover:text-blue-700 bg-blue-50 border border-blue-200 px-3 py-1.5 rounded-lg transition-colors">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path></svg>
+          Atas
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- MAIN LAYOUT -->
+  <div class="pt-20 pb-16 max-w-7xl mx-auto px-4 sm:px-6 flex gap-8">
+
+    <!-- LEFT: TABLE OF CONTENTS -->
+    <aside class="hidden lg:block w-64 flex-shrink-0 no-print">
+      <div class="sticky top-24">
+        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 px-3">Daftar Isi</h3>
+        <nav id="toc-nav" class="space-y-0.5 text-sm max-h-[calc(100vh-140px)] overflow-y-auto">
+          <a href="#pendahuluan" class="toc-link block px-3 py-2 rounded-r-lg text-slate-600">Pendahuluan</a>
+          <a href="#persyaratan" class="toc-link block px-3 py-2 rounded-r-lg text-slate-600">Persyaratan</a>
+          <a href="#alur-kerja" class="toc-link block px-3 py-2 rounded-r-lg text-slate-600">Alur Kerja COA</a>
+          <a href="#dashboard" class="toc-link block px-3 py-2 rounded-r-lg text-slate-600">1. Dashboard</a>
+          <a href="#registrasi-coa" class="toc-link block px-3 py-2 rounded-r-lg text-slate-600">2. Registrasi Akun</a>
+          <a href="#logika-kode" class="toc-link block px-3 py-2 rounded-r-lg text-slate-600">3. Memahami Kode Akun</a>
+          <a href="#pos-saldo" class="toc-link block px-3 py-2 rounded-r-lg text-slate-600">4. Memahami Pos Saldo</a>
+          <a href="#daftar-coa" class="toc-link block px-3 py-2 rounded-r-lg text-slate-600">5. Daftar COA</a>
+          <a href="#saldo-awal" class="toc-link block px-3 py-2 rounded-r-lg text-slate-600">6. Input Saldo Awal</a>
+          <a href="#aturan-khusus" class="toc-link block px-3 py-2 rounded-r-lg text-slate-600">Aturan Penting</a>
+          <a href="#faq" class="toc-link block px-3 py-2 rounded-r-lg text-slate-600">FAQ</a>
+          <a href="#glosarium" class="toc-link block px-3 py-2 rounded-r-lg text-slate-600">Glosarium</a>
+        </nav>
+      </div>
+    </aside>
+
+    <!-- RIGHT: CONTENT -->
+    <main class="flex-1 min-w-0 space-y-12">
+
+      <!-- HERO -->
+      <section id="pendahuluan" class="fade-in">
+        <div class="bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 rounded-2xl p-8 md:p-12 text-white shadow-xl relative overflow-hidden">
+          <div class="absolute top-0 right-0 w-72 h-72 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/4"></div>
+          <div class="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full translate-y-1/3 -translate-x-1/4"></div>
+          <div class="relative z-10">
+            <div class="inline-flex items-center gap-2 bg-white/15 backdrop-blur-sm rounded-full px-4 py-1.5 text-xs font-semibold mb-6 border border-white/20">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+              Dokumentasi Pengguna
+            </div>
+            <h1 class="text-3xl md:text-4xl font-extrabold leading-tight mb-3">Panduan Lengkap<br>Sistem COA Akuntansi</h1>
+            <p class="text-blue-100 text-base md:text-lg max-w-2xl leading-relaxed">Panduan praktis untuk mengelola Chart of Account (COA), memahami pembuatan kode akun otomatis, pos saldo, dan pencatatan saldo awal.</p>
+            <div class="flex flex-wrap gap-4 mt-8">
+              <div class="flex items-center gap-2 bg-white/10 rounded-lg px-4 py-2 text-sm">
+                <svg class="w-4 h-4 text-blue-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                Versi 1.0 — 2026
+              </div>
+              <div class="flex items-center gap-2 bg-white/10 rounded-lg px-4 py-2 text-sm">
+                <svg class="w-4 h-4 text-blue-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                Oleh: Tata Umkm
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- PERSYARATAN -->
+      <section id="persyaratan">
+        <div class="flex items-center gap-3 mb-6">
+          <div class="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center text-amber-600">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+          </div>
+          <h2 class="text-2xl font-bold text-slate-900">Persyaratan Penggunaan</h2>
+        </div>
+        <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+          <ul class="space-y-3">
+            <li class="flex items-start gap-2 text-sm text-slate-600">
+              <svg class="w-5 h-5 text-emerald-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+              <span>Anda telah memiliki <strong>akses</strong> ke aplikasi dan telah login.</span>
+            </li>
+            <li class="flex items-start gap-2 text-sm text-slate-600">
+              <svg class="w-5 h-5 text-emerald-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+              <span>Menggunakan browser modern (Chrome, Edge, Firefox) versi terbaru.</span>
+            </li>
+            <li class="flex items-start gap-2 text-sm text-slate-600">
+              <svg class="w-5 h-5 text-emerald-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+              <span>Memahami dasar-dasar akuntansi: perbedaan <strong>Debet/Kredit</strong> dan jenis laporan <strong>Neraca/Laba Rugi</strong>.</span>
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- ALUR KERJA -->
+      <section id="alur-kerja">
+        <div class="flex items-center gap-3 mb-6">
+          <div class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center text-blue-600">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+          </div>
+          <h2 class="text-2xl font-bold text-slate-900">Alur Kerja Sistem COA</h2>
+        </div>
+        <div class="bg-white rounded-xl border border-slate-200 p-6 md:p-8 shadow-sm">
+          <div class="flex flex-col items-center gap-3">
+            <div class="bg-blue-50 border-2 border-blue-200 rounded-xl px-6 py-4 text-center max-w-md w-full">
+              <div class="text-xs font-bold text-blue-500 mb-1">LANGKAH 1</div>
+              <div class="font-bold text-slate-800">Buat Akun COA</div>
+              <div class="text-xs text-slate-500 mt-1">Daftarkan klasifikasi, kelompok, dan nama akun</div>
+            </div>
+            <div class="text-blue-500 text-2xl">↓</div>
+            <div class="bg-green-50 border-2 border-green-200 rounded-xl px-6 py-4 text-center max-w-md w-full">
+              <div class="text-xs font-bold text-green-500 mb-1">LANGKAH 2</div>
+              <div class="font-bold text-slate-800">Isi Saldo Awal</div>
+              <div class="text-xs text-slate-500 mt-1">Masukkan nominal saldo untuk akun-akun yang sudah dibuat</div>
+            </div>
+            <div class="text-green-500 text-2xl">↓</div>
+            <div class="bg-slate-100 border-2 border-slate-300 rounded-xl px-6 py-4 text-center max-w-md w-full">
+              <div class="text-xs font-bold text-slate-500 mb-1">LANGKAH 3</div>
+              <div class="font-bold text-slate-800">Pantau Dashboard</div>
+              <div class="text-xs text-slate-500 mt-1">Pastikan total akun dan saldo sudah sesuai</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 1. DASHBOARD -->
+      <section id="dashboard">
+        <div class="flex items-center gap-3 mb-6">
+          <div class="step-number bg-blue-600 text-white">1</div>
+          <h2 class="text-2xl font-bold text-slate-900">Dashboard</h2>
+        </div>
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+          <div class="p-6 space-y-5">
+            <p class="text-sm text-slate-600">Dashboard adalah halaman utama yang menampilkan ringkasan status COA dan Saldo Anda.</p>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div class="bg-blue-50 border border-blue-100 rounded-lg p-4">
+                <div class="text-xs font-bold text-blue-600 mb-1">📊 Total Akun COA</div>
+                <p class="text-xs text-slate-500">Jumlah seluruh akun yang sudah terdaftar.</p>
+              </div>
+              <div class="bg-green-50 border border-green-100 rounded-lg p-4">
+                <div class="text-xs font-bold text-green-600 mb-1">💰 Total Saldo Awal</div>
+                <p class="text-xs text-slate-500">Total nominal uang dari seluruh saldo awal.</p>
+              </div>
+              <div class="bg-purple-50 border border-purple-100 rounded-lg p-4">
+                <div class="text-xs font-bold text-purple-600 mb-1">📋 Akun Dengan Saldo</div>
+                <p class="text-xs text-slate-500">Berapa akun yang sudah diisi saldo awalnya.</p>
+              </div>
+            </div>
+            <div class="bg-slate-50 border border-slate-200 rounded-lg p-4">
+              <h4 class="font-bold text-sm text-slate-700 mb-1">📄 Tabel Akun Terbaru</h4>
+              <p class="text-xs text-slate-500">Menampilkan 5 akun terakhir yang baru saja ditambahkan ke sistem.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. REGISTRASI AKUN -->
+      <section id="registrasi-coa" class="print-break">
+        <div class="flex items-center gap-3 mb-6">
+          <div class="step-number bg-blue-600 text-white">2</div>
+          <h2 class="text-2xl font-bold text-slate-900">Registrasi Akun (COA)</h2>
+        </div>
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+          <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50">
+            <h3 class="font-semibold text-slate-700">Cara Membuat Akun Baru</h3>
+          </div>
+          <div class="p-6 space-y-6">
+            <div class="flex gap-4">
+              <div class="step-number bg-slate-200 text-slate-700 text-sm">2.1</div>
+              <div class="flex-1">
+                <h4 class="font-bold text-slate-800 mb-2">Pilih Klasifikasi Akun</h4>
+                <p class="text-sm text-slate-600 mb-3">Pilih dari 8 kategori utama yang tersedia. Pilihan ini akan menentukan kode digit pertama dan posisi saldo dasar akun Anda.</p>
+                <div class="overflow-x-auto">
+                  <table class="w-full text-xs border border-slate-200 rounded-lg overflow-hidden">
+                    <thead class="bg-slate-100 text-slate-600 uppercase">
+                      <tr>
+                        <th class="px-3 py-2 text-left">Klasifikasi</th>
+                        <th class="px-3 py-2 text-center">Kode Awal</th>
+                        <th class="px-3 py-2 text-center">Posisi Saldo</th>
+                        <th class="px-3 py-2 text-center">Muncul di Laporan</th>
+                      </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 text-slate-700">
+                      <tr><td class="px-3 py-2 font-medium">Aktiva</td><td class="px-3 py-2 text-center font-mono font-bold text-blue-700">1-xxxx</td><td class="px-3 py-2 text-center">Debet</td><td class="px-3 py-2 text-center">Neraca</td></tr>
+                      <tr><td class="px-3 py-2 font-medium">Kewajiban</td><td class="px-3 py-2 text-center font-mono font-bold text-blue-700">2-xxxx</td><td class="px-3 py-2 text-center">Kredit</td><td class="px-3 py-2 text-center">Neraca</td></tr>
+                      <tr><td class="px-3 py-2 font-medium">Modal</td><td class="px-3 py-2 text-center font-mono font-bold text-blue-700">3-xxxx</td><td class="px-3 py-2 text-center">Kredit</td><td class="px-3 py-2 text-center">Neraca</td></tr>
+                      <tr><td class="px-3 py-2 font-medium">Penjualan</td><td class="px-3 py-2 text-center font-mono font-bold text-blue-700">4-xxxx</td><td class="px-3 py-2 text-center">Kredit</td><td class="px-3 py-2 text-center">Laba Rugi</td></tr>
+                      <tr><td class="px-3 py-2 font-medium">Harga Pokok Penjualan</td><td class="px-3 py-2 text-center font-mono font-bold text-blue-700">5-xxxx</td><td class="px-3 py-2 text-center">Debet</td><td class="px-3 py-2 text-center">Laba Rugi</td></tr>
+                      <tr><td class="px-3 py-2 font-medium">Beban Operasional</td><td class="px-3 py-2 text-center font-mono font-bold text-blue-700">6-xxxx</td><td class="px-3 py-2 text-center">Debet</td><td class="px-3 py-2 text-center">Laba Rugi</td></tr>
+                      <tr><td class="px-3 py-2 font-medium">Pendapatan Lain</td><td class="px-3 py-2 text-center font-mono font-bold text-blue-700">7-xxxx</td><td class="px-3 py-2 text-center">Kredit</td><td class="px-3 py-2 text-center">Laba Rugi</td></tr>
+                      <tr><td class="px-3 py-2 font-medium">Beban Lain</td><td class="px-3 py-2 text-center font-mono font-bold text-blue-700">8-xxxx</td><td class="px-3 py-2 text-center">Debet</td><td class="px-3 py-2 text-center">Laba Rugi</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex gap-4">
+              <div class="step-number bg-slate-200 text-slate-700 text-sm">2.2</div>
+              <div class="flex-1">
+                <h4 class="font-bold text-slate-800 mb-2">Pilih atau Buat Kelompok (Header 2)</h4>
+                <div class="bg-slate-50 border border-slate-200 rounded-lg p-4 space-y-3 text-sm text-slate-600">
+                  <p>Setelah memilih Klasifikasi, daftar kelompok akan otomatis menyesuaikan.</p>
+                  <div class="flex items-start gap-3">
+                    <span class="kbd">Pilih Dropdown</span>
+                    <span>Pilih kelompok yang sudah ada sebelumnya.</span>
+                  </div>
+                  <div class="flex items-start gap-3">
+                    <span class="kbd">Klik "Manual"</span>
+                    <span>Jika kelompok belum ada di daftar, klik tombol Manual untuk mengetik nama kelompok baru.</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex gap-4">
+              <div class="step-number bg-slate-200 text-slate-700 text-sm">2.3</div>
+              <div class="flex-1">
+                <h4 class="font-bold text-slate-800 mb-2">Pilih atau Buat Sub Kelompok (Header 3)</h4>
+                <p class="text-sm text-slate-600">Cara kerjanya sama dengan Kelompok. Daftar pilihan akan menyesuaikan berdasarkan Klasifikasi dan Kelompok yang sudah Anda tentukan. Gunakan <span class="kbd">Manual</span> jika perlu nama baru.</p>
+              </div>
+            </div>
+
+            <div class="flex gap-4">
+              <div class="step-number bg-slate-200 text-slate-700 text-sm">2.4</div>
+              <div class="flex-1">
+                <h4 class="font-bold text-slate-800 mb-2">Isi Nama Akun</h4>
+                <p class="text-sm text-slate-600">Ketik nama akun spesifik, contoh: <strong>"Kas Kecil"</strong>, <strong>"Piutang Dagang"</strong>, atau <strong>"Beban Gaji"</strong>. Setelah ini, <strong>Kode Akun</strong> akan otomatis muncul di field di atas.</p>
+              </div>
+            </div>
+
+            <div class="flex gap-4">
+              <div class="step-number bg-slate-200 text-slate-700 text-sm">2.5</div>
+              <div class="flex-1">
+                <h4 class="font-bold text-slate-800 mb-2">Atur Sifat Akun & Integrasi</h4>
+                <div class="space-y-3">
+                  <div class="bg-slate-50 border border-slate-200 rounded-lg p-3 text-sm text-slate-600">
+                    <span class="font-bold text-slate-700">Laporan & Saldo Normal:</span> Terisi otomatis dan tidak bisa diubah (mengikuti klasifikasi).
+                  </div>
+                  <div class="bg-slate-50 border border-slate-200 rounded-lg p-3 text-sm text-slate-600">
+                    <span class="font-bold text-slate-700">Jenis Pos Saldo:</span> Pilih <span class="kbd">Normal</span> atau <span class="kbd">Akun Kontra</span>. Ini akan mempengaruhi posisi saldo akhir (lihat bagian Memahami Pos Saldo).
+                  </div>
+                  <div class="bg-slate-50 border border-slate-200 rounded-lg p-3 text-sm text-slate-600">
+                    <span class="font-bold text-slate-700">Toggle Pembelian / Penjualan:</span> Nyalakan jika akun ini akan dipakai sebagai <strong>metode pembayaran</strong> (contoh: Kas, Bank BCA). Jika dinyalakan, akun ini akan muncul di daftar metode bayar saat Anda menggunakan sistem transaksi lain.
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex gap-4">
+              <div class="step-number bg-slate-200 text-slate-700 text-sm">2.6</div>
+              <div class="flex-1">
+                <h4 class="font-bold text-slate-800 mb-2">Klik "Simpan Akun"</h4>
+                <p class="text-sm text-slate-600">Selesai! Akun baru akan tersimpan dan muncul di Daftar COA.</p>
+              </div>
+            </div>
+
+            <div class="card-danger bg-red-50 border border-red-100 rounded-lg p-4">
+              <div class="flex items-start gap-3">
+                <svg class="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"></path></svg>
+                <div>
+                  <h4 class="font-bold text-red-800 text-sm">⚠ Peringatan Duplikat</h4>
+                  <p class="text-xs text-red-700 mt-1">Anda tidak bisa membuat akun jika kombinasi <strong>Klasifikasi + Kelompok + Sub Kelompok + Nama</strong> persis sama dengan akun yang sudah ada. Sistem akan memunculkan peringatan dan mencegah penyimpanan.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3. MEMAHAMI KODE AKUN -->
+      <section id="logika-kode" class="print-break">
+        <div class="flex items-center gap-3 mb-6">
+          <div class="step-number bg-indigo-600 text-white">3</div>
+          <h2 class="text-2xl font-bold text-slate-900">Memahami Kode Akun Otomatis</h2>
+        </div>
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+          <div class="p-6 space-y-5">
+            <p class="text-sm text-slate-600">Anda tidak perlu membuat kode akun secara manual. Sistem akan otomatis membuat kode berdasarkan hierarki pilihan Anda.</p>
+
+            <div class="visual-code">
+              Format Kode: <span class="part-h1">H1</span><span class="part-h2">H2</span><span class="part-h3">H3</span><span class="separator">-</span><span class="part-nama">NAMA</span><br><br>
+              Contoh untuk <strong>Kas Kecil</strong>:<br>
+              <span class="part-h1">1</span> <span class="separator">←</span> Aktiva (Digit 1 otomatis)<br>
+              <span class="part-h2">1</span> <span class="separator">←</span> Aktiva Lancar (Urutan kelompok)<br>
+              <span class="part-h3">01</span> <span class="separator">←</span> Kas (Urutan sub kelompok, 2 digit)<br>
+              <span class="part-nama">001</span> <span class="separator">←</span> Kas Kecil (Urutan nama akun, 3 digit)<br><br>
+              Hasil Kode Akhir: <span class="part-h1">1</span><span class="part-h2">1</span><span class="part-h3">01</span><span class="separator">-</span><span class="part-nama">001</span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="bg-blue-50 border border-blue-100 rounded-lg p-4">
+                <h4 class="font-bold text-blue-800 text-sm mb-2">Penomoran Cerdas</h4>
+                <ul class="text-xs text-blue-700 space-y-1 ml-4 list-disc">
+                  <li>Jika Anda memilih kelompok yang <strong>sudah ada</strong>, sistem menggunakan nomor yang sama.</li>
+                  <li>Jika Anda membuat kelompok <strong>baru</strong>, sistem otomatis melanjutkan nomor urut terakhir.</li>
+                  <li>Nomor urut nama akun selalu bertambah di bawah sub kelompok yang sama.</li>
+                </ul>
+              </div>
+              <div class="bg-amber-50 border border-amber-100 rounded-lg p-4">
+                <h4 class="font-bold text-amber-800 text-sm mb-2">Contoh Kode Lainnya</h4>
+                <ul class="text-xs text-amber-700 space-y-1 ml-4 list-disc">
+                  <li><strong>1201-001:</strong> Piutang Dagang (Aktiva=1, Lancar=2)</li>
+                  <li><strong>2101-001:</strong> Hutang Dagang (Kewajiban=2)</li>
+                  <li><strong>6101-001:</strong> Beban Gaji (Beban Ops=6)</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. MEMAHAMI POS SALDO -->
+      <section id="pos-saldo">
+        <div class="flex items-center gap-3 mb-6">
+          <div class="step-number bg-indigo-600 text-white">4</div>
+          <h2 class="text-2xl font-bold text-slate-900">Memahami Pos Saldo (Debet/Kredit)</h2>
+        </div>
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+          <div class="p-6 space-y-5">
+            <p class="text-sm text-slate-600">Setiap akun memiliki "Pos Saldo Akhir" yang menentukan sisi pencatatan normalnya. Sistem menghitung ini secara otomatis berdasarkan jenis akunnya.</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="bg-blue-50 border border-blue-100 rounded-lg p-5 text-sm text-blue-800">
+                <h4 class="font-bold mb-2">Jika Jenis Pos = "Normal"</h4>
+                <p class="text-xs">Pos Saldo Akhirnya <strong>sama</strong> dengan Saldo Normal klasifikasinya.</p>
+                <p class="text-xs mt-2">Contoh: Akun Kas (Aktiva) → Normalnya Debet → Akhirnya Debet.</p>
+              </div>
+              <div class="bg-orange-50 border border-orange-100 rounded-lg p-5 text-sm text-orange-800">
+                <h4 class="font-bold mb-2">Jika Jenis Pos = "Akun Kontra"</h4>
+                <p class="text-xs">Pos Saldo Akhirnya <strong>terbalik</strong> dari Saldo Normal klasifikasinya.</p>
+                <p class="text-xs mt-2">Contoh: Akumulasi Penyusutan (Aktiva) → Normalnya Debet, Kontra → Akhirnya Kredit.</p>
+              </div>
+            </div>
+
+            <div class="overflow-x-auto">
+              <table class="w-full text-sm border border-slate-200 rounded-lg overflow-hidden">
+                <thead class="bg-slate-100 text-slate-600 uppercase text-xs">
+                  <tr>
+                    <th class="px-4 py-3 text-left">Nama Akun</th>
+                    <th class="px-4 py-3 text-center">Saldo Normal</th>
+                    <th class="px-4 py-3 text-center">Jenis yang Dipilih</th>
+                    <th class="px-4 py-3 text-center">Pos Saldo Akhir</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                  <tr>
+                    <td class="px-4 py-3 font-medium">Kas</td>
+                    <td class="px-4 py-3 text-center"><span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs font-bold">Debet</span></td>
+                    <td class="px-4 py-3 text-center">Normal</td>
+                    <td class="px-4 py-3 text-center"><span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs font-bold">Debet</span></td>
+                  </tr>
+                  <tr>
+                    <td class="px-4 py-3 font-medium">Akumulasi Penyusutan</td>
+                    <td class="px-4 py-3 text-center"><span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs font-bold">Debet</span></td>
+                    <td class="px-4 py-3 text-center"><span class="bg-red-100 text-red-700 px-2 py-0.5 rounded text-xs font-bold">Kontra</span></td>
+                    <td class="px-4 py-3 text-center"><span class="bg-orange-100 text-orange-700 px-2 py-0.5 rounded text-xs font-bold">Kredit</span></td>
+                  </tr>
+                  <tr>
+                    <td class="px-4 py-3 font-medium">Penjualan</td>
+                    <td class="px-4 py-3 text-center"><span class="bg-orange-100 text-orange-700 px-2 py-0.5 rounded text-xs font-bold">Kredit</span></td>
+                    <td class="px-4 py-3 text-center">Normal</td>
+                    <td class="px-4 py-3 text-center"><span class="bg-orange-100 text-orange-700 px-2 py-0.5 rounded text-xs font-bold">Kredit</span></td>
+                  </tr>
+                  <tr>
+                    <td class="px-4 py-3 font-medium">Retur Penjualan</td>
+                    <td class="px-4 py-3 text-center"><span class="bg-orange-100 text-orange-700 px-2 py-0.5 rounded text-xs font-bold">Kredit</span></td>
+                    <td class="px-4 py-3 text-center"><span class="bg-red-100 text-red-700 px-2 py-0.5 rounded text-xs font-bold">Kontra</span></td>
+                    <td class="px-4 py-3 text-center"><span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs font-bold">Debet</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="card-info bg-blue-50 border border-blue-100 rounded-lg p-4">
+              <div class="flex items-start gap-3">
+                <svg class="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <div>
+                  <h4 class="font-bold text-blue-800 text-sm">Warna Indikator</h4>
+                  <p class="text-xs text-blue-600 mt-1">Di form registrasi, Pos Saldo Akhir berwarna <span class="bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded text-xs font-bold">Biru</span> jika Debet, dan berwarna <span class="bg-orange-100 text-orange-800 px-1.5 py-0.5 rounded text-xs font-bold">Oranye</span> jika Kredit.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5. DAFTAR COA -->
+      <section id="daftar-coa">
+        <div class="flex items-center gap-3 mb-6">
+          <div class="step-number bg-blue-600 text-white">5</div>
+          <h2 class="text-2xl font-bold text-slate-900">Daftar COA</h2>
+        </div>
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+          <div class="p-6 space-y-5">
+            <p class="text-sm text-slate-600">Halaman ini menampilkan seluruh daftar akun yang sudah terdaftar. Data diurutkan berdasarkan kode akun dari terkecil ke terbesar.</p>
+
+            <div class="space-y-3">
+              <h4 class="font-bold text-sm text-slate-800">🔍 Pencarian Cepat</h4>
+              <p class="text-sm text-slate-600">Ketik kode atau nama akun di kolom pencarian. Tabel akan difilter secara otomatis saat Anda mengetik.</p>
+            </div>
+
+            <div class="space-y-3">
+              <h4 class="font-bold text-sm text-slate-800">✏️ Cara Edit Akun</h4>
+              <p class="text-sm text-slate-600">Klik tombol <strong>"Edit"</strong> pada baris akun. Anda akan dibawa ke halaman form dalam mode Edit.</p>
+              <div class="bg-amber-50 border border-amber-100 rounded-lg p-4">
+                <h5 class="font-bold text-amber-800 text-sm mb-2">Yang Bisa dan Tidak Bisa Diubah:</h5>
+                <ul class="text-xs text-amber-700 space-y-1 ml-4 list-disc">
+                  <li><strong>🔴 Tidak Bisa Diubah:</strong> Klasifikasi, Kelompok, Sub Kelompok, dan Kode Akun. Field ini dikunci (ditandai latar abu-abu dan ikon gembok 🔒).</li>
+                  <li><strong>🟢 Bisa Diubah:</strong> Nama Akun, Jenis Pos Saldo (Normal/Kontra), dan Toggle Pembelian/Penjualan.</li>
+                  <li>Di mode Edit, tombol <strong>"Hapus Akun"</strong> berwarna merah akan muncul.</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="space-y-3">
+              <h4 class="font-bold text-sm text-slate-800">🏷 Keterangan Badge</h4>
+              <div class="grid grid-cols-2 gap-3 text-xs">
+                <div class="bg-slate-50 border border-slate-200 rounded-lg p-3">
+                  <span class="font-bold text-slate-700">Jenis Pos:</span>
+                  <br><span class="bg-green-100 text-green-700 px-1.5 py-0.5 rounded font-medium">Normal</span>
+                  <span class="bg-red-100 text-red-700 px-1.5 py-0.5 rounded font-medium">Kontra</span>
+                </div>
+                <div class="bg-slate-50 border border-slate-200 rounded-lg p-3">
+                  <span class="font-bold text-slate-700">Pos Saldo:</span>
+                  <br><span class="bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded font-medium">Debet</span>
+                  <span class="bg-orange-100 text-orange-700 px-1.5 py-0.5 rounded font-medium">Kredit</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 6. SALDO AWAL -->
+      <section id="saldo-awal" class="print-break">
+        <div class="flex items-center gap-3 mb-6">
+          <div class="step-number bg-blue-600 text-white">6</div>
+          <h2 class="text-2xl font-bold text-slate-900">Input Saldo Awal</h2>
+        </div>
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+          <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50">
+            <h3 class="font-semibold text-slate-700">Cata Saldo Awal Periode</h3>
+          </div>
+          <div class="p-6 space-y-6">
+            <p class="text-sm text-slate-600">Saldo awal adalah nilai mula-mula yang ada di setiap akun sebelum periode pembukuan dimulai.</p>
+
+            <div class="flex gap-4">
+              <div class="step-number bg-green-100 text-green-700 text-sm">6.1</div>
+              <div class="flex-1">
+                <h4 class="font-bold text-slate-800 mb-2">Pilih Akun COA</h4>
+                <p class="text-sm text-slate-600">Pilih akun dari dropdown. Perhatikan bahwa akun yang <strong>sudah memiliki saldo</strong> akan ditandai "(Sudah isi)" dan tidak bisa dipilih lagi. Ini mencegah pengisian ganda.</p>
+              </div>
+            </div>
+
+            <div class="flex gap-4">
+              <div class="step-number bg-green-100 text-green-700 text-sm">6.2</div>
+              <div class="flex-1">
+                <h4 class="font-bold text-slate-800 mb-2">Periksa Info Akun</h4>
+                <p class="text-sm text-slate-600">Setelah memilih, informasi Pos Saldo dan Jenis Laporan akan muncul. Ini membantu Anda memastikan akun yang dipilih sudah tepat.</p>
+              </div>
+            </div>
+
+            <div class="flex gap-4">
+              <div class="step-number bg-green-100 text-green-700 text-sm">6.3</div>
+              <div class="flex-1">
+                <h4 class="font-bold text-slate-800 mb-2">Masukkan Nominal</h4>
+                <div class="bg-slate-50 border border-slate-200 rounded-lg p-4 space-y-2 text-sm text-slate-600">
+                  <p><strong>Cara Mengetik:</strong> Ketik angka saja tanpa titik (contoh: <span class="kbd">5000000</span>). Sistem otomatis memformatnya menjadi <span class="kbd">5.000.000</span> saat Anda selesai mengetik.</p>
+                  <p><strong>Selalu Positif:</strong> Masukkan nominal positif. Sistem akan otomatis menempatkan angka di sisi Debet atau Kredit sesuai pos saldo akun.</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex gap-4">
+              <div class="step-number bg-green-100 text-green-700 text-sm">6.4</div>
+              <div class="flex-1">
+                <h4 class="font-bold text-slate-800 mb-2">Klik "Simpan Saldo"</h4>
+                <p class="text-sm text-slate-600">Data akan tersimpan dan muncul di tabel di sebelah kanan.</p>
+              </div>
+            </div>
+
+            <div class="card-info bg-blue-50 border border-blue-100 rounded-lg p-4">
+              <div class="flex items-start gap-3">
+                <svg class="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <div>
+                  <h4 class="font-bold text-blue-800 text-sm">Navigasi Halaman Tabel</h4>
+                  <p class="text-xs text-blue-600 mt-1">Jika data saldo banyak, tabel akan terbagi ke beberapa halaman. Gunakan tombol nomor halaman di bagian bawah tabel untuk berpindah. Total saldo yang terlihat adalah keseluruhan data, bukan hanya di halaman saat ini.</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="card-warning bg-amber-50 border border-amber-100 rounded-lg p-4">
+              <div class="flex items-start gap-3">
+                <svg class="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"></path></svg>
+                <div>
+                  <h4 class="font-bold text-amber-800 text-sm">Menghapus Saldo</h4>
+                  <p class="text-xs text-amber-700 mt-1">Klik "Hapus" pada baris saldo. Setelah dihapus, akun tersebut akan bisa dipilih kembali di dropdown untuk diisi ulang.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ATURAN KHUSUS -->
+      <section id="aturan-khusus" class="print-break">
+        <div class="flex items-center gap-3 mb-6">
+          <div class="w-10 h-10 bg-red-100 rounded-xl flex items-center justify-center text-red-600">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+          </div>
+          <h2 class="text-2xl font-bold text-slate-900">Aturan Penting Sistem</h2>
+        </div>
+
+        <div class="space-y-4">
+          <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+            <h3 class="font-bold text-slate-800 mb-3 flex items-center gap-2">
+              <span class="w-6 h-6 bg-red-100 rounded flex items-center justify-center text-red-600 text-xs font-bold">1</span>
+              Akun Bersaldo Tidak Bisa Dihapus
+            </h3>
+            <ul class="text-sm text-slate-600 space-y-2 ml-8 list-disc">
+              <li>Jika akun sudah memiliki Saldo Awal, tombol hapus akan <strong>dinonaktifkan</strong>.</li>
+              <li><strong>Solusi:</strong> Hapus dulu saldo awalnya di menu "Input Saldo Awal", baru kemudian hapus akun COA-nya.</li>
+            </ul>
+          </div>
+
+          <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+            <h3 class="font-bold text-slate-800 mb-3 flex items-center gap-2">
+              <span class="w-6 h-6 bg-red-100 rounded flex items-center justify-center text-red-600 text-xs font-bold">2</span>
+              Batasan Mode Edit Akun
+            </h3>
+            <ul class="text-sm text-slate-600 space-y-2 ml-8 list-disc">
+              <li>Saat mengedit, Klasifikasi, Kelompok, dan Sub Kelompok <strong>tidak bisa diubah</strong> (dikunci).</li>
+              <li><strong>Alasan:</strong> Mengubah klasifikasi akan merusak struktur kode akun dan laporan keuangan yang sudah terlanjur tercatat. Jika salah klasifikasi, buat akun baru dan hapus yang lama.</li>
+            </ul>
+          </div>
+
+          <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+            <h3 class="font-bold text-slate-800 mb-3 flex items-center gap-2">
+              <span class="w-6 h-6 bg-red-100 rounded flex items-center justify-center text-red-600 text-xs font-bold">3</span>
+              Anti-Duplikat Akun
+            </h3>
+            <ul class="text-sm text-slate-600 space-y-2 ml-8 list-disc">
+              <li>Sistem menolak pembuatan akun jika kombinasi Klasifikasi + Kelompok + Sub Kelompok + Nama Akun terdeteksi sama persis.</li>
+              <li>Untuk memperbaiki akun yang sudah ada, gunakan tombol <strong>Edit</strong> di Daftar COA.</li>
+            </ul>
+          </div>
+
+          <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+            <h3 class="font-bold text-slate-800 mb-3 flex items-center gap-2">
+              <span class="w-6 h-6 bg-red-100 rounded flex items-center justify-center text-red-600 text-xs font-bold">4</span>
+              Satu Akun, Satu Saldo Awal
+            </h3>
+            <ul class="text-sm text-slate-600 space-y-2 ml-8 list-disc">
+              <li>Setiap akun hanya bisa diisi saldo awal satu kali. Akun yang sudah diisi akan otomatis dikunci di dropdown.</li>
+              <li>Jika nominal salah, hapus data saldonya terlebih dahulu, lalu input ulang dengan nominal yang benar.</li>
+            </ul>
+          </div>
+
+          <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+            <h3 class="font-bold text-slate-800 mb-3 flex items-center gap-2">
+              <span class="w-6 h-6 bg-red-100 rounded flex items-center justify-center text-red-600 text-xs font-bold">5</span>
+              Format Input Angka
+            </h4>
+            <ul class="text-sm text-slate-600 space-y-2 ml-8 list-disc">
+              <li>Selalu ketik <strong>angka murni</strong> tanpa titik atau koma. Sistem akan otomatis menambahkan titik pemisah ribuan.</li>
+              <li>Jangan copy-paste angka yang sudah diformat (misal: "5.000.000") dari luar karena bisa menyebabkan error.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- FAQ -->
+      <section id="faq" class="print-break">
+        <div class="flex items-center gap-3 mb-6">
+          <div class="w-10 h-10 bg-indigo-100 rounded-xl flex items-center justify-center text-indigo-600">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+          </div>
+          <h2 class="text-2xl font-bold text-slate-900">Pertanyaan Umum (FAQ)</h2>
+        </div>
+        <div class="space-y-3" id="faq-container"></div>
+      </section>
+
+      <!-- GLOSARIUM -->
+      <section id="glosarium">
+        <div class="flex items-center gap-3 mb-6">
+          <div class="w-10 h-10 bg-slate-200 rounded-xl flex items-center justify-center text-slate-600">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+          </div>
+          <h2 class="text-2xl font-bold text-slate-900">Glosarium Istilah</h2>
+        </div>
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm text-left">
+              <thead class="bg-slate-50 text-slate-500 text-xs uppercase">
+                <tr>
+                  <th class="px-6 py-3 font-semibold w-48">Istilah</th>
+                  <th class="px-6 py-3 font-semibold">Penjelasan Singkat</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100">
+                <tr><td class="px-6 py-3 font-bold text-slate-800">COA</td><td class="px-6 py-3 text-slate-600">Chart of Accounts — Daftar seluruh akun yang digunakan dalam pembukuan perusahaan.</td></tr>
+                <tr><td class="px-6 py-3 font-bold text-slate-800">Klasifikasi</td><td class="px-6 py-3 text-slate-600">Kategori utama akun (Aktiva, Kewajiban, Modal, dll).</td></tr>
+                <tr><td class="px-6 py-3 font-bold text-slate-800">Kelompok</td><td class="px-6 py-3 text-slate-600">Sub-kategori dari klasifikasi (contoh: Aktiva Lancar, Aktiva Tetap).</td></tr>
+                <tr><td class="px-6 py-3 font-bold text-slate-800">Sub Kelompok</td><td class="px-6 py-3 text-slate-600">Rincian lebih detail dari kelompok (contoh: Kas, Piutang, Persediaan).</td></tr>
+                <tr><td class="px-6 py-3 font-bold text-slate-800">Pos Saldo Normal</td><td class="px-6 py-3 text-slate-600">Posisi saldo standar berdasarkan jenis akunnya (Debet/Kredit).</td></tr>
+                <tr><td class="px-6 py-3 font-bold text-slate-800">Akun Kontra</td><td class="px-6 py-3 text-slate-600">Akun yang posisi saldonya berkebalikan dari normal (contoh: Akumulasi Penyusutan, Retur Penjualan).</td></tr>
+                <tr><td class="px-6 py-3 font-bold text-slate-800">Saldo Awal</td><td class="px-6 py-3 text-slate-600">Nilai awal sebuah akun sebelum periode pembukuan dimulai.</td></tr>
+                <tr><td class="px-6 py-3 font-bold text-slate-800">Neraca</td><td class="px-6 py-3 text-slate-600">Laporan posisi keuangan yang menampilkan Aktiva, Kewajiban, dan Modal.</td></tr>
+                <tr><td class="px-6 py-3 font-bold text-slate-800">Laba Rugi</td><td class="px-6 py-3 text-slate-600">Laporan performa keuangan yang menampilkan Pendapatan dan Beban.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- FOOTER -->
+      <section class="pt-8 border-t border-slate-200">
+        <div class="text-center">
+          <div class="flex items-center justify-center gap-2 mb-3">
+            <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+            </div>
+            <span class="font-bold text-slate-700">Sistem COA</span>
+          </div>
+          <p class="text-xs text-slate-400">&copy; 2026 Produced by Tata Umkm.</p>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- BACK TO TOP -->
+  <button id="btn-back-top" onclick="scrollToTop()" class="fixed bottom-6 right-6 z-40 w-12 h-12 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 transition-all opacity-0 translate-y-4 pointer-events-none no-print flex items-center justify-center">
+    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path></svg>
+  </button>
+
+  <script>
+    const faqData = [
+      {
+        q: "Kenapa kode akun tidak muncul saat saya mengisi form?",
+        a: "Kode akun baru akan otomatis muncul setelah <strong>keempat field</strong> ini terisi: Klasifikasi, Kelompok, Sub Kelompok, dan Nama Akun. Jika salah satu masih kosong, kode tidak akan ditampilkan."
+      },
+      {
+        q: "Bagaimana cara membuat Kelompok atau Sub Kelompok yang belum ada di daftar?",
+        a: "Klik tombol <strong>\"Manual\"</strong> di sebelah dropdown. Dropdown akan berubah menjadi kolom isian. Ketik nama kelompok baru yang Anda inginkan, lalu lanjutkan mengisi form."
+      },
+      {
+        q: "Kenapa saya tidak bisa menghapus akun COA?",
+        a: "Akun yang sudah memiliki Saldo Awal tidak bisa dihapus. Anda harus menghapus data Saldo Awalnya terlebih dahulu di menu \"Input Saldo Awal\". Setelah itu, kembali ke halaman Daftar COA, klik Edit pada akun tersebut, dan tombol Hapus akan aktif."
+      },
+      {
+        q: "Apa perbedaan antara 'Pos Saldo Normal' dan 'Pos Saldo Akhir'?",
+        a: "<strong>Pos Saldo Normal</strong> adalah posisi bawaan berdasarkan jenis akunnya (Aktiva=Debet, Kewajiban=Kredit). <strong>Pos Saldo Akhir</strong> adalah posisi yang benar-benar dipakai, yang bisa berubah jika Anda memilih jenisnya sebagai \"Akun Kontra\"."
+      },
+      {
+        q: "Kenapa akun tertentu tidak bisa dipilih di menu Saldo Awal?",
+        a: "Akun yang sudah pernah diisi saldo awal akan otomatis dikunci (ditandai tulisan \"Sudah isi\"). Setiap akun hanya boleh diisi saldo awal satu kali. Jika perlu mengubah nominalnya, hapus data saldo lama terlebih dahulu."
+      },
+      {
+        q: "Format nominal berubah-ubah saat saya klik. Apakah ini normal?",
+        a: "Ya. Saat Anda mengklik kolom nominal, sistem menampilkan angka mentah (tanpa titik) agar mudah diedit. Begitu Anda pindah ke kolom lain, sistem akan otomatis memformatnya kembali dengan titik pemisah ribuan."
+      },
+      {
+        q: "Apa fungsi toggle Transaksi Pembelian/Penjualan?",
+        a: "Jika dinyalakan, akun tersebut akan muncul sebagai <strong>metode pembayaran</strong> di sistem transaksi lain (misalnya saat membayar hutang di Sistem Broker atau PO). Biasanya diaktifkan untuk akun seperti Kas atau Bank."
+      },
+      {
+        q: "Kenapa Klasifikasi dan Kelompok tidak bisa diubah saat Edit?",
+        a: "Klasifikasi dan kelompok menentukan struktur kode akun. Jika diubah, kode akun akan berubah dan bisa merusak catatan transaksi keuangan yang sudah terlanjur tercatat. Jika salah pilih klasifikasi, solusinya adalah membuat akun baru yang benar, lalu menghapus akun yang salah."
+      },
+      {
+        q: "Apakah nominal saldo awal bisa diisi angka negatif?",
+        a: "Tidak. Selalu masukkan nominal <strong>positif</strong>. Sistem akan otomatis menentukan apakah angka tersebut masuk ke sisi Debet atau Kredit berdasarkan Pos Saldo Akhir akun tersebut."
+      },
+      {
+        q: "Saya mendapat peringatan 'Akun Sudah Terdaftar' saat ingin menyimpan. Apa yang salah?",
+        a: "Peringatan ini muncul jika kombinasi Klasifikasi, Kelompok, Sub Kelompok, dan Nama Akun yang Anda isi <strong>persis sama</strong> dengan akun yang sudah ada di sistem. Coba ubah salah satu field (misalnya nama akunnya), atau edit akun yang sudah ada jika memang itu yang Anda maksud."
+      }
+    ];
+
+    function renderFAQ() {
+      const container = document.getElementById('faq-container');
+      container.innerHTML = faqData.map((item, idx) => `
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+          <button onclick="toggleFAQ(${idx})" class="w-full px-6 py-4 text-left flex items-center justify-between gap-4 hover:bg-slate-50 transition-colors">
+            <span class="font-semibold text-sm text-slate-800">${item.q}</span>
+            <svg class="w-5 h-5 text-slate-400 flex-shrink-0 transition-transform duration-200 faq-icon-${idx}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+          </button>
+          <div id="faq-answer-${idx}" class="hidden px-6 pb-5">
+            <div class="text-sm text-slate-600 leading-relaxed border-t border-slate-100 pt-4">${item.a}</div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function toggleFAQ(idx) {
+      const answer = document.getElementById(`faq-answer-${idx}`);
+      const icon = document.querySelector(`.faq-icon-${idx}`);
+      const isOpen = !answer.classList.contains('hidden');
+      document.querySelectorAll('[id^="faq-answer-"]').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('[class*="faq-icon-"]').forEach(el => el.style.transform = '');
+      if (!isOpen) { answer.classList.remove('hidden'); if (icon) icon.style.transform = 'rotate(180deg)'; }
+    }
+
+    function updateActiveTOC() {
+      const sections = document.querySelectorAll('section[id]');
+      const tocLinks = document.querySelectorAll('.toc-link');
+      let currentSection = '';
+      sections.forEach(section => { if (window.scrollY >= section.offsetTop - 100) currentSection = section.getAttribute('id'); });
+      tocLinks.forEach(link => { link.classList.remove('active'); if (link.getAttribute('href') === '#' + currentSection) link.classList.add('active'); });
+    }
+
+    function updateBackToTop() {
+      const btn = document.getElementById('btn-back-top');
+      if (window.scrollY > 400) { btn.classList.remove('opacity-0', 'translate-y-4', 'pointer-events-none'); btn.classList.add('opacity-100', 'translate-y-0', 'pointer-events-auto'); }
+      else { btn.classList.add('opacity-0', 'translate-y-4', 'pointer-events-none'); btn.classList.remove('opacity-100', 'translate-y-0', 'pointer-events-auto'); }
+    }
+
+    function scrollToTop() { window.scrollTo({ top: 0, behavior: 'smooth' }); }
+
+        // --- FITUR PENCARIAN TUTORIAL ---
+    let searchTimeout = null;
+
+    function searchTutorial(query) {
+      // Debounce agar tidak berat saat mengetik cepat
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(() => {
+        performSearch(query);
+      }, 300);
+    }
+
+    function performSearch(query) {
+      const sections = document.querySelectorAll('main section[id]');
+      const tocLinks = document.querySelectorAll('.toc-link');
+      const q = query.toLowerCase().trim();
+
+      // 1. Bersihkan highlight sebelumnya
+      removeAllHighlights();
+
+      if (!q) {
+        // Jika kosong, tampilkan semua section & TOC
+        sections.forEach(sec => sec.classList.remove('search-hidden'));
+        tocLinks.forEach(link => link.classList.remove('hidden'));
+        return;
+      }
+
+      // 2. Cek setiap section apakah mengandung kata kunci
+      sections.forEach(sec => {
+        const text = sec.textContent.toLowerCase();
+        if (text.includes(q)) {
+          sec.classList.remove('search-hidden');
+          // Berikan highlight pada teks yang cocok
+          highlightText(sec, q);
+        } else {
+          sec.classList.add('search-hidden');
+        }
+      });
+
+      // 3. Update TOC (sembunyikan link yang section-nya tersembunyi)
+      tocLinks.forEach(link => {
+        const targetId = link.getAttribute('href').substring(1);
+        const targetSection = document.getElementById(targetId);
+        if (targetSection && targetSection.classList.contains('search-hidden')) {
+          link.classList.add('hidden');
+        } else {
+          link.classList.remove('hidden');
+        }
+      });
+    }
+
+    function highlightText(element, query) {
+      // Walk through text nodes dan wrap kata yang cocok dengan <mark>
+      const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT, null, false);
+      const nodesToReplace = [];
+      
+      while (walker.nextNode()) {
+        const node = walker.currentNode;
+        const text = node.textContent.toLowerCase();
+        if (text.includes(query) && !node.parentElement.closest('.visual-code') && node.parentElement.tagName !== 'MARK') {
+          nodesToReplace.push(node);
+        }
+      }
+
+      nodesToReplace.forEach(node => {
+        const text = node.textContent;
+        const regex = new RegExp(`(${escapeRegExp(query)})`, 'gi');
+        const span = document.createElement('span');
+        span.innerHTML = text.replace(regex, '<mark class="search-highlight">$1</mark>');
+        node.parentNode.replaceChild(span, node);
+      });
+    }
+
+    function removeAllHighlights() {
+      document.querySelectorAll('mark.search-highlight').forEach(mark => {
+        const parent = mark.parentNode;
+        parent.replaceChild(document.createTextNode(mark.textContent), mark);
+        parent.normalize(); // Gabungkan text nodes yang terpecah
+      });
+    }
+
+    // Helper: Escape regex characters dari input user
+    function escapeRegExp(string) {
+      return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }
+
+    window.addEventListener('scroll', () => { updateActiveTOC(); updateBackToTop(); }, { passive: true });
+    renderFAQ();
+    updateActiveTOC();
+  </script>
+</body>
+</html>

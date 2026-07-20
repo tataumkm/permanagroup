@@ -1,0 +1,1157 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tutorial — Sistem Pembelian & Keuangan</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'sans-serif'] },
+          colors: { primary: '#2563eb', surface: '#F8FAFC' }
+        }
+      }
+    }
+  </script>
+  <style>
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #f1f5f9; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+    html { scroll-behavior: smooth; scroll-padding-top: 80px; }
+
+    .fade-in { animation: fadeIn 0.5s ease-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+
+    .step-number {
+      width: 36px; height: 36px; min-width: 36px;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 50%; font-weight: 700; font-size: 14px;
+    }
+
+    .toc-link { transition: all 0.2s; border-left: 3px solid transparent; }
+    .toc-link:hover { border-left-color: #2563eb; background: #eff6ff; color: #2563eb; }
+    .toc-link.active { border-left-color: #2563eb; background: #dbeafe; color: #2563eb; font-weight: 600; }
+
+    .card-tip { border-left: 4px solid #2563eb; }
+    .card-warning { border-left: 4px solid #f59e0b; }
+    .card-danger { border-left: 4px solid #ef4444; }
+    .card-info { border-left: 4px solid #3b82f6; }
+    .card-success { border-left: 4px solid #10b981; }
+
+    .kbd {
+      display: inline-flex; align-items: center; justify-content: center;
+      padding: 2px 8px; border-radius: 6px; font-size: 12px; font-weight: 600;
+      background: #f1f5f9; border: 1px solid #cbd5e1; color: #475569;
+      box-shadow: 0 1px 0 #cbd5e1; font-family: 'Inter', monospace;
+    }
+
+    .visual-code {
+      background: #0f172a; color: #e2e8f0; border-radius: 10px;
+      padding: 16px 20px; font-size: 12px; line-height: 1.8;
+      font-family: 'JetBrains Mono', 'Fira Code', monospace;
+      overflow-x: auto; border: 1px solid #1e293b;
+    }
+    .visual-code .tag { color: #7dd3fc; }
+    .visual-code .attr { color: #c4b5fd; }
+    .visual-code .val { color: #86efac; }
+    .visual-code .comment { color: #64748b; font-style: italic; }
+
+    .flow-arrow { width: 2px; height: 32px; background: linear-gradient(to bottom, #2563eb, #3b82f6); margin: 0 auto; position: relative; }
+    .flow-arrow::after { content: ''; position: absolute; bottom: -4px; left: 50%; transform: translateX(-50%); border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 6px solid #3b82f6; }
+
+    main section[id] { transition: opacity 0.3s ease, transform 0.3s ease; }
+    main section[id].search-hidden { display: none !important; }
+    mark.search-highlight { background-color: #fef08a; color: #854d0e; padding: 0.1rem 0.2rem; border-radius: 0.25rem; font-weight: 600; }
+
+    .screenshot-mock {
+      background: #fff; border: 1px solid #e2e8f0; border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.06); overflow: hidden;
+    }
+    .screenshot-mock .titlebar {
+      background: #f1f5f9; padding: 8px 14px; display: flex; align-items: center; gap: 6px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .screenshot-mock .titlebar .dot { width: 10px; height: 10px; border-radius: 50%; }
+
+    @media print {
+      nav, .no-print { display: none !important; }
+      .print-break { page-break-before: always; }
+    }
+  </style>
+</head>
+<body class="bg-surface text-slate-800 font-sans antialiased">
+
+  <!-- TOP NAV BAR -->
+  <nav class="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md border-b border-slate-200 shadow-sm no-print">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 bg-emerald-600 rounded-lg flex items-center justify-center text-white">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+        </div>
+        <div>
+          <h1 class="text-sm font-bold text-slate-900 leading-tight">Panduan Penggunaan</h1>
+          <p class="text-[11px] text-slate-400">Sistem Pembelian & Keuangan v1.0</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <div class="relative flex-1 max-w-xs hidden sm:block">
+          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <svg class="h-4 w-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+          </div>
+          <input type="text" id="search-input" oninput="searchTutorial(this.value)" placeholder="Cari panduan... (contoh: pelunasan)" class="pl-9 w-full bg-slate-100 border border-slate-200 rounded-lg text-sm py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-colors">
+        </div>
+        <button onclick="window.print()" class="hidden sm:flex items-center gap-1.5 text-xs font-medium text-slate-500 hover:text-slate-700 bg-white border border-slate-200 px-3 py-1.5 rounded-lg transition-colors">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+          Cetak
+        </button>
+        <button onclick="scrollToTop()" class="flex items-center gap-1.5 text-xs font-medium text-blue-600 hover:text-blue-700 bg-blue-50 border border-blue-200 px-3 py-1.5 rounded-lg transition-colors">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path></svg>
+          Atas
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- MAIN LAYOUT -->
+  <div class="pt-20 pb-16 max-w-7xl mx-auto px-4 sm:px-6 flex gap-8">
+
+    <!-- LEFT: TABLE OF CONTENTS -->
+    <aside class="hidden lg:block w-64 flex-shrink-0 no-print">
+      <div class="sticky top-24">
+        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 px-3">Daftar Isi</h3>
+        <nav id="toc-nav" class="space-y-0.5 text-sm max-h-[calc(100vh-140px)] overflow-y-auto">
+          <a href="#pendahuluan" class="toc-link block px-3 py-2 rounded-r-lg text-slate-600">Pendahuluan</a>
+          <a href="#alur-kerja" class="toc-link block px-3 py-2 rounded-r-lg text-slate-600">Alur Kerja</a>
+          <a href="#dashboard" class="toc-link block px-3 py-2 rounded-r-lg text-slate-600">1. Dashboard</a>
+          <a href="#input-po" class="toc-link block px-3 py-2 rounded-r-lg text-slate-600">2. Input Pembelian (PO)</a>
+          <a href="#pilih-produk" class="toc-link block px-3 py-2 rounded-r-lg text-slate-600">3. Memilih Produk</a>
+          <a href="#pembayaran" class="toc-link block px-3 py-2 rounded-r-lg text-slate-600">4. Logika Pembayaran</a>
+          <a href="#supplier-deposit" class="toc-link block px-3 py-2 rounded-r-lg text-slate-600">5. Supplier Kategori Deposit</a>
+          <a href="#riwayat" class="toc-link block px-3 py-2 rounded-r-lg text-slate-600">6. Riwayat Pembelian</a>
+          <a href="#detail-po" class="toc-link block px-3 py-2 rounded-r-lg text-slate-600">7. Detail & Cetak Nota</a>
+          <a href="#list-utang" class="toc-link block px-3 py-2 rounded-r-lg text-slate-600">8. List Belum Lunas</a>
+          <a href="#pelunasan-massal" class="toc-link block px-3 py-2 rounded-r-lg text-slate-600">9. Pelunasan Massal</a>
+          <a href="#laporan" class="toc-link block px-3 py-2 rounded-r-lg text-slate-600">10. Laporan & Download</a>
+          <a href="#searchable-select" class="toc-link block px-3 py-2 rounded-r-lg text-slate-600">11. Komponen Pencarian</a>
+          <a href="#aturan" class="toc-link block px-3 py-2 rounded-r-lg text-slate-600">Aturan Penting</a>
+          <a href="#faq" class="toc-link block px-3 py-2 rounded-r-lg text-slate-600">FAQ</a>
+          <a href="#glosarium" class="toc-link block px-3 py-2 rounded-r-lg text-slate-600">Glosarium</a>
+        </nav>
+      </div>
+    </aside>
+
+    <!-- RIGHT: CONTENT -->
+    <main class="flex-1 min-w-0 space-y-12">
+
+      <!-- HERO -->
+      <section id="pendahuluan" class="fade-in">
+        <div class="bg-gradient-to-br from-emerald-600 via-emerald-700 to-teal-800 rounded-2xl p-8 md:p-12 text-white shadow-xl relative overflow-hidden">
+          <div class="absolute top-0 right-0 w-72 h-72 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/4"></div>
+          <div class="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/4"></div>
+          <div class="relative z-10">
+            <div class="inline-flex items-center gap-2 bg-white/15 backdrop-blur-sm rounded-full px-4 py-1.5 text-xs font-semibold mb-6 border border-white/20">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+              Dokumentasi Pengguna
+            </div>
+            <h1 class="text-3xl md:text-4xl font-extrabold leading-tight mb-3">Panduan Lengkap<br>Sistem Pembelian & Keuangan</h1>
+            <p class="text-emerald-100 text-base md:text-lg max-w-2xl leading-relaxed">Panduan praktis untuk mengelola Purchase Order, memantau utang supplier, melakukan pelunasan massal, hingga mengunduh laporan keuangan.</p>
+            <div class="flex flex-wrap gap-3 mt-6">
+              <div class="bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-xs">
+                <span class="font-bold">Modul:</span> PO, Utang, Pelunasan, Laporan
+              </div>
+              <div class="bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-xs">
+                <span class="font-bold">Versi:</span> 1.0 — 2026
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ALUR KERJA -->
+      <section id="alur-kerja">
+        <div class="flex items-center gap-3 mb-6">
+          <div class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center text-blue-600">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+          </div>
+          <h2 class="text-2xl font-bold text-slate-900">Alur Kerja Sistem</h2>
+        </div>
+        <div class="bg-white rounded-xl border border-slate-200 p-6 md:p-8 shadow-sm">
+          <div class="flex flex-col items-center gap-1">
+            <!-- Step 1 -->
+            <div class="bg-blue-50 border-2 border-blue-200 rounded-xl px-6 py-4 text-center max-w-lg w-full">
+              <div class="text-xs font-bold text-blue-500 mb-1">LANGKAH 1</div>
+              <div class="font-bold text-slate-800">Buat Purchase Order (PO)</div>
+              <div class="text-xs text-slate-500 mt-1">Pilih supplier → Tambah produk → Atur pembayaran → Simpan</div>
+            </div>
+            <div class="flow-arrow"></div>
+            <!-- Step 2 -->
+            <div class="bg-emerald-50 border-2 border-emerald-200 rounded-xl px-6 py-4 text-center max-w-lg w-full">
+              <div class="text-xs font-bold text-emerald-500 mb-1">LANGKAH 2</div>
+              <div class="font-bold text-slate-800">Verifikasi & Validasi PO</div>
+              <div class="text-xs text-slate-500 mt-1">Cek detail PO di Riwayat → Validasi atau Batalkan jika perlu</div>
+            </div>
+            <div class="flow-arrow"></div>
+            <!-- Step 3 -->
+            <div class="bg-orange-50 border-2 border-orange-200 rounded-xl px-6 py-4 text-center max-w-lg w-full">
+              <div class="text-xs font-bold text-orange-500 mb-1">LANGKAH 3</div>
+              <div class="font-bold text-slate-800">Pantau Utang & Jatuh Tempo</div>
+              <div class="text-xs text-slate-500 mt-1">Cek Dashboard & List Belum Lunas untuk monitoring utang</div>
+            </div>
+            <div class="flow-arrow"></div>
+            <!-- Step 4 -->
+            <div class="bg-purple-50 border-2 border-purple-200 rounded-xl px-6 py-4 text-center max-w-lg w-full">
+              <div class="text-xs font-bold text-purple-500 mb-1">LANGKAH 4</div>
+              <div class="font-bold text-slate-800">Proses Pelunasan</div>
+              <div class="text-xs text-slate-500 mt-1">Bayar utang satu-satu atau massal per supplier</div>
+            </div>
+            <div class="flow-arrow"></div>
+            <!-- Step 5 -->
+            <div class="bg-slate-50 border-2 border-slate-300 rounded-xl px-6 py-4 text-center max-w-lg w-full">
+              <div class="text-xs font-bold text-slate-500 mb-1">LANGKAH 5</div>
+              <div class="font-bold text-slate-800">Unduh Laporan</div>
+              <div class="text-xs text-slate-500 mt-1">Generate laporan CSV/PDF per periode & per supplier</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 1. DASHBOARD -->
+      <section id="dashboard">
+        <div class="flex items-center gap-3 mb-6">
+          <div class="step-number bg-blue-600 text-white">1</div>
+          <h2 class="text-2xl font-bold text-slate-900">Dashboard</h2>
+        </div>
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden p-6 space-y-5">
+          <p class="text-sm text-slate-600">Dashboard adalah halaman utama yang menampilkan ringkasan keseluruhan aktivitas pembelian dan keuangan Anda.</p>
+
+          <!-- Stat Cards -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div class="bg-emerald-50 border border-emerald-100 rounded-lg p-4">
+              <div class="text-xs font-bold text-emerald-600 mb-1">📊 Total PO</div>
+              <p class="text-xs text-slate-500">Jumlah seluruh Purchase Order yang pernah dibuat.</p>
+            </div>
+            <div class="bg-red-50 border border-red-100 rounded-lg p-4">
+              <div class="text-xs font-bold text-red-600 mb-1">💰 Total Utang</div>
+              <p class="text-xs text-slate-500">Akumulasi sisa utang seluruh supplier (dalam Juta).</p>
+            </div>
+            <div class="bg-orange-50 border border-orange-100 rounded-lg p-4">
+              <div class="text-xs font-bold text-orange-600 mb-1">⏳ Belum Lunas</div>
+              <p class="text-xs text-slate-500">Jumlah PO yang status pembayarannya belum lunas.</p>
+            </div>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="bg-purple-50 border border-purple-100 rounded-lg p-4">
+              <div class="text-xs font-bold text-purple-600 mb-1">🏭 Supplier Aktif</div>
+              <p class="text-xs text-slate-500">Jumlah supplier yang memiliki transaksi PO.</p>
+            </div>
+            <div class="bg-amber-50 border border-amber-100 rounded-lg p-4">
+              <div class="text-xs font-bold text-amber-600 mb-1">⚠️ PO Perlu Validasi</div>
+              <p class="text-xs text-slate-500">PO berstatus "Butuh Validasi" yang menunggu konfirmasi.</p>
+            </div>
+          </div>
+
+          <!-- Chart -->
+          <div class="bg-blue-50 border border-blue-100 rounded-lg p-4">
+            <h4 class="font-bold text-blue-800 text-sm mb-2">📈 Grafik Tren Pembelian 10 Hari Terakhir</h4>
+            <p class="text-xs text-blue-700">Menampilkan total tagihan per hari dalam 10 hari terakhir. Arahkan kursor ke titik grafik untuk melihat nominal detail.</p>
+          </div>
+
+          <!-- Due Soon -->
+          <div class="bg-red-50 border border-red-100 rounded-lg p-4">
+            <h4 class="font-bold text-red-800 text-sm mb-2">⚠️ Tabel Jatuh Tempo (7 Hari Ke Depan)</h4>
+            <p class="text-xs text-red-700">Menampilkan daftar utang yang jatuh tempo dalam 7 hari ke depan. Klik baris tabel untuk langsung membuka modal pelunasan.</p>
+          </div>
+
+          <div class="card-tip bg-blue-50 border border-blue-100 rounded-lg p-4">
+            <div class="flex items-start gap-3">
+              <svg class="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+              <div>
+                <h4 class="font-bold text-blue-800 text-sm">Navigasi Cepat</h4>
+                <p class="text-xs text-blue-600 mt-1">Klik pada card stat (Total PO, Total Utang, Belum Lunas) untuk langsung navigasi ke halaman terkait.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. INPUT PEMBELIAN (PO) -->
+      <section id="input-po" class="print-break">
+        <div class="flex items-center gap-3 mb-6">
+          <div class="step-number bg-blue-600 text-white">2</div>
+          <h2 class="text-2xl font-bold text-slate-900">Input Pembelian (PO)</h2>
+        </div>
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+          <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50"><h3 class="font-semibold text-slate-700">Membuat Purchase Order Baru</h3></div>
+          <div class="p-6 space-y-6">
+
+            <!-- Step 2.1 -->
+            <div class="flex gap-4">
+              <div class="step-number bg-slate-200 text-slate-700 text-sm">2.1</div>
+              <div class="flex-1">
+                <h4 class="font-bold text-slate-800 mb-2">Informasi PO</h4>
+                <div class="bg-slate-50 border border-slate-200 rounded-lg p-4 space-y-2 text-sm text-slate-600">
+                  <p><strong>Tanggal PO:</strong> Otomatis terisi hari ini. Bisa diubah manual.</p>
+                  <p><strong>No Nota (Supplier):</strong> Masukkan nomor invoice/faktur dari supplier. Wajib diisi.</p>
+                  <p><strong>Supplier:</strong> Ketik kode atau nama supplier di kolom pencarian. Pilih dari dropdown yang muncul. <span class="text-red-500 font-semibold">Wajib pilih dari daftar, tidak boleh diketik manual.</span></p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Step 2.2 -->
+            <div class="flex gap-4">
+              <div class="step-number bg-slate-200 text-slate-700 text-sm">2.2</div>
+              <div class="flex-1">
+                <h4 class="font-bold text-slate-800 mb-2">Tambah Produk ke Daftar Barang</h4>
+                <p class="text-sm text-slate-600 mb-3">Ada 3 cara untuk menambahkan produk ke PO:</p>
+                <div class="space-y-3">
+                  <div class="bg-slate-50 border border-slate-200 rounded-lg p-3">
+                    <div class="font-semibold text-slate-700 text-sm mb-1">Cara A: Tambah Baris Satu-satu</div>
+                    <p class="text-xs text-slate-600">Klik tombol <span class="kbd">+ Tambah Baris Produk</span>. Ketik kode/nama produk di kolom input, lalu pilih dari dropdown.</p>
+                  </div>
+                  <div class="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                    <div class="font-semibold text-blue-700 text-sm mb-1">Cara B: Pilih Banyak (Bulk)</div>
+                    <p class="text-xs text-blue-600">Klik tombol <span class="kbd">Pilih Banyak</span>. Sebuah modal akan terbuka dengan daftar seluruh produk. Centang produk yang diinginkan, gunakan filter ketebalan/bahan/grade untuk mempercepat pencarian, lalu klik <strong>"Tambahkan ke PO"</strong>.</p>
+                  </div>
+                  <div class="bg-emerald-50 border border-emerald-200 rounded-lg p-3">
+                    <div class="font-semibold text-emerald-700 text-sm mb-1">Cara C: Quick Add dari Modal Bulk</div>
+                    <p class="text-xs text-emerald-600">Di dalam modal "Pilih Produk", klik tombol <span class="kbd">+ Tambah</span> di baris produk untuk langsung menambahkannya tanpa perlu centang & konfirmasi.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Step 2.3 -->
+            <div class="flex gap-4">
+              <div class="step-number bg-slate-200 text-slate-700 text-sm">2.3</div>
+              <div class="flex-1">
+                <h4 class="font-bold text-slate-800 mb-2">Isi Qty, Harga & Subtotal</h4>
+                <p class="text-sm text-slate-600">Setiap baris produk memiliki kolom:</p>
+                <ul class="text-sm text-slate-600 mt-2 ml-4 list-disc space-y-1">
+                  <li><strong>Qty:</strong> Jumlah unit pembelian (default: 1).</li>
+                  <li><strong>Harga Satuan:</strong> Ketik angka murni (misal: 150000). Sistem otomatis memformat menjadi 150.000. HPP produk akan terisi otomatis jika tersedia.</li>
+                  <li><strong>Subtotal:</strong> Dihitung otomatis (Qty × Harga). Tidak bisa diedit manual.</li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- Step 2.4 -->
+            <div class="flex gap-4">
+              <div class="step-number bg-slate-200 text-slate-700 text-sm">2.4</div>
+              <div class="flex-1">
+                <h4 class="font-bold text-slate-800 mb-2">Biaya Tambahan & Ringkasan</h4>
+                <p class="text-sm text-slate-600">Di panel ringkasan (kanan bawah), Anda bisa mengisi:</p>
+                <div class="mt-2 bg-slate-50 border border-slate-200 rounded-lg p-4 text-sm text-slate-600 space-y-1">
+                  <p><strong>Diskon:</strong> Nominal potongan harga (angka murni).</p>
+                  <p><strong>Biaya Ongkir:</strong> Biaya pengiriman.</p>
+                  <p><strong>Biaya Handling:</strong> Biaya penanganan/bongkar muat.</p>
+                  <p class="pt-2 border-t border-slate-200"><strong>Total Tagihan</strong> = Subtotal Produk − Diskon + Ongkir + Handling.</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="card-warning bg-amber-50 border border-amber-100 rounded-lg p-4">
+              <div class="flex items-start gap-3">
+                <svg class="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                <div>
+                  <h4 class="font-bold text-amber-800 text-sm">Hapus Baris Produk</h4>
+                  <p class="text-xs text-amber-700 mt-1">Klik ikon tempat sampah di ujung kanan baris untuk menghapus produk dari daftar. Perhatikan bahwa penghapusan akan me-reset dan merender ulang seluruh baris.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3. MEMILIH PRODUK -->
+      <section id="pilih-produk">
+        <div class="flex items-center gap-3 mb-6">
+          <div class="step-number bg-blue-600 text-white">3</div>
+          <h2 class="text-2xl font-bold text-slate-900">Memilih Produk</h2>
+        </div>
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+          <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50"><h3 class="font-semibold text-slate-700">Komponen Pencarian & Modal Bulk</h3></div>
+          <div class="p-6 space-y-5">
+
+            <div class="flex gap-4">
+              <div class="step-number bg-slate-200 text-slate-700 text-sm">3.1</div>
+              <div class="flex-1">
+                <h4 class="font-bold text-slate-800 mb-2">Input Pencarian Produk (Per Baris)</h4>
+                <p class="text-sm text-slate-600 mb-3">Setiap baris produk dilengkapi komponen <strong>Searchable Select</strong>. Cara kerjanya:</p>
+                <ol class="text-sm text-slate-600 ml-4 list-decimal space-y-1">
+                  <li>Klik kolom input atau mulai ketik kode/nama produk.</li>
+                  <li>Dropdown muncul menampilkan produk yang cocok (kode + nama).</li>
+                  <li>Gunakan <span class="kbd">↑</span> <span class="kbd">↓</span> untuk navigasi, <span class="kbd">Enter</span> untuk memilih.</li>
+                  <li>Klik langsung pada item dropdown juga bisa.</li>
+                  <li>Tekan <span class="kbd">Esc</span> atau klik di luar untuk menutup dropdown.</li>
+                </ol>
+                <div class="card-danger bg-red-50 border border-red-100 rounded-lg p-3 mt-3">
+                  <p class="text-xs text-red-700"><strong>⚠️ Mode Strict:</strong> Anda <strong>harus</strong> memilih dari dropdown. Ketik manual tanpa memilih akan memicu peringatan dan input ditandai merah.</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex gap-4">
+              <div class="step-number bg-slate-200 text-slate-700 text-sm">3.2</div>
+              <div class="flex-1">
+                <h4 class="font-bold text-slate-800 mb-2">Modal Pilih Banyak (Bulk Product)</h4>
+                <p class="text-sm text-slate-600 mb-3">Modal ini memungkinkan Anda memilih banyak produk sekaligus:</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
+                  <div class="bg-slate-50 border border-slate-200 rounded-lg p-3">
+                    <h5 class="font-semibold text-slate-700 text-xs mb-1">🔍 Pencarian</h5>
+                    <p class="text-xs text-slate-600">Ketik kode/nama di kolom pencarian atas untuk filter real-time.</p>
+                  </div>
+                  <div class="bg-slate-50 border border-slate-200 rounded-lg p-3">
+                    <h5 class="font-semibold text-slate-700 text-xs mb-1">📋 Filter Multi-Kriteria</h5>
+                    <p class="text-xs text-slate-600">Gunakan dropdown Ketebalan, Bahan, dan Grade untuk mempersempit daftar.</p>
+                  </div>
+                  <div class="bg-slate-50 border border-slate-200 rounded-lg p-3">
+                    <h5 class="font-semibold text-slate-700 text-xs mb-1">☑️ Centang / Select All</h5>
+                    <p class="text-xs text-slate-600">Centang produk satu per satu atau gunakan checkbox di header untuk pilih semua yang terlihat.</p>
+                  </div>
+                  <div class="bg-slate-50 border border-slate-200 rounded-lg p-3">
+                    <h5 class="font-semibold text-slate-700 text-xs mb-1">⚡ Quick Add</h5>
+                    <p class="text-xs text-slate-600">Tombol "+ Tambah" langsung menambahkan produk ke PO tanpa perlu centang & konfirmasi.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Registrasi Produk Baru -->
+            <div class="flex gap-4">
+              <div class="step-number bg-emerald-600 text-white text-sm">3.3</div>
+              <div class="flex-1">
+                <h4 class="font-bold text-slate-800 mb-2">Registrasi Produk Baru</h4>
+                <p class="text-sm text-slate-600">Jika produk belum terdaftar, klik tombol <span class="kbd">+ Produk Baru</span> di toolbar. Sebuah modal akan muncul:</p>
+                <div class="mt-3 bg-slate-50 border border-slate-200 rounded-lg p-4 space-y-2 text-sm text-slate-600">
+                  <p><strong>Kode Produk:</strong> Klik <span class="kbd">🔄 Generate</span> untuk membuat kode otomatis (format: A-001, A-002, dst).</p>
+                  <p><strong>Nama Produk:</strong> Wajib diisi.</p>
+                  <p><strong>Ketebalan / Bahan / Grade:</strong> Opsional. Ketik atau pilih dari suggestion yang muncul berdasarkan data produk yang sudah ada.</p>
+                </div>
+                <div class="card-success bg-emerald-50 border border-emerald-100 rounded-lg p-3 mt-3">
+                  <p class="text-xs text-emerald-700">Setelah produk berhasil disimpan, daftar produk di form PO dan modal bulk akan otomatis ter-refresh.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. LOGIKA PEMBAYARAN -->
+      <section id="pembayaran" class="print-break">
+        <div class="flex items-center gap-3 mb-6">
+          <div class="step-number bg-blue-600 text-white">4</div>
+          <h2 class="text-2xl font-bold text-slate-900">Logika Pembayaran</h2>
+        </div>
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+          <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50"><h3 class="font-semibold text-slate-700">4 Tipe Pembayaran dalam PO</h3></div>
+          <div class="p-6 space-y-5">
+
+            <p class="text-sm text-slate-600">Saat membuat PO, Anda memilih salah satu dari 4 tipe pembayaran. Masing-masing memiliki perilaku berbeda:</p>
+
+            <!-- Lunas -->
+            <div class="bg-green-50 border border-green-200 rounded-xl p-5">
+              <h4 class="font-bold text-green-800 text-sm mb-2 flex items-center gap-2">
+                <span class="w-6 h-6 bg-green-600 text-white rounded-full flex items-center justify-center text-xs">L</span>
+                Lunas
+              </h4>
+              <div class="text-sm text-green-700 space-y-1">
+                <p>✅ <strong>Metode Bayar:</strong> Pilih Bank/Kas dari daftar COA.</p>
+                <p>✅ <strong>Nominal Bayar:</strong> <strong>Read-only</strong>, otomatis terisi = Total Tagihan.</p>
+                <p>✅ <strong>Tanggal Bayar:</strong> Wajib diisi, default hari ini.</p>
+                <p>✅ <strong>Status Pembayaran:</strong> Otomatis "Lunas".</p>
+              </div>
+            </div>
+
+            <!-- DP -->
+            <div class="bg-blue-50 border border-blue-200 rounded-xl p-5">
+              <h4 class="font-bold text-blue-800 text-sm mb-2 flex items-center gap-2">
+                <span class="w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs">D</span>
+                Down Payment (DP)
+              </h4>
+              <div class="text-sm text-blue-700 space-y-1">
+                <p>✅ <strong>Metode Bayar:</strong> Pilih Bank/Kas dari daftar COA.</p>
+                <p>✅ <strong>Nominal Bayar:</strong> <strong>Bisa diedit</strong>, default 0. Isi sesuai jumlah DP yang dibayarkan.</p>
+                <p>✅ <strong>Tanggal Bayar:</strong> Wajib diisi, default hari ini.</p>
+                <p>✅ <strong>Status Pembayaran:</strong> "Sebagian" (jika DP &lt; Total) atau "Lunas" (jika DP ≥ Total).</p>
+              </div>
+            </div>
+
+            <!-- Utang -->
+            <div class="bg-orange-50 border border-orange-200 rounded-xl p-5">
+              <h4 class="font-bold text-orange-800 text-sm mb-2 flex items-center gap-2">
+                <span class="w-6 h-6 bg-orange-600 text-white rounded-full flex items-center justify-center text-xs">U</span>
+                Utang
+              </h4>
+              <div class="text-sm text-orange-700 space-y-1">
+                <p>✅ <strong>Metode Bayar:</strong> Otomatis terisi COA "Utang Supplier" (tidak bisa diubah).</p>
+                <p>✅ <strong>Nominal Bayar:</strong> Read-only, bernilai 0.</p>
+                <p>✅ <strong>Label Tanggal:</strong> Berubah menjadi <strong>"Tanggal Jatuh Tempo"</strong>. Wajib diisi.</p>
+                <p>✅ <strong>Status Pembayaran:</strong> "Belum Lunas".</p>
+              </div>
+            </div>
+
+            <!-- Deposit -->
+            <div class="bg-purple-50 border border-purple-200 rounded-xl p-5">
+              <h4 class="font-bold text-purple-800 text-sm mb-2 flex items-center gap-2">
+                <span class="w-6 h-6 bg-purple-600 text-white rounded-full flex items-center justify-center text-xs">D</span>
+                Deposit
+              </h4>
+              <div class="text-sm text-purple-700 space-y-1">
+                <p>✅ <strong>Metode Bayar:</strong> Otomatis terisi COA "Bayar Pakai Deposit Supplier" (tidak bisa diubah).</p>
+                <p>✅ <strong>Nominal Bayar:</strong> Read-only, otomatis = Total Tagihan.</p>
+                <p>✅ <strong>Tanggal Bayar:</strong> Wajib diisi, default hari ini.</p>
+                <p>✅ <strong>Keterangan:</strong> Opsi ini biasanya terkunci jika supplier berkategori Deposit (lihat bagian selanjutnya).</p>
+              </div>
+            </div>
+
+            <div class="card-info bg-blue-50 border border-blue-100 rounded-lg p-4">
+              <div class="flex items-start gap-3">
+                <svg class="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <div>
+                  <h4 class="font-bold text-blue-800 text-sm">Status Estimasi</h4>
+                  <p class="text-xs text-blue-600 mt-1">Di panel ringkasan, terdapat indikator <strong>"Status Pembayaran Estimasi"</strong> yang berubah real-time berdasarkan nominal yang Anda masukkan vs total tagihan.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5. SUPPLIER DEPOSIT -->
+      <section id="supplier-deposit">
+        <div class="flex items-center gap-3 mb-6">
+          <div class="step-number bg-purple-600 text-white">5</div>
+          <h2 class="text-2xl font-bold text-slate-900">Supplier Kategori Deposit</h2>
+        </div>
+        <div class="bg-white rounded-xl border border-purple-200 shadow-sm overflow-hidden p-6 space-y-5">
+          <p class="text-sm text-slate-600">Jika supplier yang Anda pilih di form PO memiliki <strong>kategori "Deposit"</strong> (sesuai data di Sistem Supplier), maka sistem akan berperilaku khusus:</p>
+
+          <div class="bg-purple-50 border border-purple-200 rounded-xl p-5 space-y-3">
+            <h4 class="font-bold text-purple-800 text-sm">🔄 Perubahan Otomatis saat Pilih Supplier Deposit:</h4>
+            <ul class="text-sm text-purple-700 ml-4 list-disc space-y-1">
+              <li>Banner informasi berwarna biru akan muncul di bagian pembayaran.</li>
+              <li>Tipe Pembayaran dipaksa ke <strong>"Deposit"</strong> dan dropdown dikunci (disabled).</li>
+              <li>Metode Bayar otomatis terisi <strong>"Tagih via Sistem Deposit"</strong> dan dikunci.</li>
+              <li>Nominal Bayar menjadi <strong>read-only</strong>, otomatis = Total Tagihan.</li>
+              <li>Link ke <strong>Sistem Deposit</strong> ditampilkan di banner untuk proses selanjutnya.</li>
+            </ul>
+          </div>
+
+          <div class="card-warning bg-amber-50 border border-amber-100 rounded-lg p-4">
+            <div class="flex items-start gap-3">
+              <svg class="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+              <div>
+                <h4 class="font-bold text-amber-800 text-sm">Pindah dari Supplier Deposit ke Non-Deposit</h4>
+                <p class="text-xs text-amber-700 mt-1">Jika Anda sebelumnya memilih supplier Deposit lalu mengganti ke supplier non-Deposit, tipe pembayaran yang tersangkut di "Deposit" akan otomatis direset ke "Lunas". Form kembali normal.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 6. RIWAYAT PEMBELIAN -->
+      <section id="riwayat" class="print-break">
+        <div class="flex items-center gap-3 mb-6">
+          <div class="step-number bg-blue-600 text-white">6</div>
+          <h2 class="text-2xl font-bold text-slate-900">Riwayat Pembelian</h2>
+        </div>
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden p-6 space-y-5">
+          <p class="text-sm text-slate-600">Halaman ini menampilkan seluruh Purchase Order yang pernah dibuat, dilengkapi fitur filter, pencarian, dan paginasi.</p>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+            <div class="bg-slate-50 border border-slate-200 rounded-lg p-4">
+              <h4 class="font-bold text-slate-700 mb-2">🔍 Pencarian</h4>
+              <p class="text-xs text-slate-600">Ketik No Ref, nama supplier, atau nomor nota untuk filter tabel secara real-time.</p>
+            </div>
+            <div class="bg-slate-50 border border-slate-200 rounded-lg p-4">
+              <h4 class="font-bold text-slate-700 mb-2">📋 Filter Status Transaksi</h4>
+              <p class="text-xs text-slate-600">Pilih: Valid, Butuh Validasi, atau Cancel untuk menyaring tampilan.</p>
+            </div>
+            <div class="bg-slate-50 border border-slate-200 rounded-lg p-4">
+              <h4 class="font-bold text-slate-700 mb-2">💳 Filter Tipe Bayar</h4>
+              <p class="text-xs text-slate-600">Saring berdasarkan Lunas, Utang, DP, atau Deposit.</p>
+            </div>
+          </div>
+
+          <div class="bg-slate-50 border border-slate-200 rounded-lg p-4 text-sm text-slate-600">
+            <h4 class="font-bold text-slate-700 mb-2">🛠 Tombol Aksi (⋮)</h4>
+            <p class="text-xs text-slate-600 mb-2">Setiap baris memiliki tombol aksi berupa 3 titik di kolom paling kanan. Klik untuk melihat opsi:</p>
+            <ul class="text-xs space-y-1 ml-4 list-disc">
+              <li><strong>📋 Detail:</strong> Membuka modal detail transaksi lengkap.</li>
+              <li><strong>❌ Cancel:</strong> Hanya muncul untuk PO berstatus "Butuh Validasi". Membatalkan PO dengan konfirmasi.</li>
+              <li><strong>💰 Bayar:</strong> Hanya muncul untuk PO yang belum lunas. Membuka modal pelunasan utang.</li>
+            </ul>
+          </div>
+
+          <div class="card-info bg-blue-50 border border-blue-100 rounded-lg p-4">
+            <div class="flex items-start gap-3">
+              <svg class="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+              <div>
+                <h4 class="font-bold text-blue-800 text-sm">Paginasi</h4>
+                <p class="text-xs text-blue-600 mt-1">Data ditampilkan 10 baris per halaman. Gunakan navigasi halaman di bawah tabel untuk berpindah. Filter akan mereset halaman ke halaman 1.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 7. DETAIL & CETAK NOTA -->
+      <section id="detail-po">
+        <div class="flex items-center gap-3 mb-6">
+          <div class="step-number bg-blue-600 text-white">7</div>
+          <h2 class="text-2xl font-bold text-slate-900">Detail & Cetak Nota</h2>
+        </div>
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+          <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50"><h3 class="font-semibold text-slate-700">Modal Detail Transaksi</h3></div>
+          <div class="p-6 space-y-5">
+
+            <p class="text-sm text-slate-600">Klik No Ref pada tabel riwayat (atau pilih "Detail" dari menu aksi) untuk membuka modal detail. Modal ini menampilkan:</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="bg-slate-50 border border-slate-200 rounded-lg p-4">
+                <h4 class="font-bold text-slate-700 text-sm mb-2">📦 Informasi Transaksi</h4>
+                <ul class="text-xs text-slate-600 space-y-1">
+                  <li>No Ref, Tanggal, Supplier, No Nota</li>
+                  <li>Status Transaksi (Valid / Butuh Validasi / Cancel)</li>
+                </ul>
+              </div>
+              <div class="bg-slate-50 border border-slate-200 rounded-lg p-4">
+                <h4 class="font-bold text-slate-700 text-sm mb-2">💳 Detail Pembayaran</h4>
+                <ul class="text-xs text-slate-600 space-y-1">
+                  <li>Tipe Bayar, Metode, Tanggal</li>
+                  <li>Total Tagihan, Sudah Dibayar, Sisa/Status</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="bg-slate-50 border border-slate-200 rounded-lg p-4">
+              <h4 class="font-bold text-slate-700 text-sm mb-2">📋 Daftar Barang</h4>
+              <p class="text-xs text-slate-600">Tabel berisi Kode, Nama, Qty, Harga Satuan, dan Subtotal untuk setiap item dalam PO.</p>
+            </div>
+
+            <!-- Cetak Nota -->
+            <div class="flex gap-4">
+              <div class="step-number bg-slate-800 text-white text-sm">7.1</div>
+              <div class="flex-1">
+                <h4 class="font-bold text-slate-800 mb-2">🖨️ Cetak Nota / Unduh PDF</h4>
+                <p class="text-sm text-slate-600">Klik tombol <span class="kbd">🖨️ Cetak Nota / Unduh PDF</span> di footer modal. Sebuah jendela baru akan terbuka dengan format nota profesional yang siap cetak. Pilih "Save as PDF" dari dialog print browser untuk mengunduh.</p>
+                <div class="mt-3 bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs text-slate-600 space-y-1">
+                  <p>✅ Format A4 profesional dengan header perusahaan.</p>
+                  <p>✅ Informasi penerima (supplier) & detail bayar.</p>
+                  <p>✅ Tabel item lengkap dengan total.</p>
+                  <p>✅ Footer dokumen dengan timestamp cetak.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Cancel PO -->
+            <div class="flex gap-4">
+              <div class="step-number bg-red-600 text-white text-sm">7.2</div>
+              <div class="flex-1">
+                <h4 class="font-bold text-slate-800 mb-2">❌ Batalkan PO</h4>
+                <p class="text-sm text-slate-600">Tombol <span class="kbd">Batalkan PO</span> hanya muncul jika status transaksi adalah <strong>"Butuh Validasi"</strong>. Klik tombol tersebut, konfirmasi di jendela dialog, dan PO akan dibatalkan secara permanen.</p>
+                <div class="card-danger bg-red-50 border border-red-100 rounded-lg p-3 mt-3">
+                  <p class="text-xs text-red-700"><strong>⚠️ Perhatian:</strong> Pembatalan PO tidak dapat dibatalkan (irreversible). Pastikan Anda yakin sebelum mengkonfirmasi.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 8. LIST BELUM LUNAS -->
+      <section id="list-utang" class="print-break">
+        <div class="flex items-center gap-3 mb-6">
+          <div class="step-number bg-red-600 text-white">8</div>
+          <h2 class="text-2xl font-bold text-slate-900">List Belum Lunas</h2>
+        </div>
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden p-6 space-y-5">
+          <p class="text-sm text-slate-600">Halaman ini menampilkan seluruh transaksi yang <strong>belum dibayar lunas</strong> (status Belum Lunas atau Sebagian).</p>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+            <div class="bg-slate-50 border border-slate-200 rounded-lg p-4">
+              <h4 class="font-bold text-slate-700 mb-2">🔍 Cari</h4>
+              <p class="text-xs text-slate-600">Filter berdasarkan nama supplier atau No Ref.</p>
+            </div>
+            <div class="bg-slate-50 border border-slate-200 rounded-lg p-4">
+              <h4 class="font-bold text-slate-700 mb-2">📋 Filter Status</h4>
+              <p class="text-xs text-slate-600">Pilih "Belum Lunas" atau "Sebagian" untuk menyaring.</p>
+            </div>
+            <div class="bg-slate-50 border border-slate-200 rounded-lg p-4">
+              <h4 class="font-bold text-slate-700 mb-2">📅 Filter Jatuh Tempo</h4>
+              <p class="text-xs text-slate-600">Tampilkan utang dengan jatuh tempo sebelum tanggal tertentu.</p>
+            </div>
+          </div>
+
+          <!-- Pelunasan per PO -->
+          <div class="bg-emerald-50 border border-emerald-200 rounded-lg p-5">
+            <h4 class="font-bold text-emerald-800 text-sm mb-2">💰 Pelunasan per PO</h4>
+            <p class="text-xs text-emerald-700 mb-3">Klik tombol <span class="kbd">Bayar</span> pada baris utang untuk membuka modal pelunasan individual:</p>
+            <ol class="text-xs text-emerald-700 ml-4 list-decimal space-y-1">
+              <li>Modal menampilkan informasi: Supplier, Total Tagihan, Sudah Dibayar, dan <strong class="text-red-600">Sisa Utang</strong>.</li>
+              <li>Isi <strong>Tanggal Bayar</strong> (default: hari ini).</li>
+              <li>Isi <strong>Nominal Bayar</strong> — ketik angka murni, sistem memformat otomatis. Bisa kurang dari sisa utang untuk pembayaran bertahap.</li>
+              <li>Pilih <strong>Metode Bayar (Kas/Bank)</strong> dari dropdown.</li>
+              <li>Opsional: Isi <strong>Keterangan</strong> (catatan tambahan).</li>
+              <li>Klik <strong>"Proses Pelunasan"</strong>.</li>
+            </ol>
+          </div>
+
+          <div class="card-tip bg-blue-50 border border-blue-100 rounded-lg p-4">
+            <div class="flex items-start gap-3">
+              <svg class="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+              <div>
+                <h4 class="font-bold text-blue-800 text-sm">Tombol Reset</h4>
+                <p class="text-xs text-blue-600 mt-1">Klik tombol <span class="kbd">Reset</span> untuk menghapus semua filter dan menampilkan data utuh kembali.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 9. PELUNASAN MASSAL -->
+      <section id="pelunasan-massal">
+        <div class="flex items-center gap-3 mb-6">
+          <div class="step-number bg-emerald-600 text-white">9</div>
+          <h2 class="text-2xl font-bold text-slate-900">Pelunasan Massal</h2>
+        </div>
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+          <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50"><h3 class="font-semibold text-slate-700">Bayar Banyak PO Sekaligus dari Satu Supplier</h3></div>
+          <div class="p-6 space-y-6">
+
+            <div class="flex gap-4">
+              <div class="step-number bg-slate-200 text-slate-700 text-sm">9.1</div>
+              <div class="flex-1">
+                <h4 class="font-bold text-slate-800 mb-2">Pilih Supplier & Tanggal</h4>
+                <p class="text-sm text-slate-600">Ketik kode/nama supplier di kolom pencarian dan pilih dari dropdown. Setelah dipilih, sistem akan otomatis memuat daftar PO yang belum lunas dari supplier tersebut.</p>
+              </div>
+            </div>
+
+            <div class="flex gap-4">
+              <div class="step-number bg-slate-200 text-slate-700 text-sm">9.2</div>
+              <div class="flex-1">
+                <h4 class="font-bold text-slate-800 mb-2">Centang PO yang Akan Dibayar</h4>
+                <p class="text-sm text-slate-600">Tabel menampilkan daftar PO belum lunas. Centang PO yang ingin dilunasi, atau gunakan checkbox di header untuk <strong>Select All</strong>. Panel biru di atas akan menampilkan total sisa utang dari PO yang tercentang.</p>
+              </div>
+            </div>
+
+            <div class="flex gap-4">
+              <div class="step-number bg-slate-200 text-slate-700 text-sm">9.3</div>
+              <div class="flex-1">
+                <h4 class="font-bold text-slate-800 mb-2">Atur Detail Pembayaran</h4>
+                <div class="bg-slate-50 border border-slate-200 rounded-lg p-4 space-y-2 text-sm text-slate-600">
+                  <p><strong>Nominal Transfer:</strong> Otomatis terisi = total sisa utang tercentang. <em>Bisa diedit manual</em> jika nominal transfer berbeda (misal: potongan dari supplier).</p>
+                  <p><strong>Rekening Sumber / Bank:</strong> Pilih bank/kas untuk pembayaran.</p>
+                  <p><strong>Catatan:</strong> Opsional, misal: "Pelunasan 3 invoice sekaligus".</p>
+                </div>
+                <div class="card-warning bg-amber-50 border border-amber-100 rounded-lg p-3 mt-3">
+                  <p class="text-xs text-amber-700"><strong>💡 Mode Manual:</strong> Jika Anda mengedit nominal transfer secara manual, sistem tidak akan menimpa nilai Anda saat Anda menambah/menghapus centang PO. Nilai hanya auto-fill jika Anda belum pernah mengeditnya.</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex gap-4">
+              <div class="step-number bg-slate-200 text-slate-700 text-sm">9.4</div>
+              <div class="flex-1">
+                <h4 class="font-bold text-slate-800 mb-2">Proses & Reset Otomatis</h4>
+                <p class="text-sm text-slate-600">Klik <strong>"Proses Pelunasan"</strong>. Setelah berhasil, halaman akan otomatis di-reset ke kondisi awal (supplier dikosongkan, tabel dibersihkan, nominal di-nol-kan) sehingga siap untuk pelunasan berikutnya.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 10. LAPORAN -->
+      <section id="laporan" class="print-break">
+        <div class="flex items-center gap-3 mb-6">
+          <div class="step-number bg-blue-600 text-white">10</div>
+          <h2 class="text-2xl font-bold text-slate-900">Laporan & Download</h2>
+        </div>
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+          <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50"><h3 class="font-semibold text-slate-700">Generate & Ekspor Laporan</h3></div>
+          <div class="p-6 space-y-6">
+
+            <div class="flex gap-4">
+              <div class="step-number bg-slate-200 text-slate-700 text-sm">10.1</div>
+              <div class="flex-1">
+                <h4 class="font-bold text-slate-800 mb-2">Jenis Laporan</h4>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
+                  <div class="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                    <h5 class="font-semibold text-blue-700 text-xs mb-1">📊 Laporan Pembelian</h5>
+                    <p class="text-xs text-blue-600">Seluruh PO dalam rentang tanggal.</p>
+                  </div>
+                  <div class="bg-red-50 border border-red-200 rounded-lg p-3">
+                    <h5 class="font-semibold text-red-700 text-xs mb-1">💰 Laporan Utang Supplier</h5>
+                    <p class="text-xs text-red-600">Daftar utang yang belum lunas.</p>
+                  </div>
+                  <div class="bg-green-50 border border-green-200 rounded-lg p-3">
+                    <h5 class="font-semibold text-green-700 text-xs mb-1">✅ Laporan Pelunasan</h5>
+                    <p class="text-xs text-green-600">Histori pembayaran pelunasan utang.</p>
+                  </div>
+                  <div class="bg-purple-50 border border-purple-200 rounded-lg p-3">
+                    <h5 class="font-semibold text-purple-700 text-xs mb-1">🏭 Laporan per Supplier</h5>
+                    <p class="text-xs text-purple-600">Filter pembelian berdasarkan supplier tertentu.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex gap-4">
+              <div class="step-number bg-slate-200 text-slate-700 text-sm">10.2</div>
+              <div class="flex-1">
+                <h4 class="font-bold text-slate-800 mb-2">Filter & Generate</h4>
+                <p class="text-sm text-slate-600">Pilih jenis laporan, tentukan <strong>Tanggal Mulai</strong> dan <strong>Tanggal Akhir</strong>, lalu klik <span class="kbd">Tampilkan Laporan</span>. Untuk jenis "per Supplier", dropdown filter supplier tambahan akan muncul.</p>
+              </div>
+            </div>
+
+            <div class="flex gap-4">
+              <div class="step-number bg-slate-200 text-slate-700 text-sm">10.3</div>
+              <div class="flex-1">
+                <h4 class="font-bold text-slate-800 mb-2">Download Hasil</h4>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
+                  <div class="bg-emerald-50 border border-emerald-200 rounded-lg p-4">
+                    <h5 class="font-semibold text-emerald-700 text-sm mb-2">📥 Download CSV</h5>
+                    <p class="text-xs text-emerald-600">Unduh data mentah dalam format CSV yang bisa dibuka di Excel/Google Sheets. Cocok untuk analisis data lebih lanjut.</p>
+                  </div>
+                  <div class="bg-rose-50 border border-rose-200 rounded-lg p-4">
+                    <h5 class="font-semibold text-rose-700 text-sm mb-2">📄 Download PDF</h5>
+                    <p class="text-xs text-rose-600">Cetak laporan format profesional A4 dengan header, ringkasan, tabel data, dan grand total. Pilih "Save as PDF" dari dialog print browser.</p>
+                  </div>
+                </div>
+                <div class="mt-3 bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs text-slate-600 space-y-1">
+                  <p>✅ Header: Judul laporan, periode, dan waktu cetak.</p>
+                  <p>✅ Summary Card: Total transaksi, total nilai, jenis laporan.</p>
+                  <p>✅ Tabel data lengkap dengan badge status berwarna.</p>
+                  <p>✅ Grand Total di footer tabel.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 11. KOMPONEN PENCARIAN -->
+      <section id="searchable-select">
+        <div class="flex items-center gap-3 mb-6">
+          <div class="step-number bg-indigo-600 text-white">11</div>
+          <h2 class="text-2xl font-bold text-slate-900">Komponen Searchable Select</h2>
+        </div>
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden p-6 space-y-5">
+          <p class="text-sm text-slate-600">Komponen <strong>Searchable Select</strong> digunakan di seluruh sistem untuk input yang memerlukan pemilihan dari daftar (supplier, produk). Berikut cara penggunaannya:</p>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="bg-slate-50 border border-slate-200 rounded-lg p-4">
+              <h4 class="font-bold text-slate-700 text-sm mb-2">⌨️ Keyboard Navigation</h4>
+              <div class="space-y-2 text-xs text-slate-600">
+                <div class="flex items-center gap-2"><span class="kbd">↑</span> <span class="kbd">↓</span> <span>Navigasi item</span></div>
+                <div class="flex items-center gap-2"><span class="kbd">Enter</span> <span>Pilih item</span></div>
+                <div class="flex items-center gap-2"><span class="kbd">Esc</span> <span>Tutup dropdown</span></div>
+              </div>
+            </div>
+            <div class="bg-slate-50 border border-slate-200 rounded-lg p-4">
+              <h4 class="font-bold text-slate-700 text-sm mb-2">🖱️ Mouse Interaction</h4>
+              <div class="space-y-2 text-xs text-slate-600">
+                <p>• Klik input untuk membuka dropdown</p>
+                <p>• Klik item untuk memilih</p>
+                <p>• Hover untuk highlight item</p>
+                <p>• Klik tombol <span class="kbd">×</span> untuk menghapus pilihan</p>
+                <p>• Klik di luar dropdown untuk menutup</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="card-danger bg-red-50 border border-red-100 rounded-lg p-4">
+            <div class="flex items-start gap-3">
+              <svg class="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+              <div>
+                <h4 class="font-bold text-red-800 text-sm">Mode Strict (Ketat)</h4>
+                <p class="text-xs text-red-700 mt-1">Semua searchable select dalam sistem beroperasi dalam mode strict. Artinya Anda <strong>harus memilih dari dropdown</strong>. Mengetik nilai yang tidak ada di daftar lalu meninggalkan kolom akan memicu animasi shake dan border merah. Nilai tidak akan tersimpan.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ATURAN PENTING -->
+      <section id="aturan" class="print-break">
+        <div class="flex items-center gap-3 mb-6">
+          <div class="w-10 h-10 bg-red-100 rounded-xl flex items-center justify-center text-red-600">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+          </div>
+          <h2 class="text-2xl font-bold text-slate-900">Aturan Penting Sistem</h2>
+        </div>
+        <div class="space-y-4">
+          <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+            <h3 class="font-bold text-slate-800 mb-3 flex items-center gap-2">
+              <span class="w-6 h-6 bg-red-100 rounded flex items-center justify-center text-red-600 text-xs font-bold">1</span>
+              Format Input Angka
+            </h3>
+            <p class="text-sm text-slate-600 ml-8">Selalu ketik <strong>angka murni</strong> (tanpa titik atau koma) saat mengisi nominal. Sistem akan otomatis memformat dengan pemisah ribuan saat Anda berpindah kolom atau menekan tombol. Contoh: ketik <span class="kbd">1500000</span> → tampil <strong>1.500.000</strong>.</p>
+          </div>
+          <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+            <h3 class="font-bold text-slate-800 mb-3 flex items-center gap-2">
+              <span class="w-6 h-6 bg-red-100 rounded flex items-center justify-center text-red-600 text-xs font-bold">2</span>
+              No Ref Auto-Generated
+            </h3>
+            <p class="text-sm text-slate-600 ml-8">Nomor referensi PO (No Ref) di-generate otomatis oleh sistem. Anda tidak perlu dan tidak bisa mengubahnya secara manual.</p>
+          </div>
+          <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+            <h3 class="font-bold text-slate-800 mb-3 flex items-center gap-2">
+              <span class="w-6 h-6 bg-red-100 rounded flex items-center justify-center text-red-600 text-xs font-bold">3</span>
+              Supplier Wajib dari Daftar
+            </h3>
+            <p class="text-sm text-slate-600 ml-8">Supplier harus dipilih dari dropdown pencarian. Jika supplier belum terdaftar, daftarkan terlebih dahulu melalui <strong>Sistem Supplier</strong> (modul terpisah). Ketik manual tanpa memilih akan ditolak sistem.</p>
+          </div>
+          <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+            <h3 class="font-bold text-slate-800 mb-3 flex items-center gap-2">
+              <span class="w-6 h-6 bg-red-100 rounded flex items-center justify-center text-red-600 text-xs font-bold">4</span>
+              PO Hanya Bisa Dibatalkan Sebelum Validasi
+            </h3>
+            <p class="text-sm text-slate-600 ml-8">PO hanya dapat dibatalkan jika statusnya masih <strong>"Butuh Validasi"</strong>. Setelah PO divalidasi, pembatalan tidak lagi tersedia. Pastikan data sudah benar sebelum validasi.</p>
+          </div>
+          <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+            <h3 class="font-bold text-slate-800 mb-3 flex items-center gap-2">
+              <span class="w-6 h-6 bg-red-100 rounded flex items-center justify-center text-red-600 text-xs font-bold">5</span>
+              Pembayaran DP & Utang
+            </h3>
+            <p class="text-sm text-slate-600 ml-8">Saat tipe pembayaran <strong>DP</strong>, nominal bayar bisa diedit dan status akan "Sebagian". Saat <strong>Utang</strong>, nominal bayar otomatis 0 dan Anda wajib mengisi tanggal jatuh tempo. Kedua status ini nantinya bisa dilunasi melalui halaman "List Belum Lunas" atau "Pelunasan Massal".</p>
+          </div>
+          <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+            <h3 class="font-bold text-slate-800 mb-3 flex items-center gap-2">
+              <span class="w-6 h-6 bg-red-100 rounded flex items-center justify-center text-red-600 text-xs font-bold">6</span>
+              Sistem Deposit Terpisah
+            </h3>
+            <p class="text-sm text-slate-600 ml-8">Supplier dengan kategori <strong>Deposit</strong> akan otomatis memaksa tipe pembayaran ke "Deposit" dan mengunci form. Proses selanjutnya dilanjutkan di <strong>Sistem Deposit</strong> (link tersedia di sidebar dan banner info).</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- FAQ -->
+      <section id="faq" class="print-break">
+        <div class="flex items-center gap-3 mb-6">
+          <div class="w-10 h-10 bg-indigo-100 rounded-xl flex items-center justify-center text-indigo-600">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+          </div>
+          <h2 class="text-2xl font-bold text-slate-900">Pertanyaan Umum (FAQ)</h2>
+        </div>
+        <div class="space-y-3" id="faq-container"></div>
+      </section>
+
+      <!-- GLOSARIUM -->
+      <section id="glosarium">
+        <div class="flex items-center gap-3 mb-6">
+          <div class="w-10 h-10 bg-slate-200 rounded-xl flex items-center justify-center text-slate-600">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+          </div>
+          <h2 class="text-2xl font-bold text-slate-900">Glosarium Istilah</h2>
+        </div>
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm text-left">
+              <thead class="bg-slate-50 text-slate-500 text-xs uppercase">
+                <tr>
+                  <th class="px-6 py-3 font-semibold w-48">Istilah</th>
+                  <th class="px-6 py-3 font-semibold">Penjelasan Singkat</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100">
+                <tr><td class="px-6 py-3 font-bold text-slate-800">PO (Purchase Order)</td><td class="px-6 py-3 text-slate-600">Surat pesanan pembelian barang dagang kepada supplier.</td></tr>
+                <tr><td class="px-6 py-3 font-bold text-slate-800">No Ref</td><td class="px-6 py-3 text-slate-600">Nomor referensi unik yang di-generate otomatis untuk setiap PO.</td></tr>
+                <tr><td class="px-6 py-3 font-bold text-slate-800">No Nota</td><td class="px-6 py-3 text-slate-600">Nomor invoice/faktur yang diberikan oleh supplier.</td></tr>
+                <tr><td class="px-6 py-3 font-bold text-slate-800">HPP</td><td class="px-6 py-3 text-slate-600">Harga Pokok Pembelian — harga standar per unit produk.</td></tr>
+                <tr><td class="px-6 py-3 font-bold text-slate-800">Lunas</td><td class="px-6 py-3 text-slate-600">Pembayaran penuh pada saat PO dibuat.</td></tr>
+                <tr><td class="px-6 py-3 font-bold text-slate-800">DP (Down Payment)</td><td class="px-6 py-3 text-slate-600">Pembayaran sebagian (uang muka) saat PO dibuat.</td></tr>
+                <tr><td class="px-6 py-3 font-bold text-slate-800">Utang</td><td class="px-6 py-3 text-slate-600">Pembelian dengan pembayaran ditangguhkan hingga jatuh tempo.</td></tr>
+                <tr><td class="px-6 py-3 font-bold text-slate-800">Jatuh Tempo</td><td class="px-6 py-3 text-slate-600">Batas akhir waktu pembayaran utang yang telah disepakati.</td></tr>
+                <tr><td class="px-6 py-3 font-bold text-slate-800">Deposit</td><td class="px-6 py-3 text-slate-600">Pembayaran menggunakan saldo deposit supplier. Ditangani terpisah melalui Sistem Deposit.</td></tr>
+                <tr><td class="px-6 py-3 font-bold text-slate-800">COA</td><td class="px-6 py-3 text-slate-600">Chart of Accounts — daftar akun keuangan (kas, bank, utang) yang digunakan dalam pencatatan jurnal.</td></tr>
+                <tr><td class="px-6 py-3 font-bold text-slate-800">Butuh Validasi</td><td class="px-6 py-3 text-slate-600">Status awal PO yang baru dibuat, menunggu konfirmasi/validasi.</td></tr>
+                <tr><td class="px-6 py-3 font-bold text-slate-800">Valid</td><td class="px-6 py-3 text-slate-600">Status PO yang sudah dikonfirmasi dan jurnal keuangan sudah dicatat.</td></tr>
+                <tr><td class="px-6 py-3 font-bold text-slate-800">Cancel</td><td class="px-6 py-3 text-slate-600">Status PO yang dibatalkan. Hanya bisa dilakukan saat status masih "Butuh Validasi".</td></tr>
+                <tr><td class="px-6 py-3 font-bold text-slate-800">Pelunasan Massal</td><td class="px-6 py-3 text-slate-600">Proses pembayaran banyak PO sekaligus dari satu supplier dalam satu kali transfer.</td></tr>
+                <tr><td class="px-6 py-3 font-bold text-slate-800">Searchable Select</td><td class="px-6 py-3 text-slate-600">Komponen input dengan dropdown yang bisa dicari (searchable). Wajib pilih dari daftar (mode strict).</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- FOOTER -->
+      <section class="pt-8 border-t border-slate-200">
+        <div class="text-center">
+          <div class="flex items-center justify-center gap-2 mb-3">
+            <div class="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center text-white">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+            </div>
+            <span class="font-bold text-slate-700">Sistem Pembelian & Keuangan</span>
+          </div>
+          <p class="text-xs text-slate-400">&copy; 2026 Produced by Tata Umkm.</p>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- BACK TO TOP -->
+  <button id="btn-back-top" onclick="scrollToTop()" class="fixed bottom-6 right-6 z-40 w-12 h-12 bg-emerald-600 text-white rounded-full shadow-lg hover:bg-emerald-700 transition-all opacity-0 translate-y-4 pointer-events-none no-print flex items-center justify-center">
+    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path></svg>
+  </button>
+
+  <script>
+    // === DATA FAQ ===
+    const faqData = [
+      { q: "Apa perbedaan tipe pembayaran Lunas, DP, Utang, dan Deposit?", a: "<strong>Lunas:</strong> Bayar penuh saat PO dibuat. Nominal otomatis = total tagihan. <strong>DP:</strong> Bayar sebagian, nominal bisa diisi manual. <strong>Utang:</strong> Belum bayar sama sekali, wajib isi tanggal jatuh tempo. <strong>Deposit:</strong> Khusus supplier berkategori Deposit, nominal otomatis dan diproses via sistem terpisah." },
+      { q: "Kenapa kolom nominal bayar tidak bisa diedit?", a: "Kolom nominal bersifat <strong>read-only</strong> untuk tipe Lunas dan Deposit karena nilainya otomatis = total tagihan. Juga read-only untuk tipe Utang karena nilainya 0. Hanya tipe <strong>DP</strong> yang memungkinkan pengisian nominal manual." },
+      { q: "Bagaimana cara membatalkan PO yang sudah salah?", a: "Buka halaman <strong>Riwayat Pembelian</strong>, klik tombol aksi (⋮) pada baris PO, lalu pilih <strong>\"Cancel\"</strong>. Batalkan hanya bisa dilakukan jika status PO masih <strong>\"Butuh Validasi\"</strong>. PO yang sudah Valid tidak dapat dibatalkan." },
+      { q: "Kenapa supplier tidak muncul di dropdown?", a: "Pastikan supplier sudah terdaftar di <strong>Sistem Supplier</strong>. Jika supplier berkategori <strong>Deposit</strong>, supplier tetap muncul di form PO tetapi tipe pembayaran akan otomatis dikunci ke Deposit." },
+      { q: "Apa yang dimaksud 'Butuh Validasi' pada PO?", a: "Setiap PO baru berstatus <strong>\"Butuh Validasi\"</strong> secara default. Ini berarti PO sudah tersimpan tetapi menunggu konfirmasi. Setelah divalidasi (oleh proses di backend/spreadsheet), status berubah menjadi <strong>\"Valid\"</strong> dan jurnal keuangan akan dicatat." },
+      { q: "Bagaimana cara melunasi utang dari banyak PO sekaligus?", a: "Gunakan halaman <strong>Pelunasan Massal</strong>. Pilih supplier → centang PO yang ingin dilunasi → nominal transfer otomatis terisi → pilih bank → klik Proses." },
+      { q: "Kenapa nominal transfer di Pelunasan Massal tidak berubah saat saya centang/uncentang?", a: "Jika Anda sudah <strong>mengedit nominal secara manual</strong>, sistem tidak akan menimpa nilai Anda. Untuk mengembalikan ke auto-fill, hapus isi kolom nominal dan centang ulang PO." },
+      { q: "Bagaimana cara mencetak nota PO?", a: "Buka <strong>Detail PO</strong> (klik No Ref di tabel riwayat), lalu klik tombol <strong>\"Cetak Nota / Unduh PDF\"</strong>. Jendela baru akan terbuka dengan format nota profesional. Pilih \"Save as PDF\" dari dialog print browser." },
+      { q: "Apakah saya bisa menambah produk baru langsung dari form PO?", a: "Ya. Klik tombol <strong>\"+ Produk Baru\"</strong> di toolbar atas daftar barang. Modal registrasi produk akan terbuka. Setelah disimpan, produk langsung tersedia di seluruh dropdown produk." },
+      { q: "Kenapa produk yang saya ketik ditolak (border merah)?", a: "Komponen pencarian beroperasi dalam <strong>mode strict</strong>. Anda harus memilih dari dropdown yang muncul. Jika produk belum ada, daftarkan terlebih dahulu dengan tombol \"+ Produk Baru\"." },
+      { q: "Apakah bisa melakukan pembayaran utang secara bertahap?", a: "Ya. Di modal pelunasan individual (dari List Belum Lunas atau Riwayat), Anda bisa memasukkan nominal lebih kecil dari sisa utang. Status akan berubah menjadi <strong>\"Sebagian\"</strong>. Lakukan pelunasan berikutnya sampai status menjadi \"Lunas\"." },
+      { q: "Di mana saya bisa melihat laporan pembelian per supplier?", a: "Buka halaman <strong>Laporan & Download</strong>, pilih jenis laporan <strong>\"Laporan Pembelian per Supplier\"</strong>, lalu pilih supplier dari dropdown filter yang muncul. Tentukan periode dan klik \"Tampilkan Laporan\"." }
+    ];
+
+    // === RENDER FAQ ===
+    function renderFAQ() {
+      const container = document.getElementById('faq-container');
+      container.innerHTML = faqData.map((item, idx) => `
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+          <button onclick="toggleFAQ(${idx})" class="w-full px-6 py-4 text-left flex items-center justify-between gap-4 hover:bg-slate-50 transition-colors">
+            <span class="font-semibold text-sm text-slate-800">${item.q}</span>
+            <svg class="w-5 h-5 text-slate-400 flex-shrink-0 transition-transform duration-200 faq-icon-${idx}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+          </button>
+          <div id="faq-answer-${idx}" class="hidden px-6 pb-5">
+            <div class="text-sm text-slate-600 leading-relaxed border-t border-slate-100 pt-4">${item.a}</div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function toggleFAQ(idx) {
+      const answer = document.getElementById(`faq-answer-${idx}`);
+      const icon = document.querySelector(`.faq-icon-${idx}`);
+      const isOpen = !answer.classList.contains('hidden');
+      // Close all
+      document.querySelectorAll('[id^="faq-answer-"]').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('[class*="faq-icon-"]').forEach(el => el.style.transform = '');
+      // Toggle current
+      if (!isOpen) { answer.classList.remove('hidden'); if (icon) icon.style.transform = 'rotate(180deg)'; }
+    }
+
+    // === TOC ACTIVE STATE ===
+    function updateActiveTOC() {
+      const sections = document.querySelectorAll('section[id]');
+      const tocLinks = document.querySelectorAll('.toc-link');
+      let currentSection = '';
+      sections.forEach(section => {
+        if (window.scrollY >= section.offsetTop - 100) currentSection = section.getAttribute('id');
+      });
+      tocLinks.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href') === '#' + currentSection) link.classList.add('active');
+      });
+    }
+
+    // === BACK TO TOP ===
+    function updateBackToTop() {
+      const btn = document.getElementById('btn-back-top');
+      if (window.scrollY > 400) {
+        btn.classList.remove('opacity-0', 'translate-y-4', 'pointer-events-none');
+        btn.classList.add('opacity-100', 'translate-y-0', 'pointer-events-auto');
+      } else {
+        btn.classList.add('opacity-0', 'translate-y-4', 'pointer-events-none');
+        btn.classList.remove('opacity-100', 'translate-y-0', 'pointer-events-auto');
+      }
+    }
+
+    function scrollToTop() { window.scrollTo({ top: 0, behavior: 'smooth' }); }
+
+    window.addEventListener('scroll', () => { updateActiveTOC(); updateBackToTop(); }, { passive: true });
+
+    // === FITUR PENCARIAN ===
+    let searchTimeout = null;
+
+    function searchTutorial(query) {
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(() => performSearch(query), 300);
+    }
+
+    function performSearch(query) {
+      const sections = document.querySelectorAll('main section[id]');
+      const tocLinks = document.querySelectorAll('.toc-link');
+      const q = query.toLowerCase().trim();
+
+      removeAllHighlights();
+
+      if (!q) {
+        sections.forEach(sec => sec.classList.remove('search-hidden'));
+        tocLinks.forEach(link => link.classList.remove('hidden'));
+        return;
+      }
+
+      sections.forEach(sec => {
+        const text = sec.textContent.toLowerCase();
+        if (text.includes(q)) {
+          sec.classList.remove('search-hidden');
+          highlightText(sec, q);
+        } else {
+          sec.classList.add('search-hidden');
+        }
+      });
+
+      tocLinks.forEach(link => {
+        const targetId = link.getAttribute('href').substring(1);
+        const targetSection = document.getElementById(targetId);
+        if (targetSection && targetSection.classList.contains('search-hidden')) {
+          link.classList.add('hidden');
+        } else {
+          link.classList.remove('hidden');
+        }
+      });
+    }
+
+    function highlightText(element, query) {
+      const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT, null, false);
+      const nodesToReplace = [];
+      while (walker.nextNode()) {
+        const node = walker.currentNode;
+        const text = node.textContent.toLowerCase();
+        if (text.includes(query) && !node.parentElement.closest('.visual-code') && node.parentElement.tagName !== 'MARK') {
+          nodesToReplace.push(node);
+        }
+      }
+      nodesToReplace.forEach(node => {
+        const text = node.textContent;
+        const regex = new RegExp(`(${escapeRegExp(query)})`, 'gi');
+        const span = document.createElement('span');
+        span.innerHTML = text.replace(regex, '<mark class="search-highlight">$1</mark>');
+        node.parentNode.replaceChild(span, node);
+      });
+    }
+
+    function removeAllHighlights() {
+      document.querySelectorAll('mark.search-highlight').forEach(mark => {
+        const parent = mark.parentNode;
+        parent.replaceChild(document.createTextNode(mark.textContent), mark);
+        parent.normalize();
+      });
+    }
+
+    function escapeRegExp(string) {
+      return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }
+
+    // === INIT ===
+    renderFAQ();
+    updateActiveTOC();
+  </script>
+</body>
+</html>
