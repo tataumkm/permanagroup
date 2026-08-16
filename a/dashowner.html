@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title>Dashboard Owner</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+  <style>
+    :root {
+      --pastel-blue: #DBEAFE;
+      --pastel-green: #D1FAE5;
+      --pastel-pink: #FCE7F3;
+      --pastel-yellow: #FEF3C7;
+      --pastel-purple: #EDE9FE;
+      --pastel-orange: #FFEDD5;
+      --pastel-red: #FEE2E2;
+      --text-dark: #1F2937;
+      --text-muted: #6B7280;
+      --border: #E5E7EB;
+    }
+    * { -webkit-tap-highlight-color: transparent; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      background: #F9FAFB;
+      color: var(--text-dark);
+      padding-bottom: 80px;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    .card { background: #fff; border-radius: 16px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+    .metric-card { transition: transform 0.15s; cursor: pointer; }
+    .metric-card:active { transform: scale(0.97); }
+    .pill { padding: 4px 10px; border-radius: 999px; font-size: 11px; font-weight: 600; }
+    .bottom-nav {
+      position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+      width: 100%; max-width: 600px; background: #fff;
+      border-top: 1px solid var(--border);
+      padding: 8px 0; display: flex; justify-content: space-around;
+      z-index: 50;
+    }
+    .nav-btn { display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 10px; color: var(--text-muted); padding: 4px 12px; background: none; border: none; cursor: pointer; }
+    .nav-btn.active { color: #3B82F6; font-weight: 600; }
+    .nav-btn .icon { font-size: 20px; }
+    .page { display: none; padding: 16px; }
+    .page.active { display: block; }
+    .back-btn { background: none; border: none; font-size: 16px; color: #3B82F6; padding: 8px 0; cursor: pointer; }
+    .filter-chip { padding: 6px 12px; border-radius: 999px; font-size: 12px; background: #fff; border: 1px solid var(--border); cursor: pointer; }
+    .filter-chip.active { background: #3B82F6; color: #fff; border-color: #3B82F6; }
+    .spinner { border: 3px solid #f3f3f3; border-top: 3px solid #3B82F6; border-radius: 50%; width: 24px; height: 24px; animation: spin 0.8s linear infinite; margin: 20px auto; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .list-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border); }
+    .list-row:last-child { border-bottom: none; }
+    .progress-bar { height: 6px; background: var(--border); border-radius: 999px; overflow: hidden; }
+    .progress-fill { height: 100%; border-radius: 999px; }
+    input[type="date"] { font-size: 14px; padding: 8px; border: 1px solid var(--border); border-radius: 8px; }
+    .toast { position: fixed; top: 16px; left: 50%; transform: translateX(-50%); background: #1F2937; color: #fff; padding: 10px 16px; border-radius: 8px; font-size: 13px; z-index: 100; opacity: 0; transition: opacity 0.3s; }
+    .toast.show { opacity: 1; }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="sticky top-0 bg-white border-b z-40 px-4 py-3 flex items-center justify-between">
+  <div>
+    <h1 id="pageTitle" class="text-base font-bold">Dashboard Owner</h1>
+    <p id="pageSubtitle" class="text-xs text-gray-500">Periode: Bulan Ini</p>
+  </div>
+  <button onclick="showFilterModal()" class="text-sm px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg font-medium">⚙ Filter</button>
+</header>
+
+<!-- ============ PAGE: OVERVIEW ============ -->
+<div id="page-overview" class="page active">
+  <div id="overviewContent">
+    <div class="spinner"></div>
+    <p class="text-center text-xs text-gray-400 mt-2">Memuat data...</p>
+  </div>
+</div>
+
+<!-- ============ PAGE: PIUTANG DETAIL ============ -->
+<div id="page-piutang" class="page">
+  <button class="back-btn" onclick="navigate('overview')">← Kembali</button>
+  <h2 class="text-lg font-bold mb-2">Detail Piutang</h2>
+  <div id="piutangContent"><div class="spinner"></div></div>
+</div>
+
+<!-- ============ PAGE: HUTANG DETAIL ============ -->
+<div id="page-hutang" class="page">
+  <button class="back-btn" onclick="navigate('overview')">← Kembali</button>
+  <h2 class="text-lg font-bold mb-2">Detail Hutang</h2>
+  <div id="hutangContent"><div class="spinner"></div></div>
+</div>
+
+<!-- ============ PAGE: STOK ============ -->
+<div id="page-stok" class="page">
+  <button class="back-btn" onclick="navigate('overview')">← Kembali</button>
+  <h2 class="text-lg font-bold mb-2">Detail Stok</h2>
+  <div id="stokContent"><div class="spinner"></div></div>
+</div>
+
+<!-- ============ PAGE: KAS ============ -->
+<div id="page-kas" class="page">
+  <button class="back-btn" onclick="navigate('overview')">← Kembali</button>
+  <h2 class="text-lg font-bold mb-2">Kas & Bank</h2>
+  <div id="kasContent"><div class="spinner"></div></div>
+</div>
+
+<!-- ============ PAGE: LAPORAN (P/L) ============ -->
+<div id="page-laporan" class="page">
+  <button class="back-btn" onclick="navigate('overview')">← Kembali</button>
+  <h2 class="text-lg font-bold mb-2">Laporan Laba Rugi</h2>
+  <div id="plContent"><div class="spinner"></div></div>
+  <div class="card mt-4">
+    <h3 class="text-sm font-semibold mb-2">Trend</h3>
+    <canvas id="trendChart" height="200"></canvas>
+  </div>
+</div>
+
+<!-- ============ BOTTOM NAV ============ -->
+<nav class="bottom-nav">
+  <button class="nav-btn active" data-page="overview" onclick="navigate('overview')">
+    <span class="icon">📊</span> Dashboard
+  </button>
+  <button class="nav-btn" data-page="piutang" onclick="navigate('piutang')">
+    <span class="icon">💰</span> Piutang
+  </button>
+  <button class="nav-btn" data-page="hutang" onclick="navigate('hutang')">
+    <span class="icon">📋</span> Hutang
+  </button>
+  <button class="nav-btn" data-page="laporan" onclick="navigate('laporan')">
+    <span class="icon">📈</span> Laporan
+  </button>
+</nav>
+
+<!-- ============ FILTER MODAL ============ -->
+<div id="filterModal" class="fixed inset-0 bg-black/40 z-50 hidden items-center justify-center" onclick="if(event.target===this)hideFilterModal()">
+  <div class="bg-white rounded-2xl p-5 m-4 w-full max-w-sm">
+    <h3 class="font-bold text-lg mb-3">Filter Periode</h3>
+    
+    <div class="flex gap-2 flex-wrap mb-3">
+      <button class="filter-chip" onclick="setQuickFilter('today', this)">Hari Ini</button>
+      <button class="filter-chip" onclick="setQuickFilter('week', this)">Minggu Ini</button>
+      <button class="filter-chip active" onclick="setQuickFilter('month', this)">Bulan Ini</button>
+      <button class="filter-chip" onclick="setQuickFilter('year', this)">Tahun Ini</button>
+      <button class="filter-chip" onclick="setQuickFilter('all', this)">Semua</button>
+    </div>
+    
+    <p class="text-xs text-gray-500 mb-1">Atau pilih manual:</p>
+    <div class="grid grid-cols-2 gap-2 mb-4">
+      <div>
+        <label class="text-xs text-gray-500">Dari</label>
+        <input type="date" id="filterStart" class="w-full">
+      </div>
+      <div>
+        <label class="text-xs text-gray-500">Sampai</label>
+        <input type="date" id="filterEnd" class="w-full">
+      </div>
+    </div>
+    
+    <div class="flex gap-2">
+      <button onclick="hideFilterModal()" class="flex-1 py-2 border rounded-lg text-sm">Batal</button>
+      <button onclick="applyFilter()" class="flex-1 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium">Terapkan</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ DETAIL MODAL (untuk klik card kecil) ============ -->
+<div id="detailModal" class="fixed inset-0 bg-black/40 z-50 hidden items-end justify-center" onclick="if(event.target===this)closeDetailModal()">
+  <div class="bg-white rounded-t-2xl w-full max-w-600 max-h-[80vh] overflow-y-auto p-4">
+    <div class="w-10 h-1 bg-gray-300 rounded-full mx-auto mb-3"></div>
+    <div id="detailModalContent"></div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+// ==========================================
+// CONFIG - ubah URL_INI ke Web App URL kamu
+// ==========================================
+const API_URL = window.location.href.includes('script.googleusercontent') 
+  ? window.location.href.split('?')[0]
+  : 'https://script.google.com/macros/s/AKfycbwQ99okiwVZRMulu4DnBlZK689Ku5449NkhtdZcMnYxtgRVyFUY4vMfJHqRjVjj4AaOIg/exec'; // ganti dengan URL deploy AppsScript
+
+let currentFilter = { start: null, end: null };
+let cache = {};
+
+// ==========================================
+// HELPERS
+// ==========================================
+function fmtIDR(n) {
+  return 'Rp ' + Number(n||0).toLocaleString('id-ID');
+}
+
+function fmtCompact(n) {
+  const abs = Math.abs(n);
+  if (abs >= 1e9) return (n/1e9).toFixed(1) + 'M';
+  if (abs >= 1e6) return (n/1e6).toFixed(1) + 'jt';
+  if (abs >= 1e3) return (n/1e3).toFixed(0) + 'rb';
+  return String(n);
+}
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+async function apiCall(action, params = {}) {
+  const url = new URL(API_URL);
+  url.searchParams.set('action', action);
+  if (params.start) url.searchParams.set('start', params.start);
+  if (params.end) url.searchParams.set('end', params.end);
+  if (params.sub) url.searchParams.set('sub', params.sub);
+  
+  try {
+    const res = await fetch(url.toString());
+    return await res.json();
+  } catch(e) {
+    console.error('API error:', e);
+    return { error: e.message };
+  }
+}
+
+// ==========================================
+// NAVIGATION
+// ==========================================
+function navigate(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  const navBtn = document.querySelector(`.nav-btn[data-page="${page}"]`);
+  if (navBtn) navBtn.classList.add('active');
+  
+  const titles = {
+    overview: ['Dashboard Owner', 'Periode: ' + getCurrentPeriodLabel()],
+    piutang: ['Detail Piutang', 'Daftar pelanggan yang masih berhutang'],
+    hutang: ['Detail Hutang', 'Daftar supplier/pabrik yang masih ditagih'],
+    stok: ['Stok & Persediaan', 'Nilai persediaan saat ini'],
+    kas: ['Kas & Bank', 'Saldo semua akun kas'],
+    laporan: ['Laporan Laba Rugi', 'Periode: ' + getCurrentPeriodLabel()]
+  };
+  const t = titles[page] || titles.overview;
+  document.getElementById('pageTitle').textContent = t[0];
+  document.getElementById('pageSubtitle').textContent = t[1];
+  
+  // Load data per page
+  if (page === 'overview') loadOverview();
+  if (page === 'piutang') loadPiutangDetail();
+  if (page === 'hutang') loadHutangDetail();
+  if (page === 'stok') loadStokDetail();
+  if (page === 'kas') loadKasDetail();
+  if (page === 'laporan') loadPL();
+}
+
+// ==========================================
+// FILTER
+// ==========================================
+function showFilterModal() {
+  document.getElementById('filterModal').classList.remove('hidden');
+  document.getElementById('filterModal').classList.add('flex');
+}
+function hideFilterModal() {
+  document.getElementById('filterModal').classList.add('hidden');
+  document.getElementById('filterModal').classList.remove('flex');
+}
+
+function setQuickFilter(type, btn) {
+  const now = new Date();
+  let start, end;
+  if (type === 'today') {
+    const d = now.toISOString().split('T')[0];
+    start = end = d;
+  } else if (type === 'week') {
+    const day = now.getDay() || 7;
+    const monday = new Date(now); monday.setDate(now.getDate() - day + 1);
+    const sunday = new Date(monday); sunday.setDate(monday.getDate() + 6);
+    start = monday.toISOString().split('T')[0];
+    end = sunday.toISOString().split('T')[0];
+  } else if (type === 'month') {
+    start = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+    end = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
+  } else if (type === 'year') {
+    start = `${now.getFullYear()}-01-01`;
+    end = `${now.getFullYear()}-12-31`;
+  } else { // all
+    start = null; end = null;
+  }
+  document.getElementById('filterStart').value = start || '';
+  document.getElementById('filterEnd').value = end || '';
+  
+  document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function applyFilter() {
+  currentFilter.start = document.getElementById('filterStart').value || null;
+  currentFilter.end = document.getElementById('filterEnd').value || null;
+  cache = {}; // clear cache
+  hideFilterModal();
+  toast('Filter diterapkan: ' + getCurrentPeriodLabel());
+  navigate('overview');
+}
+
+function getCurrentPeriodLabel() {
+  if (!currentFilter.start && !currentFilter.end) return 'Semua Waktu';
+  if (currentFilter.start === currentFilter.end) return currentFilter.start;
+  return `${currentFilter.start || 'Awal'} s/d ${currentFilter.end || 'Sekarang'}`;
+}
+
+// ==========================================
+// LOAD OVERVIEW
+// ==========================================
+async function loadOverview() {
+  const container = document.getElementById('overviewContent');
+  if (cache.overview) {
+    renderOverview(cache.overview);
+    return;
+  }
+  container.innerHTML = '<div class="spinner"></div><p class="text-center text-xs text-gray-400 mt-2">Memuat data...</p>';
+  
+  const data = await apiCall('overview', currentFilter);
+  if (data.error) {
+    container.innerHTML = `<div class="card text-center text-red-500 text-sm">Error: ${data.error}</div>`;
+    return;
+  }
+  cache.overview = data;
+  renderOverview(data);
+}
+
+function renderOverview(d) {
+  const html = `
+    <!-- PROFIT CARD (UTAMA) -->
+    <div class="card mb-3" style="background: linear-gradient(135deg, #DBEAFE, #EDE9FE);">
+      <p class="text-xs text-gray-600 font-medium">Laba Bersih (Periode)</p>
+      <p class="text-2xl font-bold text-gray-800 mt-1">${fmtIDR(d.period.profit)}</p>
+      <div class="flex gap-3 mt-2 text-xs">
+        <span class="text-green-700">↑ Revenue: ${fmtIDR(d.period.revenue)}</span>
+        <span class="text-red-700">↓ Beban: ${fmtIDR(d.period.expense)}</span>
+      </div>
+      ${d.period.margin !== undefined ? `<p class="text-xs text-gray-500 mt-1">Margin: ${d.period.margin.toFixed(1)}%</p>` : ''}
+    </div>
+
+    <!-- POSISI KEUANGAN -->
+    <p class="text-xs font-semibold text-gray-500 mb-2 mt-4 px-1">POSISI KEUANGAN</p>
+    
+    <div class="grid grid-cols-2 gap-2 mb-3">
+      <div class="card metric-card" style="background: #D1FAE5;" onclick="navigate('piutang')">
+        <p class="text-xs text-gray-600 font-medium">Total Piutang</p>
+        <p class="text-lg font-bold text-green-800">${fmtCompact(d.piutang.total)}</p>
+        <p class="text-[10px] text-gray-500">${d.piutang.breakdown.reduce((s,b)=>s+b.count,0)} pelanggan</p>
+      </div>
+      <div class="card metric-card" style="background: #FEE2E2;" onclick="navigate('hutang')">
+        <p class="text-xs text-gray-600 font-medium">Total Hutang</p>
+        <p class="text-lg font-bold text-red-800">${fmtCompact(d.hutang.total)}</p>
+        <p class="text-[10px] text-gray-500">${d.hutang.breakdown.reduce((s,b)=>s+b.count,0)} supplier</p>
+      </div>
+      <div class="card metric-card" style="background: #FEF3C7;" onclick="showDepositDetail()">
+        <p class="text-xs text-gray-600 font-medium">Deposit Supplier</p>
+        <p class="text-lg font-bold text-yellow-800">${fmtCompact(d.deposit.total)}</p>
+        <p class="text-[10px] text-gray-500">${d.deposit.count} supplier</p>
+      </div>
+      <div class="card metric-card" style="background: #FCE7F3;" onclick="showKontrakDetail()">
+        <p class="text-xs text-gray-600 font-medium">Kontrak Jaminan</p>
+        <p class="text-lg font-bold text-pink-800">${fmtCompact(d.kontrak.total)}</p>
+        <p class="text-[10px] text-gray-500">${d.kontrak.count} kontrak${d.kontrak.nearMaturity ? ` • ${d.kontrak.nearMaturity} jatuh tempo` : ''}</p>
+      </div>
+    </div>
+
+    <!-- ASET -->
+    <p class="text-xs font-semibold text-gray-500 mb-2 mt-4 px-1">ASET LANCAR</p>
+    <div class="grid grid-cols-2 gap-2 mb-3">
+      <div class="card metric-card" style="background: #DBEAFE;" onclick="navigate('kas')">
+        <p class="text-xs text-gray-600 font-medium">Kas & Bank</p>
+        <p class="text-lg font-bold text-blue-800">${fmtCompact(d.kas.total)}</p>
+        <p class="text-[10px] text-gray-500">${d.kas.accounts ? d.kas.accounts.length : 0} akun</p>
+      </div>
+      <div class="card metric-card" style="background: #FFEDD5;" onclick="navigate('stok')">
+        <p class="text-xs text-gray-600 font-medium">Nilai Stok</p>
+        <p class="text-lg font-bold text-orange-800">${fmtCompact(d.stok.totalValue)}</p>
+        <p class="text-[10px] text-gray-500">${d.stok.itemCount} item • ${d.stok.lowStock} kosong</p>
+      </div>
+    </div>
+
+    <!-- BREAKDOWN PIUTANG -->
+    <div class="card mb-3">
+      <p class="text-sm font-semibold mb-2">Rincian Piutang</p>
+      ${d.piutang.breakdown.map(b => `
+        <div class="list-row" onclick="showPiutangSub('${b.sub}')" style="cursor:pointer">
+          <div>
+            <p class="text-sm font-medium">${b.label}</p>
+            <p class="text-xs text-gray-500">${b.count} pelanggan</p>
+          </div>
+          <p class="text-sm font-bold">${fmtIDR(b.amount)}</p>
+        </div>
+      `).join('')}
+    </div>
+
+    <!-- BREAKDOWN HUTANG -->
+    <div class="card mb-3">
+      <p class="text-sm font-semibold mb-2">Rincian Hutang</p>
+      ${d.hutang.breakdown.map(b => `
+        <div class="list-row" onclick="showHutangSub('${b.sub}')" style="cursor:pointer">
+          <div>
+            <p class="text-sm font-medium">${b.label}</p>
+            <p class="text-xs text-gray-500">${b.count} supplier</p>
+          </div>
+          <p class="text-sm font-bold">${fmtIDR(b.amount)}</p>
+        </div>
+      `).join('')}
+    </div>
+
+    <!-- TOP REVENUE (Periode) -->
+    ${d.period.topRevenue && d.period.topRevenue.length ? `
+      <div class="card mb-3">
+        <p class="text-sm font-semibold mb-2">Sumber Pendapatan Teratas</p>
+        ${d.period.topRevenue.map(r => `
+          <div class="list-row">
+            <span class="text-sm">${r.name}</span>
+            <span class="text-sm font-bold text-green-700">${fmtIDR(r.amount)}</span>
+          </div>
+        `).join('')}
+      </div>
+    ` : ''}
+
+    <!-- TOP EXPENSE -->
+    ${d.period.topExpense && d.period.topExpense.length ? `
+      <div class="card mb-3">
+        <p class="text-sm font-semibold mb-2">Beban Terbesar</p>
+        ${d.period.topExpense.map(r => `
+          <div class="list-row">
+            <span class="text-sm">${r.name}</span>
+            <span class="text-sm font-bold text-red-700">${fmtIDR(r.amount)}</span>
+          </div>
+        `).join('')}
+      </div>
+    ` : ''}
+
+    <p class="text-center text-[10px] text-gray-400 mt-4">Update: ${d.asOf || '-'}</p>
+  `;
+  document.getElementById('overviewContent').innerHTML = html;
+}
+
+// ==========================================
+// PIUTANG DETAIL
+// ==========================================
+async function loadPiutangDetail() {
+  const c = document.getElementById('piutangContent');
+  c.innerHTML = '<div class="spinner"></div>';
+  const data = await apiCall('piutang', {...currentFilter});
+  if (data.error) { c.innerHTML = `<div class="card text-red-500 text-sm">Error: ${data.error}</div>`; return; }
+  
+  let html = `
+    <div class="card mb-3" style="background:#D1FAE5;">
+      <p class="text-xs text-gray-600">Total Piutang</p>
+      <p class="text-xl font-bold text-green-800">${fmtIDR((data.broker?.total||0) + (data.sales?.total||0) + (data.pos?.total||0))}</p>
+    </div>
+  `;
+  
+  const sections = [
+    { title: 'Broker (Buyer)', data: data.broker, amountKey: 'remaining', nameKey: 'name', subKey: 'code' },
+    { title: 'Sales Customer', data: data.sales, amountKey: 'piutang', nameKey: 'name', subKey: 'phone' },
+    { title: 'POS / Ecer', data: data.pos, amountKey: 'piutang', nameKey: 'name', subKey: 'phone' }
+  ];
+  
+  sections.forEach(sec => {
+    if (!sec.data || !sec.data.list || sec.data.list.length === 0) return;
+    html += `
+      <div class="card mb-3">
+        <div class="flex justify-between items-center mb-2">
+          <p class="text-sm font-semibold">${sec.title}</p>
+          <span class="pill" style="background:#D1FAE5;color:#065F46;">${sec.data.count} • ${fmtIDR(sec.data.total)}</span>
+        </div>
+        ${sec.data.list.slice(0, 20).map(item => `
+          <div class="list-row">
+            <div class="flex-1">
+              <p class="text-sm font-medium">${item[sec.nameKey] || '-'}</p>
+              <p class="text-xs text-gray-500">${item[sec.subKey] || ''} ${item.salesName ? '• Sales: '+item.salesName : ''}</p>
+              ${item.orders ? `<p class="text-[10px] text-gray-400">${item.orders} order • Total: ${fmtIDR(item.total)}</p>` : ''}
+            </div>
+            <div class="text-right">
+              <p class="text-sm font-bold text-red-700">${fmtIDR(item[sec.amountKey])}</p>
+              ${item.paid ? `<p class="text-[10px] text-gray-400">Bayar: ${fmtIDR(item.paid)}</p>` : ''}
+            </div>
+          </div>
+        `).join('')}
+        ${sec.data.list.length > 20 ? `<p class="text-center text-xs text-gray-400 mt-2">+${sec.data.list.length - 20} lainnya</p>` : ''}
+      </div>
+    `;
+  });
+  
+  c.innerHTML = html;
+}
+
+// ==========================================
+// HUTANG DETAIL
+// ==========================================
+async function loadHutangDetail() {
+  const c = document.getElementById('hutangContent');
+  c.innerHTML = '<div class="spinner"></div>';
+  const data = await apiCall('hutang', currentFilter);
+  if (data.error) { c.innerHTML = `<div class="card text-red-500 text-sm">Error: ${data.error}</div>`; return; }
+  
+  let html = `
+    <div class="card mb-3" style="background:#FEE2E2;">
+      <p class="text-xs text-gray-600">Total Hutang</p>
+      <p class="text-xl font-bold text-red-800">${fmtIDR((data.broker?.total||0) + (data.po?.total||0))}</p>
+    </div>
+  `;
+  
+  const sections = [
+    { title: 'Broker (Pabrik)', data: data.broker, amountKey: 'remaining' },
+    { title: 'Purchase Order', data: data.po, amountKey: 'sisa' }
+  ];
+  
+  sections.forEach(sec => {
+    if (!sec.data || !sec.data.list || sec.data.list.length === 0) return;
+    html += `
+      <div class="card mb-3">
+        <div class="flex justify-between items-center mb-2">
+          <p class="text-sm font-semibold">${sec.title}</p>
+          <span class="pill" style="background:#FEE2E2;color:#991B1B;">${sec.data.count} • ${fmtIDR(sec.data.total)}</span>
+        </div>
+        ${sec.data.list.slice(0, 20).map(item => `
+          <div class="list-row">
+            <div class="flex-1">
+              <p class="text-sm font-medium">${item.name || '-'}</p>
+              ${item.code ? `<p class="text-xs text-gray-500">${item.code}</p>` : ''}
+              ${item.orders ? `<p class="text-[10px] text-gray-400">${item.orders} order • Total: ${fmtIDR(item.total)}</p>` : ''}
+            </div>
+            <div class="text-right">
+              <p class="text-sm font-bold text-red-700">${fmtIDR(item[sec.amountKey])}</p>
+              ${item.paid ? `<p class="text-[10px] text-gray-400">Bayar: ${fmtIDR(item.paid)}</p>` : ''}
+            </div>
+          </div>
+        `).join('')}
+        ${sec.data.list.length > 20 ? `<p class="text-center text-xs text-gray-400 mt-2">+${sec.data.list.length - 20} lainnya</p>` : ''}
+      </div>
+    `;
+  });
+  
+  c.innerHTML = html;
+}
+
+// ==========================================
+// STOK DETAIL
+// ==========================================
+async function loadStokDetail() {
+  const c = document.getElementById('stokContent');
+  c.innerHTML = '<div class="spinner"></div>';
+  const data = await apiCall('stok', currentFilter);
+  if (data.error) { c.innerHTML = `<div class="card text-red-500 text-sm">Error: ${data.error}</div>`; return; }
+  
+  let html = `
+    <div class="card mb-3" style="background:#FFEDD5;">
+      <div class="grid grid-cols-3 gap-2 text-center">
+        <div>
+          <p class="text-xs text-gray-600">Total Nilai</p>
+          <p class="text-base font-bold text-orange-800">${fmtCompact(data.totalValue)}</p>
+        </div>
+        <div>
+          <p class="text-xs text-gray-600">Total Qty</p>
+          <p class="text-base font-bold text-orange-800">${data.totalQty.toLocaleString('id-ID')}</p>
+        </div>
+        <div>
+          <p class="text-xs text-gray-600">Item Kosong</p>
+          <p class="text-base font-bold text-red-600">${data.lowStock}</p>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  if (data.list && data.list.length > 0) {
+    html += `<div class="card">
+      <p class="text-sm font-semibold mb-2">Top 20 Stok (by Value)</p>
+      ${data.list.slice(0, 20).map(item => `
+        <div class="list-row">
+          <div class="flex-1">
+            <p class="text-sm font-medium">${item.name}</p>
+            <p class="text-xs text-gray-500">${item.code} • HPP: ${fmtIDR(item.hpp)}</p>
+          </div>
+          <div class="text-right">
+            <p class="text-sm font-bold ${item.stock <= 0 ? 'text-red-600' : 'text-gray-800'}">${item.stock} unit</p>
+            <p class="text-xs text-gray-500">${fmtIDR(item.value)}</p>
+          </div>
+        </div>
+      `).join('')}
+    </div>`;
+  }
+  
+  c.innerHTML = html;
+}
+
+// ==========================================
+// KAS DETAIL
+// ==========================================
+async function loadKasDetail() {
+  const c = document.getElementById('kasContent');
+  c.innerHTML = '<div class="spinner"></div>';
+  const data = await apiCall('kas', currentFilter);
+  if (data.error) { c.innerHTML = `<div class="card text-red-500 text-sm">Error: ${data.error}</div>`; return; }
+  
+  let html = `
+    <div class="card mb-3" style="background:#DBEAFE;">
+      <p class="text-xs text-gray-600">Total Kas & Bank</p>
+      <p class="text-xl font-bold text-blue-800">${fmtIDR(data.total)}</p>
+    </div>
+    <div class="card">
+      <p class="text-sm font-semibold mb-2">Rincian per Akun</p>
+      ${(data.accounts || []).map(acc => `
+        <div class="list-row">
+          <div>
+            <p class="text-sm font-medium">${acc.name}</p>
+            <p class="text-xs text-gray-500">${acc.code}</p>
+          </div>
+          <p class="text-sm font-bold ${acc.balance < 0 ? 'text-red-600' : 'text-gray-800'}">${fmtIDR(acc.balance)}</p>
+        </div>
+      `).join('')}
+    </div>
+  `;
+  c.innerHTML = html;
+}
+
+// ==========================================
+// PROFIT/LOSS + TREND CHART
+// ==========================================
+let trendChartInstance = null;
+async function loadPL() {
+  const c = document.getElementById('plContent');
+  c.innerHTML = '<div class="spinner"></div>';
+  const [pl, trend] = await Promise.all([
+    apiCall('pl', currentFilter),
+    apiCall('trend', currentFilter)
+  ]);
+  
+  if (pl.error) { c.innerHTML = `<div class="card text-red-500 text-sm">Error: ${pl.error}</div>`; return; }
+  
+  c.innerHTML = `
+    <div class="card mb-3" style="background: linear-gradient(135deg, #DBEAFE, #D1FAE5);">
+      <p class="text-xs text-gray-600">Laba Bersih Periode</p>
+      <p class="text-2xl font-bold ${pl.profit >= 0 ? 'text-green-700' : 'text-red-700'}">${fmtIDR(pl.profit)}</p>
+      ${pl.margin !== undefined ? `<p class="text-xs text-gray-500 mt-1">Margin: ${pl.margin.toFixed(2)}%</p>` : ''}
+    </div>
+    <div class="grid grid-cols-2 gap-2 mb-3">
+      <div class="card" style="background:#D1FAE5;">
+        <p class="text-xs text-gray-600">Revenue</p>
+        <p class="text-lg font-bold text-green-800">${fmtCompact(pl.revenue)}</p>
+      </div>
+      <div class="card" style="background:#FEE2E2;">
+        <p class="text-xs text-gray-600">Beban</p>
+        <p class="text-lg font-bold text-red-800">${fmtCompact(pl.expense)}</p>
+      </div>
+    </div>
+    ${pl.cogs ? `<div class="card mb-2"><div class="flex justify-between"><span class="text-sm">HPP (COGS)</span><span class="text-sm font-bold">${fmtIDR(pl.cogs)}</span></div></div>` : ''}
+    ${pl.topRevenue && pl.topRevenue.length ? `
+      <div class="card mb-3">
+        <p class="text-sm font-semibold mb-2">Sumber Pendapatan</p>
+        ${pl.topRevenue.map(r => `<div class="list-row"><span class="text-sm">${r.name}</span><span class="text-sm font-bold text-green-700">${fmtIDR(r.amount)}</span></div>`).join('')}
+      </div>
+    ` : ''}
+    ${pl.topExpense && pl.topExpense.length ? `
+      <div class="card mb-3">
+        <p class="text-sm font-semibold mb-2">Beban Terbesar</p>
+        ${pl.topExpense.map(r => `<div class="list-row"><span class="text-sm">${r.name}</span><span class="text-sm font-bold text-red-700">${fmtIDR(r.amount)}</span></div>`).join('')}
+      </div>
+    ` : ''}
+  `;
+  
+  // Render trend chart
+  if (trend && trend.labels && trend.labels.length > 0) {
+    const ctx = document.getElementById('trendChart').getContext('2d');
+    if (trendChartInstance) trendChartInstance.destroy();
+    trendChartInstance = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: trend.labels.map(l => {
+          const p = l.split('-');
+          return trend.isMonthly ? `${['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'][parseInt(p[1])-1]} ${p[0]}` : `${p[2]}/${p[1]}`;
+        }),
+        datasets: [
+          { label: 'Revenue', data: trend.revenue, borderColor: '#10B981', backgroundColor: 'rgba(16,185,129,0.1)', tension: 0.3, fill: true },
+          { label: 'Beban', data: trend.expense, borderColor: '#EF4444', backgroundColor: 'rgba(239,68,68,0.1)', tension: 0.3, fill: true },
+          { label: 'Laba', data: trend.profit, borderColor: '#3B82F6', backgroundColor: 'rgba(59,130,246,0.1)', tension: 0.3, fill: true }
+        ]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } } },
+        scales: { x: { ticks: { font: { size: 9 }, maxRotation: 45 } }, y: { ticks: { font: { size: 9 }, callback: v => fmtCompact(v) } } }
+      }
+    });
+  }
+}
+
+// ==========================================
+// MODAL HELPERS
+// ==========================================
+function showDetailModal(title, contentHtml) {
+  document.getElementById('detailModalContent').innerHTML = `<h3 class="font-bold text-base mb-2">${title}</h3>${contentHtml}`;
+  document.getElementById('detailModal').classList.remove('hidden');
+  document.getElementById('detailModal').classList.add('flex');
+}
+function closeDetailModal() {
+  document.getElementById('detailModal').classList.add('hidden');
+  document.getElementById('detailModal').classList.remove('flex');
+}
+
+async function showDepositDetail() {
+  showDetailModal('Detail Deposit Supplier', '<div class="spinner"></div>');
+  const data = await apiCall('deposit');
+  if (data.error) { showDetailModal('Detail Deposit', `<p class="text-red-500 text-sm">${data.error}</p>`); return; }
+  
+  let html = `<p class="text-sm mb-2">Total: <b>${fmtIDR(data.total)}</b> • ${data.count} supplier</p>`;
+  (data.list || []).slice(0, 30).forEach(d => {
+    html += `<div class="list-row">
+      <div><p class="text-sm font-medium">${d.name}</p><p class="text-xs text-gray-500">${d.code}</p></div>
+      <p class="text-sm font-bold ${d.balance < 0 ? 'text-red-600' : 'text-green-700'}">${fmtIDR(d.balance)}</p>
+    </div>`;
+  });
+  showDetailModal('Detail Deposit Supplier', html);
+}
+
+async function showKontrakDetail() {
+  showDetailModal('Detail Kontrak Jaminan', '<div class="spinner"></div>');
+  const data = await apiCall('kontrak');
+  if (data.error) { showDetailModal('Detail Kontrak', `<p class="text-red-500 text-sm">${data.error}</p>`); return; }
+  
+  let html = `<p class="text-sm mb-2">Total: <b>${fmtIDR(data.total)}</b> • ${data.count} kontrak • ${data.nearMaturity} jatuh tempo ≤ 7 hari</p>`;
+  (data.list || []).slice(0, 30).forEach(k => {
+    html += `<div class="list-row">
+      <div class="flex-1">
+        <p class="text-sm font-medium">${k.supplierName}</p>
+        <p class="text-xs text-gray-500">${k.category} • ${k.code}</p>
+        ${k.dueDate ? `<p class="text-[10px] ${k.nearMaturity ? 'text-red-600 font-semibold' : 'text-gray-400'}">Jatuh tempo: ${k.dueDate}</p>` : '<p class="text-[10px] text-gray-400">Unlimited</p>'}
+      </div>
+      <p class="text-sm font-bold">${fmtIDR(k.nominal)}</p>
+    </div>`;
+  });
+  showDetailModal('Detail Kontrak Jaminan', html);
+}
+
+async function showPiutangSub(sub) {
+  showDetailModal('Rincian Piutang', '<div class="spinner"></div>');
+  const data = await apiCall('piutang', {...currentFilter, sub});
+  const labelMap = { broker: 'Broker (Buyer)', sales: 'Sales Customer', pos: 'POS / Ecer' };
+  let html = `<p class="text-sm mb-2">${labelMap[sub] || ''}</p>`;
+  const sec = data;
+  if (sec && sec.list) {
+    sec.list.slice(0, 30).forEach(item => {
+      const amt = sub === 'broker' ? item.remaining : item.piutang;
+      html += `<div class="list-row">
+        <div><p class="text-sm font-medium">${item.name || '-'}</p><p class="text-xs text-gray-500">${item.code || item.phone || ''}</p></div>
+        <p class="text-sm font-bold text-red-700">${fmtIDR(amt)}</p>
+      </div>`;
+    });
+  }
+  showDetailModal('Rincian Piutang', html);
+}
+
+async function showHutangSub(sub) {
+  showDetailModal('Rincian Hutang', '<div class="spinner"></div>');
+  const data = await apiCall('hutang', {...currentFilter, sub});
+  const labelMap = { broker: 'Broker (Pabrik)', po: 'Purchase Order' };
+  let html = `<p class="text-sm mb-2">${labelMap[sub] || ''}</p>`;
+  if (data && data.list) {
+    data.list.slice(0, 30).forEach(item => {
+      const amt = sub === 'broker' ? item.remaining : item.sisa;
+      html += `<div class="list-row">
+        <div><p class="text-sm font-medium">${item.name || '-'}</p><p class="text-xs text-gray-500">${item.code || ''}</p></div>
+        <p class="text-sm font-bold text-red-700">${fmtIDR(amt)}</p>
+      </div>`;
+    });
+  }
+  showDetailModal('Rincian Hutang', html);
+}
+
+// ==========================================
+// INIT
+// ==========================================
+window.addEventListener('load', () => {
+  // Default filter: bulan ini
+  const now = new Date();
+  const start = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+  const end = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
+  currentFilter = { start, end };
+  document.getElementById('filterStart').value = start;
+  document.getElementById('filterEnd').value = end;
+  
+  loadOverview();
+});
+
+// Pull to refresh
+let touchStartY = 0;
+document.addEventListener('touchstart', e => { touchStartY = e.touches[0].clientY; });
+document.addEventListener('touchmove', e => {
+  const scrollY = window.scrollY;
+  if (scrollY === 0 && e.touches[0].clientY - touchStartY > 100) {
+    cache = {};
+    navigate('overview');
+    toast('Data diperbarui');
+  }
+});
+</script>
+
+</body>
+</html>
