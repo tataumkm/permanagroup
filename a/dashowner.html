@@ -111,8 +111,11 @@
   <h2 class="text-lg font-bold mb-2">Laporan Laba Rugi</h2>
   <div id="plContent"><div class="spinner"></div></div>
   <div class="card mt-4">
-    <h3 class="text-sm font-semibold mb-2">Trend</h3>
-    <canvas id="trendChart" height="200"></canvas>
+  <h3 class="text-sm font-semibold mb-2">Trend</h3>
+    <!-- Wrapper dengan position: relative dan tinggi tetap (h-48 = 192px, atau h-64 = 256px) -->
+    <div class="relative h-48 w-full">
+      <canvas id="trendChart"></canvas>
+    </div>
   </div>
 </div>
 
