@@ -6,6 +6,8 @@
   <title>Dashboard Owner</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+  <link rel="preconnect" href="https://script.google.com">
+  <link rel="dns-prefetch" href="https://script.google.com">
   <style>
     :root {
       --pastel-blue: #DBEAFE;
@@ -27,13 +29,24 @@
       padding-bottom: 80px;
       max-width: 600px;
       margin: 0 auto;
+      text-align: left;
+      overflow-x: hidden;
+      -webkit-text-size-adjust: 100%;
     }
     .card { background: #fff; border-radius: 16px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+    @media (min-width: 768px) {
+      body { max-width: 1000px; }
+      .bottom-nav { max-width: 1000px; }
+      .page { padding: 24px; }
+      .desktop-grid-4 { grid-template-columns: repeat(4, 1fr) !important; }
+      .desktop-grid-2 { grid-template-columns: repeat(2, 1fr) !important; }
+    }
     .metric-card { transition: transform 0.15s; cursor: pointer; }
     .metric-card:active { transform: scale(0.97); }
     .pill { padding: 4px 10px; border-radius: 999px; font-size: 11px; font-weight: 600; }
     .bottom-nav {
-      position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+      position: fixed; bottom: 0; left: 0; right: 0;
+      margin: 0 auto;
       width: 100%; max-width: 600px; background: #fff;
       border-top: 1px solid var(--border);
       padding: 8px 0; display: flex; justify-content: space-around;
@@ -56,6 +69,11 @@
     input[type="date"] { font-size: 14px; padding: 8px; border: 1px solid var(--border); border-radius: 8px; }
     .toast { position: fixed; top: 16px; left: 50%; transform: translateX(-50%); background: #1F2937; color: #fff; padding: 10px 16px; border-radius: 8px; font-size: 13px; z-index: 100; opacity: 0; transition: opacity 0.3s; }
     .toast.show { opacity: 1; }
+    .skeleton { background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 8px; }
+    .skeleton-line { height: 12px; margin-bottom: 8px; }
+    .skeleton-block { height: 80px; margin-bottom: 12px; }
+    @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+    .card { text-align: left; }
   </style>
 </head>
 <body>
@@ -247,6 +265,26 @@ async function fetchPage(cacheKey, action, extraParams = {}) {
 }
 
 // ==========================================
+// PREFETCH + STALE-WHILE-REVALIDATE
+// ==========================================
+function prefetchPage(page) {
+  const action = page === 'laporan' ? 'report' : page;
+  const key = page === 'laporan' ? 'report' : page;
+  if (cache[key]) return;
+  apiCall(action, currentFilter).then(d => { if (!d.error) cache[key] = d; }).catch(() => {});
+}
+
+function backgroundRefresh(cacheKey, action, renderFn) {
+  apiCall(action, { ...currentFilter, refresh: '1' }).then(data => {
+    if (!data.error) {
+      cache[cacheKey] = data;
+      const activeKey = currentPageName === 'laporan' ? 'report' : currentPageName;
+      if (activeKey === cacheKey) renderFn(data);
+    }
+  }).catch(() => {});
+}
+
+// ==========================================
 // NAVIGATION
 // ==========================================
 function navigate(page) {
@@ -339,6 +377,7 @@ async function loadOverview() {
   const container = document.getElementById('overviewContent');
   if (!forceRefreshFlag && cache.overview) {
     renderOverview(cache.overview);
+    setTimeout(() => ['piutang', 'hutang', 'laporan'].forEach(prefetchPage), 1500);
     return;
   }
   container.innerHTML = '<div class="spinner"></div><p class="text-center text-xs text-gray-400 mt-2">Memuat data...</p>';
@@ -349,6 +388,7 @@ async function loadOverview() {
     return;
   }
   renderOverview(data);
+  setTimeout(() => ['piutang', 'hutang', 'laporan'].forEach(prefetchPage), 1500);
 }
 
 function renderOverview(d) {
@@ -357,7 +397,7 @@ function renderOverview(d) {
     <div class="card mb-3" style="background: linear-gradient(135deg, #DBEAFE, #EDE9FE);">
       <p class="text-xs text-gray-600 font-medium">Laba Bersih (Periode)</p>
       <p class="text-2xl font-bold text-gray-800 mt-1">${fmtIDR(d.period.profit)}</p>
-      <div class="flex gap-3 mt-2 text-xs">
+      <div class="flex flex-wrap gap-2 mt-2 text-xs">
         <span class="text-green-700">↑ Revenue: ${fmtIDR(d.period.revenue)}</span>
         <span class="text-red-700">↓ Beban: ${fmtIDR(d.period.expense)}</span>
       </div>
@@ -366,7 +406,7 @@ function renderOverview(d) {
 
     <p class="text-xs font-semibold text-gray-500 mb-2 mt-4 px-1">POSISI KEUANGAN</p>
 
-    <div class="grid grid-cols-2 gap-2 mb-3">
+    <div class="grid grid-cols-2 desktop-grid-4 gap-2 mb-3">
       <div class="card metric-card" style="background: #D1FAE5;" onclick="navigate('piutang')">
         <p class="text-xs text-gray-600 font-medium">Total Piutang</p>
         <p class="text-lg font-bold text-green-800">${fmtCompact(d.piutang.total)}</p>
@@ -390,11 +430,11 @@ function renderOverview(d) {
     </div>
 
     <p class="text-xs font-semibold text-gray-500 mb-2 mt-4 px-1">ASET LANCAR</p>
-    <div class="grid grid-cols-2 gap-2 mb-3">
+    <div class="grid grid-cols-2 desktop-grid-2 gap-2 mb-3">
       <div class="card metric-card" style="background: #DBEAFE;" onclick="navigate('kas')">
         <p class="text-xs text-gray-600 font-medium">Kas & Bank</p>
         <p class="text-lg font-bold text-blue-800">${fmtCompact(d.kas.total)}</p>
-        <p class="text-[10px] text-gray-500">${d.kas.accounts ? d.kas.accounts.length : 0} akun</p>
+        <p class="text-[10px] text-gray-500">${d.kas.accountCount || 0} akun</p>
       </div>
       <div class="card metric-card" style="background: #FFEDD5;" onclick="navigate('stok')">
         <p class="text-xs text-gray-600 font-medium">Nilai Stok</p>
@@ -463,7 +503,11 @@ function renderOverview(d) {
 // ==========================================
 async function loadPiutangDetail() {
   const c = document.getElementById('piutangContent');
-  if (!forceRefreshFlag && cache.piutang) { renderPiutang(cache.piutang); return; }
+  if (!forceRefreshFlag && cache.piutang) {
+    renderPiutang(cache.piutang);
+    backgroundRefresh('piutang', 'piutang', renderPiutang);
+    return;
+  }
   c.innerHTML = '<div class="spinner"></div>';
   const data = await fetchPage('piutang', 'piutang');
   if (data.error) { c.innerHTML = `<div class="card text-red-500 text-sm">Error: ${data.error}</div>`; return; }
@@ -519,7 +563,11 @@ function renderPiutang(data) {
 // ==========================================
 async function loadHutangDetail() {
   const c = document.getElementById('hutangContent');
-  if (!forceRefreshFlag && cache.hutang) { renderHutang(cache.hutang); return; }
+  if (!forceRefreshFlag && cache.hutang) {
+    renderHutang(cache.hutang);
+    backgroundRefresh('hutang', 'hutang', renderHutang);
+    return;
+  }
   c.innerHTML = '<div class="spinner"></div>';
   const data = await fetchPage('hutang', 'hutang');
   if (data.error) { c.innerHTML = `<div class="card text-red-500 text-sm">Error: ${data.error}</div>`; return; }
@@ -574,7 +622,11 @@ function renderHutang(data) {
 // ==========================================
 async function loadStokDetail() {
   const c = document.getElementById('stokContent');
-  if (!forceRefreshFlag && cache.stok) { renderStok(cache.stok); return; }
+  if (!forceRefreshFlag && cache.stok) {
+    renderStok(cache.stok);
+    backgroundRefresh('stok', 'stok', renderStok);
+    return;
+  }
   c.innerHTML = '<div class="spinner"></div>';
   const data = await fetchPage('stok', 'stok');
   if (data.error) { c.innerHTML = `<div class="card text-red-500 text-sm">Error: ${data.error}</div>`; return; }
@@ -628,7 +680,11 @@ function renderStok(data) {
 // ==========================================
 async function loadKasDetail() {
   const c = document.getElementById('kasContent');
-  if (!forceRefreshFlag && cache.kas) { renderKas(cache.kas); return; }
+  if (!forceRefreshFlag && cache.kas) {
+    renderKas(cache.kas);
+    backgroundRefresh('kas', 'kas', renderKas);
+    return;
+  }
   c.innerHTML = '<div class="spinner"></div>';
   const data = await fetchPage('kas', 'kas');
   if (data.error) { c.innerHTML = `<div class="card text-red-500 text-sm">Error: ${data.error}</div>`; return; }
@@ -665,7 +721,11 @@ function renderKas(data) {
 let trendChartInstance = null;
 async function loadPL() {
   const c = document.getElementById('plContent');
-  if (!forceRefreshFlag && cache.report) { renderPL(cache.report); return; }
+  if (!forceRefreshFlag && cache.report) {
+    renderPL(cache.report);
+    backgroundRefresh('report', 'report', renderPL);
+    return;
+  }
   c.innerHTML = '<div class="spinner"></div>';
   const data = await fetchPage('report', 'report');
   if (data.pl && data.pl.error) { c.innerHTML = `<div class="card text-red-500 text-sm">Error: ${data.pl.error}</div>`; return; }
@@ -683,7 +743,7 @@ function renderPL(data) {
       <p class="text-2xl font-bold ${pl.profit >= 0 ? 'text-green-700' : 'text-red-700'}">${fmtIDR(pl.profit)}</p>
       ${pl.margin !== undefined ? `<p class="text-xs text-gray-500 mt-1">Margin: ${pl.margin.toFixed(2)}%</p>` : ''}
     </div>
-    <div class="grid grid-cols-2 gap-2 mb-3">
+    <div class="grid grid-cols-2 desktop-grid-4 gap-2 mb-3">
       <div class="card" style="background:#D1FAE5;">
         <p class="text-xs text-gray-600">Revenue</p>
         <p class="text-lg font-bold text-green-800">${fmtCompact(pl.revenue)}</p>
