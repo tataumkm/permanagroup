@@ -429,6 +429,7 @@ function calcPLAndTrend(startDate, endDate) {
     const useMonthly = rangeDays > 90;
 
     let revenue = 0, expense = 0, cogs = 0;
+    let segDRev = 0, segDCogs = 0, segBRev = 0, segBCosts = 0;
     const revenueByAcc = {}, expenseByAcc = {};
     const trendMap = {};
 
@@ -452,8 +453,8 @@ function calcPLAndTrend(startDate, endDate) {
       const grandTotal = Number(r[8]) || 0;
       const totalHpp = Number(r[9]) || 0;
 
-      if (grandTotal > 0) addRev('Pendapatan Penjualan POS', grandTotal);
-      if (totalHpp > 0) { addExp('HPP Penjualan POS', totalHpp); cogs += totalHpp; }
+      if (grandTotal > 0) { addRev('Pendapatan Penjualan POS', grandTotal); segDRev += grandTotal; }
+      if (totalHpp > 0) { addExp('HPP Penjualan POS', totalHpp); cogs += totalHpp; segDCogs += totalHpp; }
       addTrend(r[1], grandTotal, totalHpp);
     });
 
@@ -468,8 +469,8 @@ function calcPLAndTrend(startDate, endDate) {
       if (dt < start || dt > end) return;
       const rev = (Number(r[4]) || 0) + (Number(r[6]) || 0) + (Number(r[7]) || 0);
       const hpp = dMap[r[0]] || (Number(r[9]) || 0);
-      addRev('Pendapatan Penjualan Sales', rev);
-      if (hpp > 0) { addExp('HPP Penjualan Sales', hpp); cogs += hpp; }
+      if (rev > 0) { addRev('Pendapatan Penjualan Sales', rev); segDRev += rev; }
+      if (hpp > 0) { addExp('HPP Penjualan Sales', hpp); cogs += hpp; segDCogs += hpp; }
       addTrend(r[1], rev, hpp);
     });
 
@@ -480,8 +481,8 @@ function calcPLAndTrend(startDate, endDate) {
       if (dt < start || dt > end) return;
       const rev = (Number(r[6]) || 0) + (Number(r[10]) || 0) + (Number(r[14]) || 0) + (Number(r[17]) || 0);
       const exp = (Number(r[7]) || 0) + (Number(r[9]) || 0) + (Number(r[13]) || 0) + (Number(r[16]) || 0);
-      if (rev > 0) addRev('Pendapatan Broker', rev);
-      if (exp > 0) { addExp('HPP & Beban Broker', exp); cogs += (Number(r[7]) || 0); }
+      if (rev > 0) { addRev('Pendapatan Broker', rev); segBRev += rev; }
+      if (exp > 0) { addExp('HPP & Beban Broker', exp); cogs += (Number(r[7]) || 0); segBCosts += exp; }
       addTrend(r[2], rev, exp);
     });
 
@@ -520,10 +521,18 @@ function calcPLAndTrend(startDate, endDate) {
     const profit = revenue - expense;
     const margin = revenue > 0 ? (profit / revenue) * 100 : 0;
     const trendKeys = Object.keys(trendMap).sort();
+    const overhead = Math.max(0, expense - segDCogs - segBCosts);
+    const otherRevenue = Math.max(0, revenue - segDRev - segBRev);
 
     return {
       pl: {
         revenue, expense, cogs, profit, margin,
+        segments: {
+          direct: { revenue: segDRev, costs: segDCogs },
+          broker: { revenue: segBRev, costs: segBCosts },
+          otherRevenue,
+          overhead
+        },
         topRevenue: Object.entries(revenueByAcc).map(([k, v]) => ({ name: k, amount: v })).sort((a, b) => b.amount - a.amount).slice(0, 5),
         topExpense: Object.entries(expenseByAcc).map(([k, v]) => ({ name: k, amount: v })).sort((a, b) => b.amount - a.amount).slice(0, 5),
         filter: { start: startDate, end: endDate }
