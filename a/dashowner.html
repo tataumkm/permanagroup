@@ -2,7 +2,9 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"><meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>Dashboard Owner — Permana Group</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
@@ -52,6 +54,7 @@
       background:linear-gradient(155deg,#0b1426 0%,#14203a 55%,#1b2c4d 100%);
       color:#fff;
       padding:16px 18px 22px;
+      padding-top:calc(14px + env(safe-area-inset-top,0px));
       position:sticky;top:0;z-index:45;
       position:relative;overflow:hidden;
     }
