@@ -2,9 +2,7 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"><meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
   <title>Dashboard Owner — Permana Group</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
@@ -54,7 +52,6 @@
       background:linear-gradient(155deg,#0b1426 0%,#14203a 55%,#1b2c4d 100%);
       color:#fff;
       padding:16px 18px 22px;
-      padding-top:calc(14px + env(safe-area-inset-top,0px));
       position:sticky;top:0;z-index:45;
       position:relative;overflow:hidden;
     }
@@ -195,6 +192,10 @@
     .m-label{font-size:10.5px;font-weight:600;color:var(--ink3);text-transform:uppercase;letter-spacing:.5px}
     .m-value{font-size:17px;font-weight:800;letter-spacing:-.3px;margin-top:3px}
     .m-sub{font-size:11px;color:var(--ink3);margin-top:2px}
+    .m-split{display:flex;gap:10px;margin-top:3px}
+    .m-split-item{flex:1;min-width:0}
+    .m-split-value{font-size:15px;font-weight:800;letter-spacing:-.3px;white-space:nowrap}
+    .m-split-label{font-size:10.5px;color:var(--ink3);margin-top:1px}
 
     .t-green{color:var(--green)}.t-red{color:var(--red)}.t-amber{color:var(--amber)}.t-blue{color:var(--blue)}.t-orange{color:var(--orange)}
     .bg-tint-green{background:var(--green-bg);color:var(--green)}
@@ -280,6 +281,12 @@
       transition:border-color .15s;
     }
     input[type="date"]:focus{border-color:var(--brand)}
+    select.filter-select{
+      font-family:inherit;font-size:13px;color:var(--ink);background:#fff;
+      border:1.5px solid var(--border);border-radius:10px;padding:10px;
+      width:100%;min-height:39px;outline:none;transition:border-color .15s;
+    }
+    select.filter-select:focus{border-color:var(--brand)}
     .field-label{font-size:11.5px;font-weight:600;color:var(--ink2);display:block;margin-bottom:5px}
 
     /* ─────────────── TOAST / SKELETON / SPINNER ─────────────── */
@@ -350,7 +357,7 @@
     <button class="side-btn" data-page="piutang" onclick="navigate('piutang')"><i class="ph-fill ph-coins"></i> Piutang</button>
     <button class="side-btn" data-page="hutang" onclick="navigate('hutang')"><i class="ph-fill ph-receipt"></i> Hutang</button>
     <p class="side-label" style="display:none"></p>
-    <button class="side-btn" data-page="stok" onclick="navigate('stok')"><i class="ph-fill ph-package"></i> Stok</button>
+    <button class="side-btn" data-page="stok" onclick="navigate('stok')"><i class="ph-fill ph-archive"></i> Stok</button>
     <button class="side-btn" data-page="kas" onclick="navigate('kas')"><i class="ph-fill ph-bank"></i> Kas &amp; Bank</button>
     <button class="side-btn" data-page="laporan" onclick="navigate('laporan')"><i class="ph-fill ph-chart-line"></i> Laporan</button>
   </nav>
@@ -377,10 +384,7 @@
           <div class="brand-sub">Owner Dashboard</div>
         </div>
       </div>
-      <div style="display:flex;gap:8px;">
-        <button class="btn-filter" onclick="window.location.href='../index.html'" title="Kembali ke Menu Utama"><i class="ph-fill ph-house"></i></button>
-        <button class="btn-filter" onclick="showFilterModal()"><i class="ph-fill ph-sliders-horizontal"></i> Filter</button>
-      </div>
+      <button class="btn-filter" onclick="showFilterModal()"><i class="ph-fill ph-sliders-horizontal"></i> Filter</button>
     </div>
     <h1 class="hero-title" id="pageTitle">Dashboard</h1>
     <p class="hero-sub" id="pageSubtitle">Periode: Bulan Ini</p>
@@ -396,10 +400,7 @@
           <p id="pageSubtitleD">Periode Bulan Ini</p>
         </div>
       </div>
-      <div style="display:flex;gap:8px;">
-        <button class="btn-filter-solid" onclick="window.location.href='../index.html'" title="Kembali ke Menu Utama"><i class="ph-fill ph-house"></i></button>
-        <button class="btn-filter-solid" onclick="showFilterModal()"><i class="ph-fill ph-sliders-horizontal"></i> Filter Periode</button>
-      </div>
+      <button class="btn-filter-solid" onclick="showFilterModal()"><i class="ph-fill ph-sliders-horizontal"></i> Filter Periode</button>
     </div>
   </header>
 
@@ -455,6 +456,15 @@
     <div class="handle"></div>
     <h3 class="sheet-title">Filter Periode</h3>
 
+    <p class="field-label">PILIH BULAN</p>
+    <select id="filterMonth" class="filter-select" onchange="setMonthFilter(this.value)">
+      <option value="">Pilih bulan…</option>
+    </select>
+    <p style="font-size:11px;color:var(--ink3);margin:6px 0 16px;line-height:1.45">
+      Pilih bulan untuk otomatis mengisi tanggal 1 sampai akhir bulan.
+    </p>
+
+    <p class="field-label">ATAU FILTER CEPAT</p>
     <div class="flex gap-2 flex-wrap mb-4" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">
       <button class="chip" onclick="setQuickFilter('today', this)">Hari Ini</button>
       <button class="chip" onclick="setQuickFilter('week', this)">Minggu Ini</button>
@@ -467,11 +477,11 @@
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px">
       <div>
         <label class="field-label">Dari</label>
-        <input type="date" id="filterStart">
+        <input type="date" id="filterStart" oninput="syncMonthSelectFromInputs()">
       </div>
       <div>
         <label class="field-label">Sampai</label>
-        <input type="date" id="filterEnd">
+        <input type="date" id="filterEnd" oninput="syncMonthSelectFromInputs()">
       </div>
     </div>
 
@@ -506,11 +516,19 @@ let currentPageName = 'overview';
 let cache = {};
 let forceRefreshFlag = false;
 
+const NAMA_BULAN = [
+  'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+  'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+];
+
 // ==========================================
 // HELPERS
 // ==========================================
 function fmtIDR(n) {
   return 'Rp ' + Number(n || 0).toLocaleString('id-ID');
+}
+function toDateInputValue(d) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 function fmtCompact(n) {
   const abs = Math.abs(n);
@@ -614,7 +632,69 @@ function navigate(page) {
 // ==========================================
 // FILTER
 // ==========================================
+function monthKeyOfDate(d) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+}
+function monthKeyFromRange(start, end) {
+  if (!start || !end) return '';
+  const s = String(start).split('-').map(Number);
+  const e = String(end).split('-').map(Number);
+  if (s.length !== 3 || e.length !== 3 || s.some(isNaN) || e.some(isNaN)) return '';
+  if (s[0] !== e[0] || s[1] !== e[1] || s[2] !== 1 || s[1] < 1 || s[1] > 12) return '';
+  const lastDay = new Date(e[0], e[1], 0).getDate();
+  return e[2] === lastDay ? `${s[0]}-${String(s[1]).padStart(2, '0')}` : '';
+}
+function monthRangeFromKey(key) {
+  const [year, month] = String(key).split('-').map(Number);
+  if (!year || !month || month < 1 || month > 12) return null;
+  return {
+    start: `${year}-${String(month).padStart(2, '0')}-01`,
+    end: toDateInputValue(new Date(year, month, 0))
+  };
+}
+function formatMonthKey(key) {
+  const [year, month] = String(key).split('-').map(Number);
+  if (!year || !month || month < 1 || month > 12) return key;
+  return `${NAMA_BULAN[month - 1]} ${year}`;
+}
+function populateMonthSelect() {
+  const sel = document.getElementById('filterMonth');
+  if (!sel) return;
+  const selected = monthKeyFromRange(currentFilter.start, currentFilter.end);
+  const now = new Date();
+  let html = '<option value="">Pilih bulan…</option>';
+  for (let i = 0; i < 48; i++) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const key = monthKeyOfDate(d);
+    html += `<option value="${key}">${formatMonthKey(key)}</option>`;
+  }
+  sel.innerHTML = html;
+  if (selected && !Array.from(sel.options).some(o => o.value === selected)) {
+    const opt = document.createElement('option');
+    opt.value = selected;
+    opt.textContent = formatMonthKey(selected);
+    sel.appendChild(opt);
+  }
+  sel.value = selected || '';
+}
+function syncMonthSelectFromInputs() {
+  const sel = document.getElementById('filterMonth');
+  if (!sel) return;
+  sel.value = monthKeyFromRange(
+    document.getElementById('filterStart').value,
+    document.getElementById('filterEnd').value
+  );
+}
+function setMonthFilter(value) {
+  if (!value) return;
+  const range = monthRangeFromKey(value);
+  if (!range) return;
+  document.getElementById('filterStart').value = range.start;
+  document.getElementById('filterEnd').value = range.end;
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+}
 function showFilterModal() {
+  populateMonthSelect();
   document.getElementById('filterModal').classList.add('open');
 }
 function hideFilterModal() {
@@ -624,17 +704,17 @@ function setQuickFilter(type, btn) {
   const now = new Date();
   let start, end;
   if (type === 'today') {
-    const d = now.toISOString().split('T')[0];
+    const d = toDateInputValue(now);
     start = end = d;
   } else if (type === 'week') {
     const day = now.getDay() || 7;
-    const monday = new Date(now); monday.setDate(now.getDate() - day + 1);
-    const sunday = new Date(monday); sunday.setDate(monday.getDate() + 6);
-    start = monday.toISOString().split('T')[0];
-    end = sunday.toISOString().split('T')[0];
+    const monday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - day + 1);
+    const sunday = new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + 6);
+    start = toDateInputValue(monday);
+    end = toDateInputValue(sunday);
   } else if (type === 'month') {
-    start = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
-    end = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
+    start = toDateInputValue(new Date(now.getFullYear(), now.getMonth(), 1));
+    end = toDateInputValue(new Date(now.getFullYear(), now.getMonth() + 1, 0));
   } else if (type === 'year') {
     start = `${now.getFullYear()}-01-01`;
     end = `${now.getFullYear()}-12-31`;
@@ -643,6 +723,8 @@ function setQuickFilter(type, btn) {
   }
   document.getElementById('filterStart').value = start || '';
   document.getElementById('filterEnd').value = end || '';
+  const monthSel = document.getElementById('filterMonth');
+  if (monthSel) monthSel.value = type === 'month' ? monthKeyOfDate(now) : '';
   document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
   btn.classList.add('active');
 }
@@ -656,6 +738,8 @@ function applyFilter() {
 }
 function getCurrentPeriodLabel() {
   if (!currentFilter.start && !currentFilter.end) return 'Semua Waktu';
+  const monthKey = monthKeyFromRange(currentFilter.start, currentFilter.end);
+  if (monthKey) return formatMonthKey(monthKey);
   if (currentFilter.start === currentFilter.end) return currentFilter.start;
   return `${currentFilter.start || 'Awal'} s/d ${currentFilter.end || 'Sekarang'}`;
 }
@@ -682,6 +766,7 @@ function skeletonOverview() {
 async function loadOverview() {
   const container = document.getElementById('overviewContent');
   if (!forceRefreshFlag && cache.overview) {
+    await ensureDepositSplit(cache.overview);
     renderOverview(cache.overview);
     setTimeout(() => ['piutang', 'hutang', 'laporan'].forEach(prefetchPage), 1500);
     return;
@@ -695,6 +780,7 @@ async function loadOverview() {
       </div>`;
     return;
   }
+  await ensureDepositSplit(data);
   renderOverview(data);
   setTimeout(() => ['piutang', 'hutang', 'laporan'].forEach(prefetchPage), 1500);
 }
@@ -703,6 +789,12 @@ function renderOverview(d) {
   const piutangCount = d.piutang.breakdown.reduce((s,b)=>s+b.count,0);
   const hutangCount = d.hutang.breakdown.reduce((s,b)=>s+b.count,0);
   const profitCls = d.period.profit >= 0 ? 'pos' : 'neg';
+  const sourceLabel = d.period.source || d.source || 'AKUNTANSI';
+  const sourceDetail = d.period.sourceDetail === 'LAPORAN' ? ' · Laporan Laba Rugi' : '';
+  const seg = d.period.segments || null;
+  const segGudang = (seg && (seg.gudang || seg.direct)) || { revenue: 0, costs: 0 };
+  const segSales = (seg && seg.sales) || { revenue: 0, costs: 0 };
+  const segBroker = (seg && seg.broker) || { revenue: 0, costs: 0 };
 
   const html = `
     <div class="hero">
@@ -711,22 +803,38 @@ function renderOverview(d) {
       <p class="h-value tnum ${profitCls}">${fmtIDR(d.period.profit)}</p>
       <div class="h-tags">
         <span class="h-tag" style="background:rgba(16,185,129,.16);color:#34d399"><i class="ph-fill ph-arrow-down-left" style="font-size:12px"></i> Revenue ${fmtIDR(d.period.revenue)}</span>
-        <span class="h-tag" style="background:rgba(251,113,133,.14);color:#fda4af"><i class="ph-fill ph-arrow-up-right" style="font-size:12px"></i> Beban ${fmtIDR(d.period.expense)}</span>
+        <span class="h-tag" style="background:rgba(251,113,133,.14);color:#fda4af" title="Beban neto setelah pendapatan lain"><i class="ph-fill ph-arrow-up-right" style="font-size:12px"></i> Beban Neto ${fmtIDR(d.period.expense)}</span>
       </div>
-      ${d.period.margin !== undefined ? `<p class="h-margin">Margin profit: <b class="pos">${d.period.margin.toFixed(1)}%</b></p>` : ''}
+      ${d.period.margin !== undefined ? `<p class="h-margin">Margin profit: <b class="pos">${d.period.margin.toFixed(1)}%</b> · Sumber: ${sourceLabel}${sourceDetail}</p>` : ''}
     </div>
 
-    ${d.period.segments ? `
-      <div class="m-grid desktop-2" style="margin-top:14px">
+    ${sourceLabel === 'LOKAL' ? `
+      <div class="card" style="margin-top:12px;padding:12px 16px;background:#fff7ed;border-color:#fdba74;color:#9a3412;font-size:12.5px;line-height:1.55">
+        <b>Mode fallback lokal.</b> Library <b>AkuntansiCore</b> belum memuat API baru, jadi angka belum tentu sama dengan AKUNTANSI.
+        Deploy ulang library dari project <b>KAS DAN SETARA KAS</b>, lalu buka Dashboard dengan <code>?refresh=1</code>.
+      </div>` : ''}
+    ${sourceLabel !== 'LOKAL' && (d.period.segmentsSource === 'LOKAL' || (seg && !seg.gudang)) ? `
+      <div class="card" style="margin-top:12px;padding:12px 16px;background:#fff7ed;border-color:#fdba74;color:#9a3412;font-size:12.5px;line-height:1.55">
+        <b>Library AkuntansiCore masih versi lama.</b> Rincian Gudang/Sales masih dihitung dari sheet operasional.
+        Deploy ulang library dari project <b>KAS DAN SETARA KAS</b> agar segmen dan laba bersih memakai ledger/Template Laporan.
+      </div>` : ''}
+
+    ${seg ? `
+      <div class="m-grid desktop-3" style="margin-top:14px">
         <div class="pl-tile">
-          <p class="t-label">Penjualan Langsung</p>
-          <p class="t-value tnum ${d.period.segments.direct.revenue - d.period.segments.direct.costs >= 0 ? 't-green' : 't-red'}">${fmtIDR(d.period.segments.direct.revenue - d.period.segments.direct.costs)}</p>
-          <p style="font-size:11.5px;color:var(--ink3);margin-top:4px">Laba kotor · Rev ${fmtIDR(d.period.segments.direct.revenue)} · HPP ${fmtIDR(d.period.segments.direct.costs)}</p>
+          <p class="t-label">Gudang</p>
+          <p class="t-value tnum ${segGudang.revenue - segGudang.costs >= 0 ? 't-green' : 't-red'}">${fmtIDR(segGudang.revenue - segGudang.costs)}</p>
+          <p style="font-size:11.5px;color:var(--ink3);margin-top:4px">Laba kotor · Rev ${fmtIDR(segGudang.revenue)} · HPP ${fmtIDR(segGudang.costs)}</p>
         </div>
         <div class="pl-tile">
-          <p class="t-label">Penjualan Broker</p>
-          <p class="t-value tnum ${d.period.segments.broker.revenue - d.period.segments.broker.costs >= 0 ? 't-blue' : 't-red'}">${fmtIDR(d.period.segments.broker.revenue - d.period.segments.broker.costs)}</p>
-          <p style="font-size:11.5px;color:var(--ink3);margin-top:4px">Laba kotor · Fee ${fmtIDR(d.period.segments.broker.revenue)} · Beban ${fmtIDR(d.period.segments.broker.costs)}</p>
+          <p class="t-label">Sales</p>
+          <p class="t-value tnum ${segSales.revenue - segSales.costs >= 0 ? 't-green' : 't-red'}">${fmtIDR(segSales.revenue - segSales.costs)}</p>
+          <p style="font-size:11.5px;color:var(--ink3);margin-top:4px">Laba kotor · Rev ${fmtIDR(segSales.revenue)} · HPP ${fmtIDR(segSales.costs)}</p>
+        </div>
+        <div class="pl-tile">
+          <p class="t-label">Broker</p>
+          <p class="t-value tnum ${segBroker.revenue - segBroker.costs >= 0 ? 't-blue' : 't-red'}">${fmtIDR(segBroker.revenue - segBroker.costs)}</p>
+          <p style="font-size:11.5px;color:var(--ink3);margin-top:4px">Laba kotor · Fee ${fmtIDR(segBroker.revenue)} · HPP ${fmtIDR(segBroker.costs)}</p>
         </div>
       </div>
       <div class="card" style="margin-top:10px;padding:12px 16px">
@@ -734,6 +842,11 @@ function renderOverview(d) {
           <span style="font-size:12.5px;color:var(--ink2);font-weight:600">Beban operasional</span>
           <span class="tnum" style="font-size:13px;font-weight:700;color:var(--red)">− ${fmtIDR(d.period.segments.overhead)}</span>
         </div>
+        ${d.period.segments.otherExpense > 0 ? `
+        <div class="list-row" style="padding:6px 0">
+          <span style="font-size:12.5px;color:var(--ink2);font-weight:600">Beban lain</span>
+          <span class="tnum" style="font-size:13px;font-weight:700;color:var(--red)">− ${fmtIDR(d.period.segments.otherExpense)}</span>
+        </div>` : ''}
         ${d.period.segments.otherRevenue > 0 ? `
         <div class="list-row" style="padding:6px 0">
           <span style="font-size:12.5px;color:var(--ink2);font-weight:600">Pendapatan lain</span>
@@ -746,7 +859,7 @@ function renderOverview(d) {
       </div>
     ` : ''}
 
-    <p class="sec-label">Posisi Keuangan</p>
+    <p class="sec-label">Posisi Keuangan · Sumber: ${sourceLabel}</p>
     <div class="m-grid desktop-4">
       <div class="metric" onclick="navigate('piutang')">
         <div class="m-icon bg-tint-green"><i class="ph-fill ph-arrow-down-left"></i></div>
@@ -760,17 +873,26 @@ function renderOverview(d) {
         <p class="m-value tnum t-red">${fmtCompact(d.hutang.total)}</p>
         <p class="m-sub">${hutangCount} supplier</p>
       </div>
-      <div class="metric" onclick="showDepositDetail()">
+      <div class="metric" onclick="showDepositDetail()" title="Rincian pabrik dengan saldo plus dan minus">
         <div class="m-icon bg-tint-amber"><i class="ph-fill ph-wallet"></i></div>
         <p class="m-label">Deposit Supplier</p>
-        <p class="m-value tnum t-amber">${fmtCompact(d.deposit.total)}</p>
-        <p class="m-sub">${d.deposit.count} supplier</p>
+        <div class="m-split">
+          <div class="m-split-item">
+            <p class="m-split-value tnum t-green">+ ${fmtCompact(Number(d.deposit.positiveTotal) || 0)}</p>
+            <p class="m-split-label" style="color:var(--green)">${Number(d.deposit.positiveCount) || 0} pabrik +</p>
+          </div>
+          <div class="m-split-item">
+            <p class="m-split-value tnum t-red">− ${fmtCompact(Math.abs(Number(d.deposit.negativeTotal) || 0))}</p>
+            <p class="m-split-label" style="color:var(--red)">${Number(d.deposit.negativeCount) || 0} pabrik −</p>
+          </div>
+        </div>
+        <p class="m-sub">Neto ${fmtCompact(Number(d.deposit.netTotal) || 0)}${d.deposit.adjustment ? ` · selisih ${fmtCompact(d.deposit.adjustment)}` : ''}</p>
       </div>
       <div class="metric" onclick="showKontrakDetail()">
         <div class="m-icon bg-tint-blue"><i class="ph-fill ph-file-text"></i></div>
         <p class="m-label">Kontrak Jaminan</p>
         <p class="m-value tnum t-blue">${fmtCompact(d.kontrak.total)}</p>
-        <p class="m-sub">${d.kontrak.count} kontrak${d.kontrak.nearMaturity ? ` · ${d.kontrak.nearMaturity} jatuh tempo` : ''}</p>
+        <p class="m-sub">${d.kontrak.count} kontrak${d.kontrak.nearMaturity ? ` · ${d.kontrak.nearMaturity} jatuh tempo` : ''}${d.kontrak.adjustment ? ` · selisih ${fmtCompact(d.kontrak.adjustment)}` : ''}</p>
       </div>
     </div>
 
@@ -783,24 +905,24 @@ function renderOverview(d) {
         <p class="m-sub">${d.kas.accountCount || 0} akun</p>
       </div>
       <div class="metric" onclick="navigate('stok')">
-        <div class="m-icon bg-tint-orange"><i class="ph-fill ph-box"></i></div>
-        <p class="m-label">Nilai Stok</p>
+        <div class="m-icon bg-tint-orange"><i class="ph-fill ph-archive"></i></div>
+        <p class="m-label">Nilai Stok (Akuntansi)</p>
         <p class="m-value tnum t-orange">${fmtCompact(d.stok.totalValue)}</p>
-        <p class="m-sub">${d.stok.itemCount} item · ${d.stok.lowStock} kosong</p>
+        <p class="m-sub">${d.stok.itemCount} item · ${d.stok.lowStock} kosong${d.stok.adjustment ? ` · selisih ${fmtCompact(d.stok.adjustment)}` : ''}</p>
       </div>
     </div>
 
     <p class="sec-label">Rincian Piutang</p>
     <div class="card">
       ${d.piutang.breakdown.map(b => `
-        <div class="list-row row-click" onclick="showPiutangSub('${b.sub}')">
+        <div class="list-row ${b.sub ? 'row-click' : ''}" ${b.sub ? `onclick="showPiutangSub('${b.sub}')"` : ''}>
           <div class="flex-1">
             <p class="lr-title">${b.label}</p>
-            <p class="lr-sub">${b.count} pelanggan</p>
+            <p class="lr-sub">${b.adjustment ? 'Selisih saldo ledger akuntansi vs rincian' : `${b.count} pelanggan`}</p>
           </div>
           <div style="display:flex;align-items:center;gap:6px">
-            <p class="lr-amount tnum t-green">${fmtIDR(b.amount)}</p>
-            <i class="ph-fill ph-caret-right chev"></i>
+            <p class="lr-amount tnum ${b.adjustment ? 't-red' : 't-green'}">${fmtIDR(b.amount)}</p>
+            ${b.sub ? `<i class="ph-fill ph-caret-right chev"></i>` : ''}
           </div>
         </div>
       `).join('')}
@@ -809,14 +931,14 @@ function renderOverview(d) {
     <p class="sec-label">Rincian Hutang</p>
     <div class="card">
       ${d.hutang.breakdown.map(b => `
-        <div class="list-row row-click" onclick="showHutangSub('${b.sub}')">
+        <div class="list-row ${b.sub ? 'row-click' : ''}" ${b.sub ? `onclick="showHutangSub('${b.sub}')"` : ''}>
           <div class="flex-1">
             <p class="lr-title">${b.label}</p>
-            <p class="lr-sub">${b.count} supplier</p>
+            <p class="lr-sub">${b.adjustment ? 'Selisih saldo ledger akuntansi vs rincian' : `${b.count} supplier`}</p>
           </div>
           <div style="display:flex;align-items:center;gap:6px">
-            <p class="lr-amount tnum t-red">${fmtIDR(b.amount)}</p>
-            <i class="ph-fill ph-caret-right chev"></i>
+            <p class="lr-amount tnum ${b.adjustment ? 't-amber' : 't-red'}">${fmtIDR(b.amount)}</p>
+            ${b.sub ? `<i class="ph-fill ph-caret-right chev"></i>` : ''}
           </div>
         </div>
       `).join('')}
@@ -867,12 +989,14 @@ async function loadPiutangDetail() {
 
 function renderPiutang(data) {
   const c = document.getElementById('piutangContent');
-  const total = (data.broker?.total||0) + (data.sales?.total||0) + (data.pos?.total||0);
+  const operationalTotal = (data.broker?.total||0) + (data.sales?.total||0) + (data.pos?.total||0);
+  const total = data.accountingTotal !== undefined && data.accountingTotal !== null ? data.accountingTotal : operationalTotal;
   let html = `
     <div class="hero">
       <i class="ph-fill ph-coins hero-deco"></i>
-      <p class="h-label">TOTAL PIUTANG</p>
+      <p class="h-label">TOTAL PIUTANG — AKUNTANSI</p>
       <p class="h-value tnum pos">${fmtIDR(total)}</p>
+      ${Math.abs(total - operationalTotal) >= 0.5 ? `<p class="h-margin">Rincian operasional: ${fmtIDR(operationalTotal)} · Selisih: ${fmtIDR(total - operationalTotal)}</p>` : ''}
     </div>
   `;
 
@@ -931,12 +1055,14 @@ async function loadHutangDetail() {
 
 function renderHutang(data) {
   const c = document.getElementById('hutangContent');
-  const total = (data.broker?.total||0) + (data.po?.total||0);
+  const operationalTotal = (data.broker?.total||0) + (data.po?.total||0);
+  const total = data.accountingTotal !== undefined && data.accountingTotal !== null ? data.accountingTotal : operationalTotal;
   let html = `
     <div class="hero">
       <i class="ph-fill ph-receipt hero-deco"></i>
-      <p class="h-label">TOTAL HUTANG</p>
+      <p class="h-label">TOTAL HUTANG — AKUNTANSI</p>
       <p class="h-value tnum neg">${fmtIDR(total)}</p>
+      ${Math.abs(total - operationalTotal) >= 0.5 ? `<p class="h-margin">Rincian operasional: ${fmtIDR(operationalTotal)} · Selisih: ${fmtIDR(total - operationalTotal)}</p>` : ''}
     </div>
   `;
 
@@ -996,15 +1122,18 @@ function renderStok(data) {
   const c = document.getElementById('stokContent');
   let html = `
     <div class="sum-strip">
-      <div class="sum-cell"><p class="s-label">Total Nilai</p><p class="s-value t-orange">${fmtCompact(data.totalValue)}</p></div>
+      <div class="sum-cell"><p class="s-label">Nilai Akuntansi</p><p class="s-value t-orange">${fmtCompact(data.totalValue)}</p></div>
       <div class="sum-cell"><p class="s-label">Total Qty</p><p class="s-value">${data.totalQty.toLocaleString('id-ID')}</p></div>
       <div class="sum-cell"><p class="s-label">Item Kosong</p><p class="s-value t-red">${data.lowStock}</p></div>
     </div>
+    ${data.operationalValue !== undefined && Math.abs((data.operationalValue || 0) - (data.totalValue || 0)) >= 0.5 ? `
+      <p style="font-size:12px;color:var(--ink3);margin-top:8px">Nilai stok operasional: ${fmtIDR(data.operationalValue)} · Selisih dengan akuntansi: ${fmtIDR((data.totalValue || 0) - (data.operationalValue || 0))}</p>
+    ` : ''}
   `;
 
   if (data.list && data.list.length > 0) {
     html += `<div class="card" style="margin-top:14px">
-      <p class="card-title"><i class="ph-fill ph-box"></i> Top 20 Stok (by Value)</p>
+      <p class="card-title"><i class="ph-fill ph-archive"></i> Top 20 Stok (by Value)</p>
       <div class="list">
         ${data.list.slice(0, 20).map(item => `
           <div class="list-row">
@@ -1021,7 +1150,7 @@ function renderStok(data) {
       </div>
     </div>`;
   } else {
-    html += `<div class="empty"><i class="ph-fill ph-box"></i><p>Belum ada data stok.</p></div>`;
+    html += `<div class="empty"><i class="ph-fill ph-archive"></i><p>Belum ada data stok.</p></div>`;
   }
   c.innerHTML = html;
 }
@@ -1091,37 +1220,83 @@ function renderPL(data) {
   const pl = data.pl;
   const trend = data.trend;
   const profitCls = pl.profit >= 0 ? 'pos' : 'neg';
+  const grossProfit = pl.grossProfit !== undefined ? pl.grossProfit : (pl.revenue - (pl.cogs || 0));
+  const opex = pl.opex !== undefined ? pl.opex : (pl.segments ? pl.segments.overhead : 0);
+  const operatingProfit = pl.operatingProfit !== undefined ? pl.operatingProfit : (grossProfit - opex);
+  const otherIncome = pl.otherIncome || 0;
+  const otherExpense = pl.otherExpense || 0;
+  const sourceLabel = pl.source || 'AKUNTANSI';
+  const sourceDetail = pl.sourceDetail === 'LAPORAN' ? ' · Laporan Laba Rugi' : '';
+  const seg = pl.segments || null;
+  const segGudang = (seg && (seg.gudang || seg.direct)) || { revenue: 0, costs: 0 };
+  const segSales = (seg && seg.sales) || { revenue: 0, costs: 0 };
+  const segBroker = (seg && seg.broker) || { revenue: 0, costs: 0 };
 
   c.innerHTML = `
     <div class="hero">
       <i class="ph-fill ph-chart-line hero-deco"></i>
       <p class="h-label">LABA BERSIH — PERIODE</p>
       <p class="h-value tnum ${profitCls}">${fmtIDR(pl.profit)}</p>
-      ${pl.margin !== undefined ? `<p class="h-margin">Margin profit: <b class="${profitCls}">${pl.margin.toFixed(2)}%</b></p>` : ''}
+      ${pl.margin !== undefined ? `<p class="h-margin">Margin profit: <b class="${profitCls}">${pl.margin.toFixed(2)}%</b> · Sumber: ${sourceLabel}${sourceDetail}</p>` : ''}
     </div>
-    ${pl.segments ? `
-    <div class="m-grid desktop-2" style="margin-top:14px">
+    ${sourceLabel === 'LOKAL' ? `
+      <div class="card" style="margin-top:12px;padding:12px 16px;background:#fff7ed;border-color:#fdba74;color:#9a3412;font-size:12.5px;line-height:1.55">
+        <b>Mode fallback lokal.</b> Library <b>AkuntansiCore</b> belum memuat API baru. Deploy ulang library dari project <b>KAS DAN SETARA KAS</b>, lalu buka Dashboard dengan <code>?refresh=1</code>.
+      </div>` : ''}
+    ${sourceLabel !== 'LOKAL' && (pl.segmentsSource === 'LOKAL' || (seg && !seg.gudang)) ? `
+      <div class="card" style="margin-top:12px;padding:12px 16px;background:#fff7ed;border-color:#fdba74;color:#9a3412;font-size:12.5px;line-height:1.55">
+        <b>Library AkuntansiCore masih versi lama.</b> Rincian Gudang/Sales masih dihitung dari sheet operasional. Deploy ulang library dari project <b>KAS DAN SETARA KAS</b> agar memakai ledger/Template Laporan.
+      </div>` : ''}
+    ${pl.sourceDetail === 'LAPORAN' && Math.abs(Number(pl.netProfitDifference) || 0) >= 0.5 ? `
+      <p style="font-size:11px;color:var(--ink3);margin:9px 2px 0;line-height:1.5">
+        Angka utama memakai <b>Template Laporan Laba Rugi</b>. Klasifikasi kartu Dashboard AKUNTANSI menghasilkan
+        ${fmtIDR(pl.dashboardNetProfit)} (selisih ${fmtIDR(pl.netProfitDifference)}).
+      </p>` : ''}
+    ${pl.netProfitLabel ? `
+      <p style="font-size:11px;color:var(--ink3);margin:9px 2px 0;line-height:1.5">
+        Baris acuan laba bersih: <b>${pl.netProfitLabel}</b>${pl.operatingProfitLabel ? ` · laba operasional: ${pl.operatingProfitLabel}` : ''}.
+      </p>` : ''}
+    ${seg ? `
+    <div class="m-grid desktop-3" style="margin-top:14px">
       <div class="pl-tile">
-        <p class="t-label">Laba Kotor · Penjualan Langsung</p>
-        <p class="t-value tnum ${pl.segments.direct.revenue - pl.segments.direct.costs >= 0 ? 't-green' : 't-red'}">${fmtIDR(pl.segments.direct.revenue - pl.segments.direct.costs)}</p>
-        <p style="font-size:11.5px;color:var(--ink3);margin-top:4px">Rev ${fmtIDR(pl.segments.direct.revenue)} · HPP ${fmtIDR(pl.segments.direct.costs)}</p>
+        <p class="t-label">Laba Kotor · Gudang</p>
+        <p class="t-value tnum ${segGudang.revenue - segGudang.costs >= 0 ? 't-green' : 't-red'}">${fmtIDR(segGudang.revenue - segGudang.costs)}</p>
+        <p style="font-size:11.5px;color:var(--ink3);margin-top:4px">Rev ${fmtIDR(segGudang.revenue)} · HPP ${fmtIDR(segGudang.costs)}</p>
+      </div>
+      <div class="pl-tile">
+        <p class="t-label">Laba Kotor · Sales</p>
+        <p class="t-value tnum ${segSales.revenue - segSales.costs >= 0 ? 't-green' : 't-red'}">${fmtIDR(segSales.revenue - segSales.costs)}</p>
+        <p style="font-size:11.5px;color:var(--ink3);margin-top:4px">Rev ${fmtIDR(segSales.revenue)} · HPP ${fmtIDR(segSales.costs)}</p>
       </div>
       <div class="pl-tile">
         <p class="t-label">Laba Kotor · Broker</p>
-        <p class="t-value tnum ${pl.segments.broker.revenue - pl.segments.broker.costs >= 0 ? 't-blue' : 't-red'}">${fmtIDR(pl.segments.broker.revenue - pl.segments.broker.costs)}</p>
-        <p style="font-size:11.5px;color:var(--ink3);margin-top:4px">Fee ${fmtIDR(pl.segments.broker.revenue)} · Beban ${fmtIDR(pl.segments.broker.costs)}</p>
+        <p class="t-value tnum ${segBroker.revenue - segBroker.costs >= 0 ? 't-blue' : 't-red'}">${fmtIDR(segBroker.revenue - segBroker.costs)}</p>
+        <p style="font-size:11.5px;color:var(--ink3);margin-top:4px">Fee ${fmtIDR(segBroker.revenue)} · HPP ${fmtIDR(segBroker.costs)}</p>
       </div>
     </div>
     <div class="card" style="margin-top:10px;padding:12px 16px">
       <div class="list-row" style="padding:6px 0">
-        <span style="font-size:12.5px;color:var(--ink2);font-weight:600">Beban operasional</span>
-        <span class="tnum" style="font-size:13px;font-weight:700;color:var(--red)">− ${fmtIDR(pl.segments.overhead)}</span>
+        <span style="font-size:12.5px;color:var(--ink2);font-weight:600">Laba kotor</span>
+        <span class="tnum" style="font-size:13px;font-weight:700;color:${grossProfit >= 0 ? 'var(--green)' : 'var(--red)'}">${fmtIDR(grossProfit)}</span>
       </div>
-      ${pl.segments.otherRevenue > 0 ? `
+      <div class="list-row" style="padding:6px 0">
+        <span style="font-size:12.5px;color:var(--ink2);font-weight:600">Beban operasional</span>
+        <span class="tnum" style="font-size:13px;font-weight:700;color:var(--red)">− ${fmtIDR(opex)}</span>
+      </div>
+      ${otherExpense > 0 ? `
+      <div class="list-row" style="padding:6px 0">
+        <span style="font-size:12.5px;color:var(--ink2);font-weight:600">Beban lain</span>
+        <span class="tnum" style="font-size:13px;font-weight:700;color:var(--red)">− ${fmtIDR(otherExpense)}</span>
+      </div>` : ''}
+      ${otherIncome > 0 ? `
       <div class="list-row" style="padding:6px 0">
         <span style="font-size:12.5px;color:var(--ink2);font-weight:600">Pendapatan lain</span>
-        <span class="tnum" style="font-size:13px;font-weight:700;color:var(--green)">+ ${fmtIDR(pl.segments.otherRevenue)}</span>
+        <span class="tnum" style="font-size:13px;font-weight:700;color:var(--green)">+ ${fmtIDR(otherIncome)}</span>
       </div>` : ''}
+      <div class="list-row" style="padding:6px 0">
+        <span style="font-size:12.5px;color:var(--ink2);font-weight:600">Laba operasional</span>
+        <span class="tnum" style="font-size:13px;font-weight:700;color:${operatingProfit >= 0 ? 'var(--green)' : 'var(--red)'}">${fmtIDR(operatingProfit)}</span>
+      </div>
       <div class="list-row" style="padding:8px 0 2px">
         <span style="font-size:12.5px;color:var(--ink);font-weight:700">Laba bersih</span>
         <span class="tnum" style="font-size:14px;font-weight:800;color:${pl.profit >= 0 ? 'var(--green)' : 'var(--red)'}">${fmtIDR(pl.profit)}</span>
@@ -1134,7 +1309,7 @@ function renderPL(data) {
         <p class="t-value tnum t-green">${fmtCompact(pl.revenue)}</p>
       </div>
       <div class="pl-tile">
-        <p class="t-label">Beban</p>
+        <p class="t-label">Beban Neto</p>
         <p class="t-value tnum t-red">${fmtCompact(pl.expense)}</p>
       </div>
       <div class="pl-tile" style="grid-column:1 / -1">
@@ -1172,7 +1347,7 @@ function renderPL(data) {
         }),
         datasets: [
           { label: 'Revenue', data: trend.revenue, borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,.08)', tension: .4, fill: true, pointRadius: 3, pointBackgroundColor: '#10b981', borderWidth: 2 },
-          { label: 'Beban', data: trend.expense, borderColor: '#f43f5e', backgroundColor: 'rgba(244,63,94,.08)', tension: .4, fill: true, pointRadius: 3, pointBackgroundColor: '#f43f5e', borderWidth: 2 },
+          { label: 'Beban Neto', data: trend.expense, borderColor: '#f43f5e', backgroundColor: 'rgba(244,63,94,.08)', tension: .4, fill: true, pointRadius: 3, pointBackgroundColor: '#f43f5e', borderWidth: 2 },
           { label: 'Laba', data: trend.profit, borderColor: '#0ea5e9', backgroundColor: 'rgba(14,165,233,.08)', tension: .4, fill: true, pointRadius: 3, pointBackgroundColor: '#0ea5e9', borderWidth: 2 }
         ]
       },
@@ -1201,25 +1376,138 @@ function closeDetailModal() {
   document.getElementById('detailModal').classList.remove('open');
 }
 
+function getDepositSplit(data) {
+  const allRows = (data && data.list) || [];
+  const rawRows = allRows.filter(d => !d.adjustment);
+  const plusRows = rawRows
+    .filter(d => (Number(d.balance) || 0) > 0)
+    .sort((a, b) => (Number(b.balance) || 0) - (Number(a.balance) || 0));
+  const minusRows = rawRows
+    .filter(d => (Number(d.balance) || 0) < 0)
+    .sort((a, b) => (Number(a.balance) || 0) - (Number(b.balance) || 0));
+  const adjRows = allRows.filter(d => d.adjustment);
+
+  const plusTotal = data && data.positiveTotal !== undefined
+    ? Number(data.positiveTotal) || 0
+    : plusRows.reduce((s, d) => s + (Number(d.balance) || 0), 0);
+  const minusTotal = data && data.negativeTotal !== undefined
+    ? Number(data.negativeTotal) || 0
+    : minusRows.reduce((s, d) => s + (Number(d.balance) || 0), 0);
+  const netTotal = data && data.netTotal !== undefined
+    ? Number(data.netTotal) || 0
+    : plusTotal + minusTotal;
+  const accountingTotal = Number(data && data.total) || 0;
+
+  return {
+    allRows, rawRows, plusRows, minusRows, adjRows,
+    plusTotal, minusTotal, netTotal, accountingTotal
+  };
+}
+
+// Payload overview dari deployment/cache lama belum tentu punya field split.
+// Lengkapi dari endpoint detail agar card dan modal selalu memakai angka yang sama.
+async function ensureDepositSplit(overviewData) {
+  const dep = overviewData && overviewData.deposit;
+  if (!dep) return;
+
+  const hasSplit = dep.positiveTotal !== undefined &&
+    dep.negativeTotal !== undefined &&
+    dep.positiveCount !== undefined &&
+    dep.negativeCount !== undefined;
+  // Kalau total ada tetapi split sama-sama 0, anggap payload lama/tidak lengkap.
+  const suspiciousEmpty = Math.abs(Number(dep.total) || 0) >= 0.5 &&
+    (Number(dep.positiveTotal) || 0) === 0 &&
+    (Number(dep.negativeTotal) || 0) === 0;
+  if (hasSplit && !suspiciousEmpty) return;
+
+  try {
+    const detail = cache.deposit && cache.deposit.list
+      ? cache.deposit
+      : await apiCall('deposit', currentFilter);
+    if (!detail || detail.error || !detail.list) return;
+
+    cache.deposit = detail;
+    const split = getDepositSplit(detail);
+    dep.positiveTotal = split.plusTotal;
+    dep.negativeTotal = split.minusTotal;
+    dep.positiveCount = split.plusRows.length;
+    dep.negativeCount = split.minusRows.length;
+    dep.netTotal = split.netTotal;
+    dep.operationalTotal = split.netTotal;
+    dep.adjustment = split.accountingTotal - split.netTotal;
+    if (dep.total === undefined) dep.total = split.accountingTotal;
+    if (dep.count === undefined) dep.count = split.rawRows.length;
+  } catch (e) {
+    console.error('Gagal melengkapi split deposit:', e);
+  }
+}
+
 async function showDepositDetail() {
   showDetailModal('Detail Deposit Supplier', '<div class="spinner"></div>');
-  const data = cache.deposit || await (async () => { const r = await apiCall('deposit'); if (!r.error) cache.deposit = r; return r; })();
+  const data = cache.deposit || await (async () => { const r = await apiCall('deposit', currentFilter); if (!r.error) cache.deposit = r; return r; })();
   if (data.error) { showDetailModal('Detail Deposit', `<p style="color:var(--red)">${data.error}</p>`); return; }
 
-  let html = `<p style="font-size:13px;color:var(--ink2);margin:0 0 4px"><span style="font-weight:700;color:var(--ink)">${fmtIDR(data.total)}</span> · ${data.count} supplier</p><div class="list">`;
-  (data.list || []).slice(0, 30).forEach(d => {
-    html += `<div class="list-row">
-      <div><p class="lr-title">${d.name}</p><p class="lr-sub">${d.code}</p></div>
-      <p class="lr-amount tnum" style="color:${d.balance < 0 ? 'var(--red)' : 'var(--green)'}">${fmtIDR(d.balance)}</p>
+  const {
+    rawRows, plusRows, minusRows, adjRows,
+    plusTotal, minusTotal, netTotal, accountingTotal
+  } = getDepositSplit(data);
+
+  const amountText = (n) => {
+    const v = Number(n) || 0;
+    return v < 0 ? `− ${fmtIDR(Math.abs(v))}` : `+ ${fmtIDR(v)}`;
+  };
+  const rowHtml = (d) => {
+    const balance = Number(d.balance) || 0;
+    return `<div class="list-row">
+      <div><p class="lr-title">${d.name}</p><p class="lr-sub">${d.code || '-'}</p></div>
+      <p class="lr-amount tnum" style="color:${balance < 0 ? 'var(--red)' : 'var(--green)'}">${amountText(balance)}</p>
     </div>`;
-  });
-  html += `</div>`;
+  };
+  const sectionHtml = (title, rows, color, emptyText) => `
+    <p class="sec-label" style="color:${color};margin:18px 0 4px">${title}</p>
+    ${rows.length ? `<div class="list">${rows.map(rowHtml).join('')}</div>` : `<p style="font-size:12px;color:var(--ink3);margin:2px 0 0">${emptyText}</p>`}
+  `;
+
+  let html = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+      <div style="background:var(--green-bg);border-radius:10px;padding:10px 12px">
+        <p style="font-size:10.5px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.6px">Deposit +</p>
+        <p class="tnum t-green" style="font-size:15px;font-weight:800;margin-top:2px">+ ${fmtIDR(plusTotal)}</p>
+        <p style="font-size:11px;color:var(--ink3);margin-top:1px">${plusRows.length} pabrik</p>
+      </div>
+      <div style="background:var(--red-bg);border-radius:10px;padding:10px 12px">
+        <p style="font-size:10.5px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.6px">Deposit −</p>
+        <p class="tnum t-red" style="font-size:15px;font-weight:800;margin-top:2px">− ${fmtIDR(Math.abs(minusTotal))}</p>
+        <p style="font-size:11px;color:var(--ink3);margin-top:1px">${minusRows.length} pabrik</p>
+      </div>
+    </div>
+    <p style="font-size:12.5px;color:var(--ink2);margin:0 0 2px">
+      Neto per pabrik: <b class="tnum" style="color:var(--ink)">${fmtIDR(netTotal)}</b>
+      ${Math.abs(accountingTotal - netTotal) >= 0.5 ? ` · Saldo akuntansi: <b class="tnum" style="color:var(--ink)">${fmtIDR(accountingTotal)}</b>` : ''}
+    </p>
+    <p style="font-size:11.5px;color:var(--ink3);margin:0">${rawRows.length} pabrik terdaftar</p>
+  `;
+
+  html += sectionHtml('Pabrik Saldo Minus · Kewajiban', minusRows, 'var(--red)', 'Tidak ada pabrik dengan saldo minus.');
+  html += sectionHtml('Pabrik Saldo Plus · Deposit', plusRows, 'var(--green)', 'Tidak ada pabrik dengan saldo plus.');
+
+  if (adjRows.length) {
+    html += `<p class="sec-label" style="color:var(--ink3);margin:18px 0 4px">Penyesuaian Akuntansi</p><div class="list">`;
+    adjRows.forEach(d => {
+      html += `<div class="list-row">
+        <div><p class="lr-title">${d.name}</p><p class="lr-sub">Selisih saldo ledger akuntansi vs rincian pabrik</p></div>
+        <p class="lr-amount tnum" style="color:var(--ink)">${fmtIDR(d.balance)}</p>
+      </div>`;
+    });
+    html += `</div>`;
+  }
+
   showDetailModal('Detail Deposit Supplier', html);
 }
 
 async function showKontrakDetail() {
   showDetailModal('Detail Kontrak Jaminan', '<div class="spinner"></div>');
-  const data = cache.kontrak || await (async () => { const r = await apiCall('kontrak'); if (!r.error) cache.kontrak = r; return r; })();
+  const data = cache.kontrak || await (async () => { const r = await apiCall('kontrak', currentFilter); if (!r.error) cache.kontrak = r; return r; })();
   if (data.error) { showDetailModal('Detail Kontrak', `<p style="color:var(--red)">${data.error}</p>`); return; }
 
   let html = `<p style="font-size:13px;color:var(--ink2);margin:0 0 4px"><span style="font-weight:700;color:var(--ink)">${fmtIDR(data.total)}</span> · ${data.count} kontrak · ${data.nearMaturity} jatuh tempo ≤ 7 hari</p><div class="list">`;
@@ -1227,10 +1515,12 @@ async function showKontrakDetail() {
     html += `<div class="list-row">
       <div class="flex-1">
         <p class="lr-title">${k.supplierName}</p>
-        <p class="lr-sub">${k.category} · ${k.code}</p>
-        ${k.dueDate
+        ${k.adjustment
+          ? '<p class="lr-sub">Selisih saldo ledger akuntansi vs daftar kontrak</p>'
+          : `<p class="lr-sub">${k.category} · ${k.code}</p>`}
+        ${k.adjustment ? '' : (k.dueDate
           ? `<p class="lr-sub" style="color:${k.nearMaturity ? 'var(--red)' : 'var(--ink3)'};${k.nearMaturity ? 'font-weight:700' : ''}">Jatuh tempo: ${k.dueDate}</p>`
-          : '<p class="lr-sub">Unlimited</p>'}
+          : '<p class="lr-sub">Unlimited</p>')}
       </div>
       <p class="lr-amount tnum" style="color:var(--ink)">${fmtIDR(k.nominal)}</p>
     </div>`;
@@ -1281,11 +1571,12 @@ async function showHutangSub(sub) {
 // ==========================================
 window.addEventListener('load', () => {
   const now = new Date();
-  const start = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
-  const end = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
+  const start = toDateInputValue(new Date(now.getFullYear(), now.getMonth(), 1));
+  const end = toDateInputValue(new Date(now.getFullYear(), now.getMonth() + 1, 0));
   currentFilter = { start, end };
   document.getElementById('filterStart').value = start;
   document.getElementById('filterEnd').value = end;
+  populateMonthSelect();
   updateHeader('Dashboard', getCurrentPeriodLabel());
   loadOverview();
 });
