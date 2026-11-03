@@ -537,6 +537,11 @@ function fmtCompact(n) {
   if (abs >= 1e3) return (n / 1e3).toFixed(0) + 'rb';
   return String(n);
 }
+function escHtml(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+  });
+}
 function toast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg;
@@ -821,18 +826,18 @@ function renderOverview(d) {
 
     ${seg ? `
       <div class="m-grid desktop-3" style="margin-top:14px">
-        <div class="pl-tile">
-          <p class="t-label">Gudang</p>
+        <div class="pl-tile" onclick="showProfitDetail('gudang')" title="Klik untuk detail per nota" style="cursor:pointer">
+          <p class="t-label" style="display:flex;justify-content:space-between">Gudang <i class="ph ph-caret-right" style="color:var(--ink3)"></i></p>
           <p class="t-value tnum ${segGudang.revenue - segGudang.costs >= 0 ? 't-green' : 't-red'}">${fmtIDR(segGudang.revenue - segGudang.costs)}</p>
           <p style="font-size:11.5px;color:var(--ink3);margin-top:4px">Laba kotor · Rev ${fmtIDR(segGudang.revenue)} · HPP ${fmtIDR(segGudang.costs)}</p>
         </div>
-        <div class="pl-tile">
-          <p class="t-label">Sales</p>
+        <div class="pl-tile" onclick="showProfitDetail('sales')" title="Klik untuk detail per nota" style="cursor:pointer">
+          <p class="t-label" style="display:flex;justify-content:space-between">Sales <i class="ph ph-caret-right" style="color:var(--ink3)"></i></p>
           <p class="t-value tnum ${segSales.revenue - segSales.costs >= 0 ? 't-green' : 't-red'}">${fmtIDR(segSales.revenue - segSales.costs)}</p>
           <p style="font-size:11.5px;color:var(--ink3);margin-top:4px">Laba kotor · Rev ${fmtIDR(segSales.revenue)} · HPP ${fmtIDR(segSales.costs)}</p>
         </div>
-        <div class="pl-tile">
-          <p class="t-label">Broker</p>
+        <div class="pl-tile" onclick="showProfitDetail('broker')" title="Klik untuk detail per nota" style="cursor:pointer">
+          <p class="t-label" style="display:flex;justify-content:space-between">Broker <i class="ph ph-caret-right" style="color:var(--ink3)"></i></p>
           <p class="t-value tnum ${segBroker.revenue - segBroker.costs >= 0 ? 't-blue' : 't-red'}">${fmtIDR(segBroker.revenue - segBroker.costs)}</p>
           <p style="font-size:11.5px;color:var(--ink3);margin-top:4px">Laba kotor · Fee ${fmtIDR(segBroker.revenue)} · HPP ${fmtIDR(segBroker.costs)}</p>
         </div>
@@ -1503,6 +1508,108 @@ async function showDepositDetail() {
   }
 
   showDetailModal('Detail Deposit Supplier', html);
+}
+
+async function showProfitDetail(segment) {
+  const seg = ['gudang', 'sales', 'broker'].indexOf(segment) !== -1 ? segment : 'gudang';
+  const label = seg === 'sales' ? 'Sales' : (seg === 'broker' ? 'Broker' : 'Gudang');
+  showDetailModal('Detail Laba Kotor · ' + label, '<div class="spinner"></div>');
+
+  const cacheKey = 'profit_' + seg;
+  let data = cache[cacheKey];
+  if (!data) {
+    data = await apiCall('profit', { ...currentFilter, sub: seg });
+    if (!data.error) cache[cacheKey] = data;
+  }
+  if (data.error) {
+    showDetailModal('Detail Laba Kotor · ' + label,
+      `<p style="color:var(--red);font-size:13px;line-height:1.55">${escHtml(data.error)}</p>`);
+    return;
+  }
+
+  const rows = data.rows || [];
+  const mainRows = rows.filter(r => !r.adjustment);
+  const adjRows = rows.filter(r => r.adjustment);
+  const profit = Number(data.profit) || 0;
+  const margin = Number(data.margin) || 0;
+  const profitColor = profit >= 0 ? 'var(--green)' : 'var(--red)';
+  const period = data.period || {};
+
+  let html = `
+    <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-bottom:10px">
+      <div style="background:var(--green-bg);border-radius:10px;padding:9px 10px;min-width:0">
+        <p style="font-size:10px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.5px">Revenue</p>
+        <p class="tnum t-green" style="font-size:13px;font-weight:800;margin-top:2px;white-space:nowrap">${fmtCompact(data.revenue)}</p>
+      </div>
+      <div style="background:var(--red-bg);border-radius:10px;padding:9px 10px;min-width:0">
+        <p style="font-size:10px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.5px">HPP</p>
+        <p class="tnum t-red" style="font-size:13px;font-weight:800;margin-top:2px;white-space:nowrap">${fmtCompact(data.costs)}</p>
+      </div>
+      <div style="background:var(--bg);border-radius:10px;padding:9px 10px;min-width:0">
+        <p style="font-size:10px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.5px">Laba kotor</p>
+        <p class="tnum" style="font-size:13px;font-weight:800;margin-top:2px;white-space:nowrap;color:${profitColor}">${fmtCompact(profit)}</p>
+      </div>
+    </div>
+    <p style="font-size:12.5px;color:var(--ink2);margin:0 0 2px">
+      <b class="tnum" style="color:${profitColor}">${fmtIDR(profit)}</b> · ${Number(data.count) || 0} nota · margin ${margin.toFixed(1)}%
+    </p>
+    <p style="font-size:11.5px;color:var(--ink3);margin:0 0 2px">
+      Periode ${escHtml(period.start || '-')} s/d ${escHtml(period.end || '-')}
+    </p>
+    <p style="font-size:11.5px;color:var(--ink3);margin:0 0 12px">
+      Revenue ${fmtIDR(data.revenue)} − HPP ${fmtIDR(data.costs)}. Beban operasional belum dialokasikan per sector.
+    </p>
+  `;
+
+  const rowHtml = (r) => {
+    const p = Number(r.profit) || 0;
+    const meta = [];
+    if (r.date) meta.push(r.date);
+    if (r.customer) meta.push(r.customer);
+    if (r.factory) meta.push('Pabrik: ' + r.factory);
+    if (Number(r.lines) > 0) meta.push(`${Number(r.lines)} baris jurnal`);
+    const badge = r.isReturn
+      ? '<span class="pill" style="background:var(--amber-bg);color:var(--amber);margin-left:6px">Retur</span>'
+      : '';
+    return `<div class="list-row" style="align-items:flex-start">
+      <div style="min-width:0;flex:1">
+        <p class="lr-title">${escHtml(r.ref || '-')}${badge}</p>
+        <p class="lr-sub">${escHtml(meta.join(' · '))}</p>
+        ${r.description ? `<p class="lr-sub" style="margin-top:2px;color:var(--ink2)">${escHtml(r.description)}</p>` : ''}
+      </div>
+      <div style="text-align:right;flex-shrink:0">
+        <p class="lr-amount tnum" style="color:${p >= 0 ? 'var(--green)' : 'var(--red)'}">${fmtIDR(p)}</p>
+        <p class="lr-sub tnum">Rev ${fmtIDR(r.revenue)} · HPP ${fmtIDR(r.costs)}</p>
+      </div>
+    </div>`;
+  };
+
+  if (mainRows.length) {
+    html += `<p class="sec-label" style="margin:0 0 2px">Rincian per Nota</p>
+      <div class="list">${mainRows.map(rowHtml).join('')}</div>`;
+  } else {
+    html += `<p style="font-size:12.5px;color:var(--ink3);margin:8px 0">Belum ada transaksi pada periode ini.</p>`;
+  }
+
+  if (adjRows.length) {
+    html += `<p class="sec-label" style="margin:16px 0 2px">Penyesuaian ke Laporan</p><div class="list">`;
+    adjRows.forEach(r => {
+      const p = Number(r.profit) || 0;
+      html += `<div class="list-row" style="align-items:flex-start">
+        <div style="min-width:0;flex:1">
+          <p class="lr-title">${escHtml(r.description || 'Penyesuaian')}</p>
+          <p class="lr-sub">Agar total rincian sama dengan card dan Laporan Laba Rugi</p>
+        </div>
+        <div style="text-align:right;flex-shrink:0">
+          <p class="lr-amount tnum" style="color:${p >= 0 ? 'var(--green)' : 'var(--red)'}">${fmtIDR(p)}</p>
+          <p class="lr-sub tnum">Rev ${fmtIDR(r.revenue)} · HPP ${fmtIDR(r.costs)}</p>
+        </div>
+      </div>`;
+    });
+    html += `</div>`;
+  }
+
+  showDetailModal('Detail Laba Kotor · ' + label, html);
 }
 
 async function showKontrakDetail() {
