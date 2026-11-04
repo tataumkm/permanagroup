@@ -224,6 +224,8 @@
 
     /* P/L tiles */
     .pl-tile{border-radius:var(--radius);padding:14px;border:1px solid var(--border);background:#fff}
+    .pl-tile.pl-tile-total{background:linear-gradient(135deg,#f5f3ff,#ede9fe);border-color:#ddd6fe}
+    .pl-tile.pl-tile-total .t-label{color:#7c3aed}
     .pl-tile .t-label{font-size:10.5px;font-weight:600;color:var(--ink3);text-transform:uppercase;letter-spacing:.5px}
     .pl-tile .t-value{font-size:18px;font-weight:800;margin-top:3px;font-variant-numeric:tabular-nums}
 
@@ -790,6 +792,40 @@ async function loadOverview() {
   setTimeout(() => ['piutang', 'hutang', 'laporan'].forEach(prefetchPage), 1500);
 }
 
+function profitBreakdownCard(v) {
+  const grossProfit = Number(v.grossProfit) || 0;
+  const opex = Number(v.opex) || 0;
+  const operatingProfit = Number(v.operatingProfit) || 0;
+  const otherIncome = Number(v.otherIncome) || 0;
+  const otherExpense = Number(v.otherExpense) || 0;
+  const netProfit = Number(v.netProfit) || 0;
+
+  const expenseText = (n) => {
+    const x = Number(n) || 0;
+    return x < 0 ? `+ ${fmtIDR(Math.abs(x))}` : `− ${fmtIDR(x)}`;
+  };
+  const incomeText = (n) => {
+    const x = Number(n) || 0;
+    return x < 0 ? `− ${fmtIDR(Math.abs(x))}` : `+ ${fmtIDR(x)}`;
+  };
+  const row = (label, valueHtml, color, strong) => `<div class="list-row" style="padding:${strong ? '8px 0 2px' : '6px 0'}">
+    <span style="font-size:12.5px;color:${strong ? 'var(--ink)' : 'var(--ink2)'};font-weight:${strong ? 700 : 600}">${label}</span>
+    <span class="tnum" style="font-size:${strong ? 14 : 13}px;font-weight:${strong ? 800 : 700};color:${color}">${valueHtml}</span>
+  </div>`;
+  const divider = '<div style="border-top:1px solid var(--border);margin:4px 0"></div>';
+
+  return `<div class="card" style="margin-top:10px;padding:12px 16px">
+    ${row('Total Laba Kotor Penjualan', fmtIDR(grossProfit), grossProfit >= 0 ? 'var(--green)' : 'var(--red)', false)}
+    ${row('Beban Operasional', expenseText(opex), opex < 0 ? 'var(--green)' : 'var(--red)', false)}
+    ${divider}
+    ${row('Laba Operasional', fmtIDR(operatingProfit), operatingProfit >= 0 ? 'var(--green)' : 'var(--red)', true)}
+    ${row('Pendapatan Lain', incomeText(otherIncome), otherIncome < 0 ? 'var(--red)' : 'var(--green)', false)}
+    ${row('Beban Lain', expenseText(otherExpense), otherExpense < 0 ? 'var(--green)' : 'var(--red)', false)}
+    ${divider}
+    ${row('Laba Bersih', fmtIDR(netProfit), netProfit >= 0 ? 'var(--green)' : 'var(--red)', true)}
+  </div>`;
+}
+
 function renderOverview(d) {
   const piutangCount = d.piutang.breakdown.reduce((s,b)=>s+b.count,0);
   const hutangCount = d.hutang.breakdown.reduce((s,b)=>s+b.count,0);
@@ -800,6 +836,24 @@ function renderOverview(d) {
   const segGudang = (seg && (seg.gudang || seg.direct)) || { revenue: 0, costs: 0 };
   const segSales = (seg && seg.sales) || { revenue: 0, costs: 0 };
   const segBroker = (seg && seg.broker) || { revenue: 0, costs: 0 };
+  const grossProfit = d.period.grossProfit !== undefined
+    ? Number(d.period.grossProfit) || 0
+    : (Number(d.period.revenue) || 0) - (Number(d.period.cogs) || 0);
+  const opex = d.period.opex !== undefined
+    ? Number(d.period.opex) || 0
+    : ((seg && seg.overhead) || 0);
+  const operatingProfit = d.period.operatingProfit !== undefined
+    ? Number(d.period.operatingProfit) || 0
+    : grossProfit - opex;
+  const otherIncome = d.period.otherIncome !== undefined
+    ? Number(d.period.otherIncome) || 0
+    : ((seg && seg.otherRevenue) || 0);
+  const otherExpense = d.period.otherExpense !== undefined
+    ? Number(d.period.otherExpense) || 0
+    : ((seg && seg.otherExpense) || 0);
+  const netProfit = d.period.netProfit !== undefined
+    ? Number(d.period.netProfit) || 0
+    : (Number(d.period.profit) || 0);
 
   const html = `
     <div class="hero">
@@ -825,7 +879,7 @@ function renderOverview(d) {
       </div>` : ''}
 
     ${seg ? `
-      <div class="m-grid desktop-3" style="margin-top:14px">
+      <div class="m-grid desktop-4" style="margin-top:14px">
         <div class="pl-tile" onclick="showProfitDetail('gudang')" title="Klik untuk detail per nota" style="cursor:pointer">
           <p class="t-label" style="display:flex;justify-content:space-between">Gudang <i class="ph ph-caret-right" style="color:var(--ink3)"></i></p>
           <p class="t-value tnum ${segGudang.revenue - segGudang.costs >= 0 ? 't-green' : 't-red'}">${fmtIDR(segGudang.revenue - segGudang.costs)}</p>
@@ -841,27 +895,13 @@ function renderOverview(d) {
           <p class="t-value tnum ${segBroker.revenue - segBroker.costs >= 0 ? 't-blue' : 't-red'}">${fmtIDR(segBroker.revenue - segBroker.costs)}</p>
           <p style="font-size:11.5px;color:var(--ink3);margin-top:4px">Laba kotor · Fee ${fmtIDR(segBroker.revenue)} · HPP ${fmtIDR(segBroker.costs)}</p>
         </div>
-      </div>
-      <div class="card" style="margin-top:10px;padding:12px 16px">
-        <div class="list-row" style="padding:6px 0">
-          <span style="font-size:12.5px;color:var(--ink2);font-weight:600">Beban operasional</span>
-          <span class="tnum" style="font-size:13px;font-weight:700;color:var(--red)">− ${fmtIDR(d.period.segments.overhead)}</span>
-        </div>
-        ${d.period.segments.otherExpense > 0 ? `
-        <div class="list-row" style="padding:6px 0">
-          <span style="font-size:12.5px;color:var(--ink2);font-weight:600">Beban lain</span>
-          <span class="tnum" style="font-size:13px;font-weight:700;color:var(--red)">− ${fmtIDR(d.period.segments.otherExpense)}</span>
-        </div>` : ''}
-        ${d.period.segments.otherRevenue > 0 ? `
-        <div class="list-row" style="padding:6px 0">
-          <span style="font-size:12.5px;color:var(--ink2);font-weight:600">Pendapatan lain</span>
-          <span class="tnum" style="font-size:13px;font-weight:700;color:var(--green)">+ ${fmtIDR(d.period.segments.otherRevenue)}</span>
-        </div>` : ''}
-        <div class="list-row" style="padding:8px 0 2px">
-          <span style="font-size:12.5px;color:var(--ink);font-weight:700">Laba bersih</span>
-          <span class="tnum" style="font-size:14px;font-weight:800;color:${d.period.profit >= 0 ? 'var(--green)' : 'var(--red)'}">${fmtIDR(d.period.profit)}</span>
+        <div class="pl-tile pl-tile-total">
+          <p class="t-label">Total Laba Kotor</p>
+          <p class="t-value tnum" style="color:${grossProfit >= 0 ? '#7c3aed' : 'var(--red)'}">${fmtIDR(grossProfit)}</p>
+          <p style="font-size:11.5px;color:var(--ink3);margin-top:4px">Gudang + Sales + Broker</p>
         </div>
       </div>
+      ${profitBreakdownCard({ grossProfit, opex, operatingProfit, otherIncome, otherExpense, netProfit })}
     ` : ''}
 
     <p class="sec-label">Posisi Keuangan · Sumber: ${sourceLabel}</p>
@@ -1230,6 +1270,7 @@ function renderPL(data) {
   const operatingProfit = pl.operatingProfit !== undefined ? pl.operatingProfit : (grossProfit - opex);
   const otherIncome = pl.otherIncome || 0;
   const otherExpense = pl.otherExpense || 0;
+  const netProfit = pl.netProfit !== undefined ? pl.netProfit : pl.profit;
   const sourceLabel = pl.source || 'AKUNTANSI';
   const sourceDetail = pl.sourceDetail === 'LAPORAN' ? ' · Laporan Laba Rugi' : '';
   const seg = pl.segments || null;
@@ -1262,7 +1303,7 @@ function renderPL(data) {
         Baris acuan laba bersih: <b>${pl.netProfitLabel}</b>${pl.operatingProfitLabel ? ` · laba operasional: ${pl.operatingProfitLabel}` : ''}.
       </p>` : ''}
     ${seg ? `
-    <div class="m-grid desktop-3" style="margin-top:14px">
+    <div class="m-grid desktop-4" style="margin-top:14px">
       <div class="pl-tile">
         <p class="t-label">Laba Kotor · Gudang</p>
         <p class="t-value tnum ${segGudang.revenue - segGudang.costs >= 0 ? 't-green' : 't-red'}">${fmtIDR(segGudang.revenue - segGudang.costs)}</p>
@@ -1278,35 +1319,13 @@ function renderPL(data) {
         <p class="t-value tnum ${segBroker.revenue - segBroker.costs >= 0 ? 't-blue' : 't-red'}">${fmtIDR(segBroker.revenue - segBroker.costs)}</p>
         <p style="font-size:11.5px;color:var(--ink3);margin-top:4px">Fee ${fmtIDR(segBroker.revenue)} · HPP ${fmtIDR(segBroker.costs)}</p>
       </div>
-    </div>
-    <div class="card" style="margin-top:10px;padding:12px 16px">
-      <div class="list-row" style="padding:6px 0">
-        <span style="font-size:12.5px;color:var(--ink2);font-weight:600">Laba kotor</span>
-        <span class="tnum" style="font-size:13px;font-weight:700;color:${grossProfit >= 0 ? 'var(--green)' : 'var(--red)'}">${fmtIDR(grossProfit)}</span>
-      </div>
-      <div class="list-row" style="padding:6px 0">
-        <span style="font-size:12.5px;color:var(--ink2);font-weight:600">Beban operasional</span>
-        <span class="tnum" style="font-size:13px;font-weight:700;color:var(--red)">− ${fmtIDR(opex)}</span>
-      </div>
-      ${otherExpense > 0 ? `
-      <div class="list-row" style="padding:6px 0">
-        <span style="font-size:12.5px;color:var(--ink2);font-weight:600">Beban lain</span>
-        <span class="tnum" style="font-size:13px;font-weight:700;color:var(--red)">− ${fmtIDR(otherExpense)}</span>
-      </div>` : ''}
-      ${otherIncome > 0 ? `
-      <div class="list-row" style="padding:6px 0">
-        <span style="font-size:12.5px;color:var(--ink2);font-weight:600">Pendapatan lain</span>
-        <span class="tnum" style="font-size:13px;font-weight:700;color:var(--green)">+ ${fmtIDR(otherIncome)}</span>
-      </div>` : ''}
-      <div class="list-row" style="padding:6px 0">
-        <span style="font-size:12.5px;color:var(--ink2);font-weight:600">Laba operasional</span>
-        <span class="tnum" style="font-size:13px;font-weight:700;color:${operatingProfit >= 0 ? 'var(--green)' : 'var(--red)'}">${fmtIDR(operatingProfit)}</span>
-      </div>
-      <div class="list-row" style="padding:8px 0 2px">
-        <span style="font-size:12.5px;color:var(--ink);font-weight:700">Laba bersih</span>
-        <span class="tnum" style="font-size:14px;font-weight:800;color:${pl.profit >= 0 ? 'var(--green)' : 'var(--red)'}">${fmtIDR(pl.profit)}</span>
+      <div class="pl-tile pl-tile-total">
+        <p class="t-label">Total Laba Kotor</p>
+        <p class="t-value tnum" style="color:${grossProfit >= 0 ? '#7c3aed' : 'var(--red)'}">${fmtIDR(grossProfit)}</p>
+        <p style="font-size:11.5px;color:var(--ink3);margin-top:4px">Gudang + Sales + Broker</p>
       </div>
     </div>
+    ${profitBreakdownCard({ grossProfit, opex, operatingProfit, otherIncome, otherExpense, netProfit })}
     ` : ''}
     <div class="m-grid desktop-2" style="margin-top:14px">
       <div class="pl-tile">
@@ -1528,7 +1547,8 @@ async function showProfitDetail(segment) {
   }
 
   const rows = data.rows || [];
-  const mainRows = rows.filter(r => !r.adjustment);
+  const mainRows = rows.filter(r => !r.adjustment && !r.unmeasured);
+  const unmeasuredRows = rows.filter(r => r.unmeasured);
   const adjRows = rows.filter(r => r.adjustment);
   const profit = Number(data.profit) || 0;
   const margin = Number(data.margin) || 0;
@@ -1551,18 +1571,20 @@ async function showProfitDetail(segment) {
       </div>
     </div>
     <p style="font-size:12.5px;color:var(--ink2);margin:0 0 2px">
-      <b class="tnum" style="color:${profitColor}">${fmtIDR(profit)}</b> · ${Number(data.count) || 0} nota · margin ${margin.toFixed(1)}%
+      <b class="tnum" style="color:${profitColor}">${fmtIDR(profit)}</b> · ${Number(data.count) || 0} nota terukur${unmeasuredRows.length ? ` · ${unmeasuredRows.length} belum terukur` : ''} · margin ${margin.toFixed(1)}%
     </p>
     <p style="font-size:11.5px;color:var(--ink3);margin:0 0 2px">
       Periode ${escHtml(period.start || '-')} s/d ${escHtml(period.end || '-')}
     </p>
     <p style="font-size:11.5px;color:var(--ink3);margin:0 0 12px">
       Revenue ${fmtIDR(data.revenue)} − HPP ${fmtIDR(data.costs)}. Beban operasional belum dialokasikan per sector.
+      ${unmeasuredRows.length ? ' Transaksi dengan revenue/HPP kosong tidak dihitung ke stat.' : ''}
     </p>
   `;
 
   const rowHtml = (r) => {
     const p = Number(r.profit) || 0;
+    const unmeasured = !!r.unmeasured;
     const meta = [];
     if (r.date) meta.push(r.date);
     if (r.customer) meta.push(r.customer);
@@ -1571,14 +1593,17 @@ async function showProfitDetail(segment) {
     const badge = r.isReturn
       ? '<span class="pill" style="background:var(--amber-bg);color:var(--amber);margin-left:6px">Retur</span>'
       : '';
+    const unmeasuredBadge = unmeasured
+      ? '<span class="pill" style="background:var(--amber-bg);color:var(--amber);margin-left:6px">Belum terukur</span>'
+      : '';
     return `<div class="list-row" style="align-items:flex-start">
       <div style="min-width:0;flex:1">
-        <p class="lr-title">${escHtml(r.ref || '-')}${badge}</p>
+        <p class="lr-title">${escHtml(r.ref || '-')}${badge}${unmeasuredBadge}</p>
         <p class="lr-sub">${escHtml(meta.join(' · '))}</p>
         ${r.description ? `<p class="lr-sub" style="margin-top:2px;color:var(--ink2)">${escHtml(r.description)}</p>` : ''}
       </div>
       <div style="text-align:right;flex-shrink:0">
-        <p class="lr-amount tnum" style="color:${p >= 0 ? 'var(--green)' : 'var(--red)'}">${fmtIDR(p)}</p>
+        <p class="lr-amount tnum" style="color:${unmeasured ? 'var(--ink3)' : (p >= 0 ? 'var(--green)' : 'var(--red)')}">${unmeasured ? 'Belum terukur' : fmtIDR(p)}</p>
         <p class="lr-sub tnum">Rev ${fmtIDR(r.revenue)} · HPP ${fmtIDR(r.costs)}</p>
       </div>
     </div>`;
@@ -1587,8 +1612,15 @@ async function showProfitDetail(segment) {
   if (mainRows.length) {
     html += `<p class="sec-label" style="margin:0 0 2px">Rincian per Nota</p>
       <div class="list">${mainRows.map(rowHtml).join('')}</div>`;
-  } else {
+  } else if (!unmeasuredRows.length) {
     html += `<p style="font-size:12.5px;color:var(--ink3);margin:8px 0">Belum ada transaksi pada periode ini.</p>`;
+  }
+
+  if (unmeasuredRows.length) {
+    html += `<p class="sec-label" style="margin:16px 0 2px">Belum Terukur
+      <span style="font-weight:600;text-transform:none;letter-spacing:0;color:var(--ink3)">(tidak masuk stat)</span>
+    </p>
+    <div class="list">${unmeasuredRows.map(rowHtml).join('')}</div>`;
   }
 
   if (adjRows.length) {
