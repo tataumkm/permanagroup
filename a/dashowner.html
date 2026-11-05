@@ -1472,8 +1472,8 @@ async function showDepositDetail() {
   if (data.error) { showDetailModal('Detail Deposit', `<p style="color:var(--red)">${data.error}</p>`); return; }
 
   const {
-    rawRows, plusRows, minusRows, adjRows,
-    plusTotal, minusTotal, netTotal, accountingTotal
+    rawRows, plusRows, minusRows,
+    plusTotal, minusTotal, netTotal
   } = getDepositSplit(data);
 
   const amountText = (n) => {
@@ -1507,24 +1507,12 @@ async function showDepositDetail() {
     </div>
     <p style="font-size:12.5px;color:var(--ink2);margin:0 0 2px">
       Neto per pabrik: <b class="tnum" style="color:var(--ink)">${fmtIDR(netTotal)}</b>
-      ${Math.abs(accountingTotal - netTotal) >= 0.5 ? ` · Saldo akuntansi: <b class="tnum" style="color:var(--ink)">${fmtIDR(accountingTotal)}</b>` : ''}
     </p>
     <p style="font-size:11.5px;color:var(--ink3);margin:0">${rawRows.length} pabrik terdaftar</p>
   `;
 
   html += sectionHtml('Pabrik Saldo Minus · Kewajiban', minusRows, 'var(--red)', 'Tidak ada pabrik dengan saldo minus.');
   html += sectionHtml('Pabrik Saldo Plus · Deposit', plusRows, 'var(--green)', 'Tidak ada pabrik dengan saldo plus.');
-
-  if (adjRows.length) {
-    html += `<p class="sec-label" style="color:var(--ink3);margin:18px 0 4px">Penyesuaian Akuntansi</p><div class="list">`;
-    adjRows.forEach(d => {
-      html += `<div class="list-row">
-        <div><p class="lr-title">${d.name}</p><p class="lr-sub">Selisih saldo ledger akuntansi vs rincian pabrik</p></div>
-        <p class="lr-amount tnum" style="color:var(--ink)">${fmtIDR(d.balance)}</p>
-      </div>`;
-    });
-    html += `</div>`;
-  }
 
   showDetailModal('Detail Deposit Supplier', html);
 }
