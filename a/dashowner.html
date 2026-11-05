@@ -931,7 +931,6 @@ function renderOverview(d) {
             <p class="m-split-label" style="color:var(--red)">${Number(d.deposit.negativeCount) || 0} pabrik −</p>
           </div>
         </div>
-        <p class="m-sub">Neto ${fmtCompact(Number(d.deposit.netTotal) || 0)}${d.deposit.adjustment ? ` · selisih ${fmtCompact(d.deposit.adjustment)}` : ''}</p>
       </div>
       <div class="metric" onclick="showKontrakDetail()">
         <div class="m-icon bg-tint-blue"><i class="ph-fill ph-file-text"></i></div>
